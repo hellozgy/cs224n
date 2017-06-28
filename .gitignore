@@ -1,5 +1,9 @@
 *
 !.gitignore
+!TODO.DOCX
+!/lecture*/*.pdf
+!/lecture*/*.txt
+!/lecture*/*.srt
 !/assignment*/*.py
 !/assignment*/*.txt
 !/assignment*/*.pdf
