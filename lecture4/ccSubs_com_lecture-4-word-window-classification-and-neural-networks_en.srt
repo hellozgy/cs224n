@@ -1,0 +1,5457 @@
+1
+0:00:00 --> 0:00:05
+Downloaded from ccSubs.com
+
+2
+00:00:00 --> 00:00:04
+[MUSIC]
+
+3
+00:00:04 --> 00:00:05
+Stanford University.
+
+4
+00:00:05 --> 00:00:06
+It&#39;s getting real today.
+
+5
+00:00:06 --> 00:00:11
+So, let&#39;s talk about a little
+bit of the overview today.
+
+6
+00:00:11 --> 00:00:15
+So, we&#39;ll really get you into
+the background for classification.
+
+7
+00:00:15 --> 00:00:18
+And then, we&#39;ll do some interesting things
+with updating these word vectors that we
+
+8
+00:00:18 --> 00:00:20
+so far have learned in
+an unsupervised way.
+
+9
+00:00:20 --> 00:00:23
+We&#39;ll update them with some real
+supervision signals such as sentiment and
+
+10
+00:00:23 --> 00:00:24
+other things.
+
+11
+00:00:24 --> 00:00:27
+Then, we&#39;ll look at the first real
+model that is actually useful and
+
+12
+00:00:27 --> 00:00:28
+you might wanna use in practice.
+
+13
+00:00:28 --> 00:00:32
+Well, other than, of course, the word
+vectors, but one sort of downstream task
+
+14
+00:00:32 --> 00:00:36
+which is window classification and we&#39;ll
+really also clear up some of the confusion
+
+15
+00:00:36 --> 00:00:40
+around the cross entropy error and
+how it connects with the softmax.
+
+16
+00:00:40 --> 00:00:46
+And then, we&#39;ll introduce the famous
+neural network, our most basic LEGO block
+
+17
+00:00:46 --> 00:00:51
+that we may start to call deep to get
+to the actual title of this class.
+
+18
+00:00:51 --> 00:00:52
+Deep learning in NLP.
+And then,
+
+19
+00:00:52 --> 00:00:56
+we&#39;ll actually introduce another loss
+function, the max margin loss and
+
+20
+00:00:56 --> 00:00:59
+take our first steps into
+the direction of backprop.
+
+21
+00:00:59 --> 00:01:04
+So, this lecture will be,
+I think very helpful for problem set one.
+
+22
+00:01:04 --> 00:01:06
+We&#39;ll go into a lot of the math
+that you&#39;ll need probably for
+
+23
+00:01:06 --> 00:01:07
+number two in the problem set.
+
+24
+00:01:07 --> 00:01:12
+So, I hope it&#39;ll be very useful and
+I&#39;m excited for you cuz at the end of this
+
+25
+00:01:12 --> 00:01:17
+lecture, you&#39;ll feel hopefully a lot
+better about the magic of deep learning.
+
+26
+00:01:17 --> 00:01:21
+All right, are there any
+organizational questions around
+
+27
+00:01:21 --> 00:01:26
+problem sets or
+programming sessions with the TAs?
+
+28
+00:01:26 --> 00:01:27
+No, we&#39;re all good?
+
+29
+00:01:27 --> 00:01:30
+Awesome, thanks to the TAs for
+clearing up everything.
+
+30
+00:01:30 --> 00:01:35
+Cool, so let&#39;s be very careful about
+our notation today because that is one
+
+31
+00:01:35 --> 00:01:37
+of the main things that
+a lot of people trip up over
+
+32
+00:01:37 --> 00:01:39
+as we go through very complex
+chain-rules and so on.
+
+33
+00:01:39 --> 00:01:41
+So, let&#39;s start at the beginning and
+say, all right,
+
+34
+00:01:41 --> 00:01:44
+we have usually a training dataset
+of some input X and some output Y.
+
+35
+00:01:44 --> 00:01:48
+X could be in the simplest case, words
+in isolation, just a single word vector.
+
+36
+00:01:48 --> 00:01:51
+It&#39;s not something you would
+usually do in practice.
+
+37
+00:01:51 --> 00:01:53
+But it&#39;ll be easy for
+us to learn that way.
+
+38
+00:01:53 --> 00:01:55
+So we&#39;ll start with that but then,
+we&#39;ll move to context windows today.
+
+39
+00:01:55 --> 00:01:59
+And then eventually, we&#39;ll use the same
+basic building blocks that we introduce
+
+40
+00:01:59 --> 00:02:03
+today for sentences and documents and
+then complex interactions for everything.
+
+41
+00:02:03 --> 00:02:06
+Now, the output in the simplest
+case it&#39;s just a single label.
+
+42
+00:02:06 --> 00:02:09
+It&#39;s just a positive or
+a negative kind of sentence.
+
+43
+00:02:09 --> 00:02:12
+It could be the named entities of
+certain words in their context.
+
+44
+00:02:12 --> 00:02:15
+It can also be other words, so
+in machine translation, for instance,
+
+45
+00:02:15 --> 00:02:18
+you might wanna output eventually
+a sequence of other words as our yi and
+
+46
+00:02:18 --> 00:02:20
+we&#39;ll get to that in a couple weeks.
+
+47
+00:02:20 --> 00:02:23
+And, yeah, basically they have multiword
+sequences as potential outputs.
+
+48
+00:02:23 --> 00:02:26
+All right, so what is the intuition for
+classification?
+
+49
+00:02:26 --> 00:02:30
+In the standard machine learning case,
+so not yet the deep learning world,
+
+50
+00:02:30 --> 00:02:33
+we usually just, for
+something as simple logistic regression,
+
+51
+00:02:33 --> 00:02:37
+basically want to define and learn
+a simple decision boundary where we say
+
+52
+00:02:37 --> 00:02:42
+everything to the left of this or
+in one direction is in one class and
+
+53
+00:02:42 --> 00:02:44
+the other one,
+all the other things in the other class.
+
+54
+00:02:44 --> 00:02:49
+And so, in general machine learning,
+we assume our inputs,
+
+55
+00:02:49 --> 00:02:52
+the Xs are kinda fixed,
+they&#39;re just set and
+
+56
+00:02:52 --> 00:02:56
+we&#39;ll only train the W parameter,
+which is our softmax weights.
+
+57
+00:02:56 --> 00:03:01
+So, we&#39;ll compute the probability of Y,
+given the input X with this kind of input.
+
+58
+00:03:01 --> 00:03:04
+And so, one notational comment here is for
+
+59
+00:03:04 --> 00:03:08
+the whole dataset,
+we often subscript with i but then,
+
+60
+00:03:08 --> 00:03:14
+when I drop the i we&#39;re just looking
+at a single example of x and y.
+
+61
+00:03:14 --> 00:03:17
+Eventually, we&#39;re going to overload
+at the subscript a little bit and
+
+62
+00:03:17 --> 00:03:20
+look at the indices of certain vector so,
+if you get confused,
+
+63
+00:03:20 --> 00:03:21
+just raise your hand and ask.
+
+64
+00:03:21 --> 00:03:22
+I&#39;ll try to make it clear
+which one is which.
+
+65
+00:03:22 --> 00:03:24
+Now, let&#39;s dive into the softmax.
+
+66
+00:03:24 --> 00:03:29
+We mentioned it before but we wanna really
+carefully define and recall the notation
+
+67
+00:03:29 --> 00:03:34
+here cuz we&#39;ll go and take derivatives
+with respect to all of these parameters.
+
+68
+00:03:34 --> 00:03:40
+So, we can tease apart two steps here for
+computing this probability of y given x.
+
+69
+00:03:40 --> 00:03:44
+The first thing is, we&#39;ll take the y&#39;th
+row of W and multiply that row with x.
+
+70
+00:03:44 --> 00:03:49
+And so again this notation here,
+when we have Wy.
+
+71
+00:03:49 --> 00:03:54
+And that means we&#39;ll have,
+we&#39;re taking the y&#39;th row of this matrix.
+
+72
+00:03:54 --> 00:03:56
+And then, multiplying it here with x.
+
+73
+00:03:56 --> 00:04:01
+Now if we do that multiple times for
+all c from one to our classes.
+
+74
+00:04:01 --> 00:04:05
+So let&#39;s say, this is 1, 2, 3,
+the 4th row and multiply each of these.
+
+75
+00:04:05 --> 00:04:06
+So then we get four numbers here.
+
+76
+00:04:06 --> 00:04:07
+And these are unnormalized scores.
+
+77
+00:04:07 --> 00:04:11
+And then, we&#39;ll basically,
+pipe this vector through the softmax to
+
+78
+00:04:11 --> 00:04:14
+compute a probability
+distribution that sums to one.
+
+79
+00:04:14 --> 00:04:16
+All right, that&#39;s our step one.
+
+80
+00:04:16 --> 00:04:18
+Any questions around that?
+
+81
+00:04:18 --> 00:04:20
+Cuz it&#39;s just gonna keep
+on going from here.
+
+82
+00:04:20 --> 00:04:21
+All right, great.
+
+83
+00:04:21 --> 00:04:26
+And, I get that sometimes
+in general from previous
+
+84
+00:04:26 --> 00:04:30
+sort of surveys, it seems to be that
+15% of the class are usually bored
+
+85
+00:04:30 --> 00:04:33
+when we go through all of these,
+like all of these derivatives.
+
+86
+00:04:33 --> 00:04:37
+15% are super overwhelmed and then the
+majority of people are like, okay, it&#39;s
+
+87
+00:04:37 --> 00:04:39
+a good speed, I&#39;m learning something, I&#39;m
+getting it, and you&#39;re making progress.
+
+88
+00:04:39 --> 00:04:43
+So, sorry for the 30% for
+whom this is too slow or too fast.
+
+89
+00:04:43 --> 00:04:46
+You can probably just skim
+through the lecture slides or
+
+90
+00:04:46 --> 00:04:48
+speed it up if you&#39;re watching online.
+
+91
+00:04:48 --> 00:04:50
+If you&#39;re super familiar with taking
+super complex derivatives and
+
+92
+00:04:50 --> 00:04:53
+if it&#39;s a little overwhelming, then
+definitely come to all the office hours.
+
+93
+00:04:53 --> 00:04:55
+We have an awesome set of
+TAs who will help you.
+
+94
+00:04:55 --> 00:05:00
+All right, now we,
+let&#39;s look at a single example of an x and
+
+95
+00:05:00 --> 00:05:02
+y that we wanna predict.
+
+96
+00:05:02 --> 00:05:06
+In general, we want our model to
+essentially maximize the probability
+
+97
+00:05:06 --> 00:05:06
+of the correct class.
+
+98
+00:05:06 --> 00:05:12
+We wanted to output the right class at the
+end by taking the argmax of that output.
+
+99
+00:05:12 --> 00:05:15
+And maximizing probability is the same
+as maximizing log probability,
+
+100
+00:05:15 --> 00:05:18
+it&#39;s the same as minimizing the negative
+of that log probability and
+
+101
+00:05:18 --> 00:05:20
+that is often our objective function.
+
+102
+00:05:20 --> 00:05:23
+So, why do we call this
+the cross-entropy error?
+
+103
+00:05:23 --> 00:05:28
+Well, we can define the cross-entropy
+in the abstract in general as follows.
+
+104
+00:05:28 --> 00:05:31
+So let&#39;s assume we have
+the ground truth or gold or
+
+105
+00:05:31 --> 00:05:36
+target probability distribution,
+we use those three terms interchangeably.
+
+106
+00:05:36 --> 00:05:40
+Basically, what the ideal target
+in our training dataset, the y and
+
+107
+00:05:40 --> 00:05:45
+we&#39;ll assume that, that is one at
+the right class and zero everywhere else.
+
+108
+00:05:45 --> 00:05:49
+So if we have for instance, five
+classes here and it&#39;s the center class.
+
+109
+00:05:49 --> 00:05:51
+Its the third class and this would be one
+and all the other, numbers would be zero.
+
+110
+00:05:51 --> 00:05:54
+So, if we define this as p
+in our computed probability,
+
+111
+00:05:54 --> 00:05:58
+that our softmax outputs as q then we
+would define here the cross-entropy
+
+112
+00:05:58 --> 00:06:00
+is basically this sum
+over all the classes.
+
+113
+00:06:00 --> 00:06:03
+And in our case, p here is just
+one-hot vector that&#39;s really only 1 in
+
+114
+00:06:03 --> 00:06:05
+one location and 0 everywhere else.
+
+115
+00:06:05 --> 00:06:08
+So, all these other terms
+are basically gone.
+
+116
+00:06:08 --> 00:06:10
+And we end up with just log of q and
+
+117
+00:06:10 --> 00:06:14
+that&#39;s exactly the log of what
+our softmax outputs, all right?
+
+118
+00:06:14 --> 00:06:19
+And then, there are some nice connections
+to Kullback-Leibler divergence and so on.
+
+119
+00:06:19 --> 00:06:21
+I used to talk about it but
+we don&#39;t have that much time today.
+
+120
+00:06:21 --> 00:06:23
+So and you can also if you&#39;re
+familiar of this in stats,
+
+121
+00:06:23 --> 00:06:27
+you can see this as trying to minimize the
+Kullback-Leibler divergence between these
+
+122
+00:06:27 --> 00:06:28
+two distributions.
+
+123
+00:06:28 --> 00:06:32
+But really, this is all you need to
+know for the purpose of this class.
+
+124
+00:06:32 --> 00:06:36
+So this is for
+one element of your training data set.
+
+125
+00:06:36 --> 00:06:39
+Now, of course, in general,
+you have lots of training examples.
+
+126
+00:06:39 --> 00:06:42
+So we have our overall objective
+function we often denote with J,
+
+127
+00:06:42 --> 00:06:44
+over all our parameters theta.
+
+128
+00:06:44 --> 00:06:49
+And we basically sum these negative log
+probabilities of the correct classes
+
+129
+00:06:49 --> 00:06:52
+that we index here, a sub-index with yi.
+
+130
+00:06:52 --> 00:06:55
+And basically we want to
+minimize this whole sum.
+
+131
+00:06:55 --> 00:06:57
+So that&#39;s our cross-entropy error
+that we&#39;re trying to minimize, and
+
+132
+00:06:57 --> 00:07:02
+we&#39;ll take lots of derivatives off in
+a lot of the next couple of hours.
+
+133
+00:07:02 --> 00:07:05
+All right, any questions so far?
+
+134
+00:07:05 --> 00:07:09
+So this is the general ML case where
+we assume our inputs here are fixed.
+
+135
+00:07:09 --> 00:07:10
+Yes, it&#39;s a single number.
+
+136
+00:07:10 --> 00:07:14
+So we are not multiplying a vector here,
+so p(c) is the probability for that class,
+
+137
+00:07:14 --> 00:07:15
+so that&#39;s one single number.
+
+138
+00:07:15 --> 00:07:18
+Great question.
+
+139
+00:07:18 --> 00:07:22
+So the cross entropy, a single number,
+our main objective that we&#39;re trying
+
+140
+00:07:22 --> 00:07:24
+to minimize, or
+our error that we&#39;re trying to minimize.
+
+141
+00:07:24 --> 00:07:27
+Now, whenever you write
+this F subscript Y here,
+
+142
+00:07:27 --> 00:07:32
+we don&#39;t want to forget that F is really
+also a function of X, our inputs, right?
+
+143
+00:07:32 --> 00:07:33
+It&#39;s sort of an intermediate step and
+it&#39;s very important for
+
+144
+00:07:33 --> 00:07:36
+us to play around with this notation.
+
+145
+00:07:36 --> 00:07:41
+So we can also rewrite this as W y,
+that row,
+
+146
+00:07:41 --> 00:07:43
+times x, and
+we can write out that whole sum.
+
+147
+00:07:43 --> 00:07:47
+And that can often be helpful as you are
+trying to take derivatives of one element
+
+148
+00:07:47 --> 00:07:52
+at a time to eventually see the bigger
+picture of the whole matrix notation.
+
+149
+00:07:52 --> 00:07:55
+All right, so often we&#39;ll write f here
+in terms of this matrix notation.
+
+150
+00:07:55 --> 00:07:58
+So this is our f, this is our W,
+and this is our x.
+
+151
+00:07:58 --> 00:08:03
+So just standard matrix
+multiplication with a vector.
+
+152
+00:08:03 --> 00:08:06
+All right, now most of the time we&#39;ll
+just talk about this first part of
+
+153
+00:08:06 --> 00:08:09
+the objective function but
+it&#39;s a bit of a simplification because in
+
+154
+00:08:09 --> 00:08:13
+all your real applications you will
+also have this regularization term here.
+
+155
+00:08:13 --> 00:08:15
+As part of your overall
+objective function.
+
+156
+00:08:15 --> 00:08:17
+And in many cases,
+this theta here for instance,
+
+157
+00:08:17 --> 00:08:21
+if it&#39;s the W matrix of our
+standard logistic regression,
+
+158
+00:08:21 --> 00:08:24
+we&#39;ll essentially just try this
+part of the objective function.
+
+159
+00:08:24 --> 00:08:27
+We&#39;ll try to encourage the model to keep
+all the weights as small as possible and
+
+160
+00:08:27 --> 00:08:28
+as close as possible to zero.
+
+161
+00:08:28 --> 00:08:32
+You can kind of assume if you want as
+a Bayesian that you can have a prior,
+
+162
+00:08:32 --> 00:08:36
+a Gaussian distributed prior that says
+ideally all these are small numbers.
+
+163
+00:08:36 --> 00:08:38
+Often times if you don&#39;t have
+this regularization term
+
+164
+00:08:38 --> 00:08:40
+your numbers will blow up and
+it will start to overfit more and more.
+
+165
+00:08:40 --> 00:08:44
+And in fact, this kind of plot is
+something that you will very often see
+
+166
+00:08:44 --> 00:08:46
+in your projects and
+even in the problem sets.
+
+167
+00:08:46 --> 00:08:50
+And when I took my very first statistical
+learning class, the professor said,
+
+168
+00:08:50 --> 00:08:51
+this is the number one plot to remember.
+
+169
+00:08:51 --> 00:08:52
+So, I don&#39;t know if it&#39;s that important,
+but it is very,
+
+170
+00:08:52 --> 00:08:54
+very important for all our applications.
+
+171
+00:08:54 --> 00:08:56
+And it&#39;s basically a pretty abstract plot.
+
+172
+00:08:56 --> 00:08:59
+You can think of the x-axis as
+a variety of different things.
+
+173
+00:08:59 --> 00:09:01
+For instance, how powerful your model is.
+
+174
+00:09:01 --> 00:09:04
+How many deep layers you&#39;ll have or
+how many parameters you&#39;ll have.
+
+175
+00:09:04 --> 00:09:06
+Or how many dimensions
+each word vector has.
+
+176
+00:09:06 --> 00:09:09
+Or how long you trained a model for.
+
+177
+00:09:09 --> 00:09:13
+You&#39;ll see the same kind of pattern
+with a lot of different, x-axis and
+
+178
+00:09:13 --> 00:09:16
+then the y-axis here is
+essentially your error.
+
+179
+00:09:16 --> 00:09:19
+Or your objective function that you&#39;re
+trying to optimize and minimize.
+
+180
+00:09:19 --> 00:09:22
+And what you often observe is,
+the more powerful your model gets,
+
+181
+00:09:22 --> 00:09:27
+the better you are on
+lowering your training error,
+
+182
+00:09:27 --> 00:09:30
+the better you can fit these x-i,
+y-i pairs.
+
+183
+00:09:30 --> 00:09:34
+But at some point you&#39;ll actually start
+to over-fit, and then your test error, or
+
+184
+00:09:34 --> 00:09:37
+your validation or
+development set error, will go up again.
+
+185
+00:09:37 --> 00:09:41
+We&#39;ll go into a little bit more details
+on how to avoid all of that throughout
+
+186
+00:09:41 --> 00:09:43
+this course and
+in the project advice and so on.
+
+187
+00:09:43 --> 00:09:47
+But this is a pretty fundamental thing and
+just keep in mind that for a lot of
+
+188
+00:09:47 --> 00:09:51
+the implementations, and your projects you
+will want this regularization parameter.
+
+189
+00:09:51 --> 00:09:54
+But really it&#39;s the same one for
+almost all the objective functions so
+
+190
+00:09:54 --> 00:09:58
+we&#39;re going to chop it and mostly
+focus on actually fitting our dataset.
+
+191
+00:09:58 --> 00:09:59
+All right,
+any questions around regularization?
+
+192
+00:09:59 --> 00:10:03
+So basically, you can think of
+this in terms of if you really
+
+193
+00:10:03 --> 00:10:07
+care about one specific number,
+then you can adjust all your
+
+194
+00:10:07 --> 00:10:13
+parameters such that it will exactly
+go to those different points.
+
+195
+00:10:13 --> 00:10:17
+And if you force it to not do that,
+it will kind of be a little smoother.
+
+196
+00:10:17 --> 00:10:20
+And be less likely to fit
+exactly those points and
+
+197
+00:10:20 --> 00:10:22
+hence often generalize slightly better.
+
+198
+00:10:22 --> 00:10:25
+And we&#39;ll go through a couple of examples
+of what this will look like soon.
+
+199
+00:10:25 --> 00:10:29
+All right, now as I mentioned
+in general machine learning,
+
+200
+00:10:29 --> 00:10:34
+we&#39;ll only optimize the W here,
+the parameters of our Softmax classifier.
+
+201
+00:10:34 --> 00:10:37
+And hence our updates and
+gradients will only be pretty small,
+
+202
+00:10:37 --> 00:10:40
+so in many cases we only have you
+know a handful of classes and
+
+203
+00:10:40 --> 00:10:44
+maybe our word vectors are hundred so if
+we have three classes and 100 dimensional
+
+204
+00:10:44 --> 00:10:48
+word vectors we&#39;re trying to classify,
+we&#39;d only have 300 parameters.
+
+205
+00:10:48 --> 00:10:51
+Now, in deep learning,
+we have these amazing word vectors.
+
+206
+00:10:51 --> 00:10:54
+And we actually will want to
+learn not just the Softmax but
+
+207
+00:10:54 --> 00:10:55
+also the word vectors.
+
+208
+00:10:55 --> 00:10:59
+We can back propagate into them and
+we&#39;ll talk about how to do that today.
+
+209
+00:10:59 --> 00:11:01
+Hint, it&#39;s going to be taking derivatives.
+
+210
+00:11:01 --> 00:11:04
+But the problem is when we update
+word vectors, conceptually
+
+211
+00:11:04 --> 00:11:07
+as you are thinking through this, you
+have to realize this is very, very large.
+
+212
+00:11:07 --> 00:11:09
+And now all of the sudden have a very
+large set of parameters, right?
+
+213
+00:11:09 --> 00:11:12
+Let&#39;s say your word vectors
+are 300 dimensional you have,
+
+214
+00:11:12 --> 00:11:14
+you know 10,000 words in your vocabulary.
+
+215
+00:11:14 --> 00:11:18
+All of the sudden you have an immensely
+large set of parameters so
+
+216
+00:11:18 --> 00:11:22
+on this kind of plot you&#39;re going
+to be very likely to overfit.
+
+217
+00:11:22 --> 00:11:26
+And so before we dive into all this
+optimization, I want you to get
+
+218
+00:11:26 --> 00:11:28
+a little bit of an intuition of what
+it means to update word vectors.
+
+219
+00:11:28 --> 00:11:30
+So let&#39;s go through a very simple example
+
+220
+00:11:30 --> 00:11:32
+where we might want to
+classify single words.
+
+221
+00:11:32 --> 00:11:34
+Again, it&#39;s not something
+we&#39;ll do very often, but
+
+222
+00:11:34 --> 00:11:36
+let&#39;s say you want to classify single
+words as positive or negative.
+
+223
+00:11:36 --> 00:11:40
+And let&#39;s say in our training data set we
+have the word TV and telly and say you
+
+224
+00:11:40 --> 00:11:43
+know this is movie reviews and if you
+say this movie is better suited for TV.
+
+225
+00:11:43 --> 00:11:46
+It&#39;s not a very positive thing to say
+about a movie that&#39;s just coming out into
+
+226
+00:11:46 --> 00:11:47
+movie theaters.
+
+227
+00:11:47 --> 00:11:50
+And so we would assume that
+in the beginning telly, TV,
+
+228
+00:11:50 --> 00:11:53
+and television are actually all
+close by in the vector space.
+
+229
+00:11:53 --> 00:11:57
+We learn something with word2vec or
+glove vectors and we train these word
+
+230
+00:11:57 --> 00:12:00
+vectors on a very, very large corpus and
+it learned all these three words appear
+
+231
+00:12:00 --> 00:12:04
+often in a similar context, so
+they are close by in the vector space.
+
+232
+00:12:04 --> 00:12:08
+And now we&#39;re going to train but,
+our smaller sentiment data set
+
+233
+00:12:08 --> 00:12:12
+only includes in the training set, the X-i
+Y-i as TV and telly and not television.
+
+234
+00:12:12 --> 00:12:15
+So now what happens as we
+train these word vectors?
+
+235
+00:12:15 --> 00:12:17
+Well, they will start to move around.
+
+236
+00:12:17 --> 00:12:22
+We&#39;ll project sentiment into them and
+so you now might see telly and
+
+237
+00:12:22 --> 00:12:26
+TV, that&#39;s a British dataset, so like to
+move somewhere else into the vector space.
+
+238
+00:12:26 --> 00:12:28
+But television actually stays
+where it was in the beginning.
+
+239
+00:12:28 --> 00:12:30
+And now when we want to test it,
+
+240
+00:12:30 --> 00:12:35
+we would actually now misclassify this
+word because it&#39;s never been moved.
+
+241
+00:12:35 --> 00:12:36
+And so what does that mean?
+
+242
+00:12:36 --> 00:12:38
+The take home message here will be that
+
+243
+00:12:38 --> 00:12:41
+if you have only a very
+small training dataset.
+
+244
+00:12:41 --> 00:12:45
+That will allow you especially with these
+deep models to overfit very quickly,
+
+245
+00:12:45 --> 00:12:47
+you do not want to train
+your word vectors.
+
+246
+00:12:47 --> 00:12:51
+You want to keep them fixed,
+you pre-trained them with nice Glove or
+
+247
+00:12:51 --> 00:12:53
+word2vec models on a very large corpus or
+
+248
+00:12:53 --> 00:12:57
+you just downloaded them from the cloud
+website and you want to keep them fixed,
+
+249
+00:12:57 --> 00:13:00
+cuz otherwise you will
+not generalize as well.
+
+250
+00:13:00 --> 00:13:04
+However, if you have a very large dataset
+it may be better to train them in a way
+
+251
+00:13:04 --> 00:13:06
+we&#39;re going to describe in
+the next couple of slides.
+
+252
+00:13:06 --> 00:13:07
+So, an example for
+where you do that is, for instance,
+
+253
+00:13:07 --> 00:13:11
+machine translation where you might have
+many hundreds of Megabytes or Gigabytes of
+
+254
+00:13:11 --> 00:13:16
+training data and you don&#39;t really need to
+do much with the word vectors other than
+
+255
+00:13:16 --> 00:13:18
+initialize them randomly, and then train
+them as part of your overall objective.
+
+256
+00:13:18 --> 00:13:19
+All right,
+
+257
+00:13:19 --> 00:13:22
+any questions around generalization
+capabilities of word vectors?
+
+258
+00:13:22 --> 00:13:25
+All right, it might still be
+magical how we&#39;re training this, so
+
+259
+00:13:25 --> 00:13:27
+that&#39;s what we&#39;re gonna describe now.
+
+260
+00:13:27 --> 00:13:29
+So, we rarely ever really
+classify single words.
+
+261
+00:13:29 --> 00:13:32
+Really what we wanna do is
+classify words in their context.
+
+262
+00:13:32 --> 00:13:34
+And there are a lot of fun and
+interesting.
+
+263
+00:13:34 --> 00:13:37
+Issues that arise in context really
+that&#39;s where language begins and
+
+264
+00:13:37 --> 00:13:40
+grammar and
+the connection to meaning and so on.
+
+265
+00:13:40 --> 00:13:44
+So here, a couple of fun examples of
+where context is really necessary.
+
+266
+00:13:44 --> 00:13:47
+So for instance, we have some words
+that actually auto-antonyms, so
+
+267
+00:13:47 --> 00:13:48
+they mean their own opposite.
+
+268
+00:13:48 --> 00:13:52
+So for instance to sanction can
+mean to permit or to punish.
+
+269
+00:13:52 --> 00:13:56
+And it really depends on the context for
+you to understand which one is meant, or
+
+270
+00:13:56 --> 00:13:59
+to seed can mean to place seeds or
+to remove seeds.
+
+271
+00:13:59 --> 00:14:02
+So without the context, we wouldn&#39;t really
+understand the meaning of these words.
+
+272
+00:14:02 --> 00:14:06
+And in one of the examples that you&#39;ll see
+a lot, which is named entity recognition,
+
+273
+00:14:06 --> 00:14:09
+let&#39;s say we wanna find locations or
+people names,
+
+274
+00:14:09 --> 00:14:11
+we wanna identify is this the location or
+not.
+
+275
+00:14:11 --> 00:14:16
+You may also have things like Paris, which
+could be Paris in France or Paris Hilton.
+
+276
+00:14:16 --> 00:14:17
+And you might have Paris
+staying in Paris and
+
+277
+00:14:17 --> 00:14:19
+you still wanna understand
+which one is which.
+
+278
+00:14:19 --> 00:14:23
+Or if you wanna use deep learning for
+financial trading and you see Hathaway,
+
+279
+00:14:23 --> 00:14:27
+you wanna make sure that if it&#39;s just a
+positive movie review from Anne Hathaway.
+
+280
+00:14:27 --> 00:14:30
+You&#39;re not all the sudden buying
+stocks from Berkshire Hathaway, right?
+
+281
+00:14:30 --> 00:14:32
+And so,
+there are a lot of issues that are fun and
+
+282
+00:14:32 --> 00:14:35
+interesting and
+complex that arise in context.
+
+283
+00:14:35 --> 00:14:39
+And so, let&#39;s now carefully walk
+through this first useful model,
+
+284
+00:14:39 --> 00:14:40
+which is Window classification.
+
+285
+00:14:40 --> 00:14:44
+So, we&#39;ll use as our first motivating
+example here 4-class named
+
+286
+00:14:44 --> 00:14:48
+entity recognition, where we basically
+wanna identify a person or location or
+
+287
+00:14:48 --> 00:14:52
+organization or none of the above for
+every single word in a large corpus.
+
+288
+00:14:52 --> 00:14:54
+And there are lots of different
+possibilities that exist.
+
+289
+00:14:54 --> 00:14:56
+But we&#39;ll basically look
+at the following model.
+
+290
+00:14:56 --> 00:14:57
+Which is actually quite
+a reasonable model.
+
+291
+00:14:57 --> 00:14:59
+And also one that started in 2008.
+
+292
+00:14:59 --> 00:15:03
+So the first beginning by Collobert and
+Weston, a great paper,
+
+293
+00:15:03 --> 00:15:07
+to do the first kind of useful state
+of the art Text classification and
+
+294
+00:15:07 --> 00:15:08
+word classification context.
+
+295
+00:15:08 --> 00:15:13
+So, what we wanna do is basically train a
+softmax classifier by assigning a label to
+
+296
+00:15:13 --> 00:15:18
+the center word and then concatenating all
+the words in a window around that word.
+
+297
+00:15:18 --> 00:15:24
+So, let&#39;s take for example this
+subphrase here from a longer sentence.
+
+298
+00:15:24 --> 00:15:27
+We basically wanna classify
+the center word here which is Paris,
+
+299
+00:15:27 --> 00:15:29
+in the context of this window.
+
+300
+00:15:29 --> 00:15:31
+And we&#39;ll define the window length as 2.
+
+301
+00:15:31 --> 00:15:32
+2 being 2 words to the left and
+
+302
+00:15:32 --> 00:15:35
+2 words to the right of the current center
+word that we&#39;re trying to classify.
+
+303
+00:15:35 --> 00:15:39
+All right, so what we will do
+is we&#39;ll define our new x for
+
+304
+00:15:39 --> 00:15:45
+this whole window as the concatenation
+of these five word vectors.
+
+305
+00:15:45 --> 00:15:48
+And just in general
+
+306
+00:15:48 --> 00:15:51
+throughout all of this lecture all my
+vectors are going to be column vectors.
+
+307
+00:15:51 --> 00:15:54
+Sadly in number two of the problem set,
+they&#39;re row vectors.
+
+308
+00:15:54 --> 00:15:54
+Sorry for that.
+
+309
+00:15:54 --> 00:15:59
+Eventually, all these programming
+frameworks they&#39;re actually row-wise first
+
+310
+00:15:59 --> 00:16:04
+and so it&#39;s faster in the low-level
+optimization to use row vectors.
+
+311
+00:16:04 --> 00:16:06
+For a lot of the math it&#39;s actually I find
+it simpler to think of them as column
+
+312
+00:16:06 --> 00:16:07
+vectors so.
+
+313
+00:16:07 --> 00:16:11
+We&#39;re very clear in the problem set but
+don&#39;t get tripped up on that.
+
+314
+00:16:11 --> 00:16:17
+So basically, we&#39;ll define this here as
+one five D dimensional column vector.
+
+315
+00:16:17 --> 00:16:19
+So, we have T dimensional word vectors,
+we have five of them and
+
+316
+00:16:19 --> 00:16:22
+we stack them up in one column, all right.
+
+317
+00:16:22 --> 00:16:27
+Now, the simplest window classifier that
+we could think of is to now just put
+
+318
+00:16:27 --> 00:16:32
+the softmax on top of this
+concatenation of five word vectors and
+
+319
+00:16:32 --> 00:16:34
+we&#39;ll define this, our x here.
+
+320
+00:16:34 --> 00:16:37
+Our inputs is just the x of the entire
+window for this concatenation.
+
+321
+00:16:37 --> 00:16:39
+And we have the softmax on top of that.
+
+322
+00:16:39 --> 00:16:41
+And so, this is the same
+notation that we used before.
+
+323
+00:16:41 --> 00:16:45
+We&#39;re introducing here y hat,
+with sadly the subscript y for
+
+324
+00:16:45 --> 00:16:46
+the correct current class.
+
+325
+00:16:46 --> 00:16:49
+It&#39;s tough, I went through [LAUGH] several
+iterations, it&#39;s tough to have like
+
+326
+00:16:49 --> 00:16:52
+prefect notation that works
+through the entire lecture always.
+
+327
+00:16:52 --> 00:16:53
+But you&#39;ll see why soon.
+
+328
+00:16:53 --> 00:16:57
+So, our overall objective here is,
+again, this whole sum over all
+
+329
+00:16:57 --> 00:17:02
+these probabilities that we have,
+or negative log of those.
+
+330
+00:17:02 --> 00:17:05
+So now, the question is, how do we
+update these word vectors x here?
+
+331
+00:17:05 --> 00:17:08
+One x is a window, and
+x is now deep inside the softmax.
+
+332
+00:17:08 --> 00:17:11
+All right, well, the short answer
+is we&#39;ll take a lot of derivatives.
+
+333
+00:17:11 --> 00:17:14
+But the long answer is, you&#39;re gonna have
+to do that a lot in problem set one and
+
+334
+00:17:14 --> 00:17:14
+maybe in the midterm.
+
+335
+00:17:14 --> 00:17:18
+So, let&#39;s be a little more helpful, and
+actually go through some of the steps and
+
+336
+00:17:18 --> 00:17:19
+give you some hints.
+
+337
+00:17:19 --> 00:17:21
+So some of this, you&#39;ll actually
+have to do in your problem set, so
+
+338
+00:17:21 --> 00:17:23
+I&#39;m not gonna go through all the details.
+
+339
+00:17:23 --> 00:17:27
+But I&#39;ll give you a couple of hints
+along the way and then you can know if
+
+340
+00:17:27 --> 00:17:30
+you&#39;re hitting those and then you&#39;ll
+see if you&#39;re on the right track.
+
+341
+00:17:30 --> 00:17:34
+So, step one, always very
+carefully define your variables,
+
+342
+00:17:34 --> 00:17:35
+their dimensionality and everything.
+
+343
+00:17:35 --> 00:17:40
+So, y hat will define as the softmax
+probability of the vector.
+
+344
+00:17:40 --> 00:17:43
+So, the normalized scores or
+the probabilities for
+
+345
+00:17:43 --> 00:17:44
+all the different classes that we have.
+
+346
+00:17:44 --> 00:17:46
+So, in our case we have four.
+
+347
+00:17:46 --> 00:17:47
+Then we have the target distribution.
+
+348
+00:17:47 --> 00:17:50
+Again, that will be a one hot
+vector where it&#39;s all zeroes except
+
+349
+00:17:50 --> 00:17:54
+at the ground truth index of the class y,
+where it&#39;s one.
+
+350
+00:17:54 --> 00:17:56
+And we&#39;ll define our f
+here as f of x again,
+
+351
+00:17:56 --> 00:17:57
+which is this matrix multiplication.
+
+352
+00:17:57 --> 00:18:00
+Which is going to be a C dimensional
+vector where capital C is the number of
+
+353
+00:18:00 --> 00:18:04
+classes that we have, all right.
+
+354
+00:18:04 --> 00:18:05
+So, that was step one.
+
+355
+00:18:05 --> 00:18:08
+Carefully define all of your variables and
+keep track of their dimensionality.
+
+356
+00:18:08 --> 00:18:12
+It&#39;s very easy when you implement this and
+you multiply two things, and
+
+357
+00:18:12 --> 00:18:15
+they have wrong dimensionality, and
+you can&#39;t actually legally multiply them,
+
+358
+00:18:15 --> 00:18:15
+you know you have a bug.
+
+359
+00:18:15 --> 00:18:17
+And you can do this also
+in a lot of your equations.
+
+360
+00:18:17 --> 00:18:18
+You&#39;d be surprised.
+
+361
+00:18:18 --> 00:18:20
+In the midterm, you&#39;re nervous.
+
+362
+00:18:20 --> 00:18:21
+But maybe at the end you have some time.
+
+363
+00:18:21 --> 00:18:24
+And you could totally grade it
+by yourself in the first pass,
+
+364
+00:18:24 --> 00:18:27
+by just making sure that all your
+dimensionality of your matrix and
+
+365
+00:18:27 --> 00:18:30
+vector multiplications are correct.
+
+366
+00:18:30 --> 00:18:33
+All right, the second tip is the chain
+rule, we went over this before, but
+
+367
+00:18:33 --> 00:18:35
+I heard there&#39;s a little bit of
+confusion still in the office hours.
+
+368
+00:18:35 --> 00:18:39
+So, let&#39;s define this carefully for
+a simple example and then we&#39;ll go and
+
+369
+00:18:39 --> 00:18:42
+give you a couple more hints also for
+more complex example.
+
+370
+00:18:42 --> 00:18:45
+So again, if you have something
+very simple, such as a function y,
+
+371
+00:18:45 --> 00:18:49
+which you can defined here as f of u and
+u can be defined as g of
+
+372
+00:18:49 --> 00:18:53
+x as in the whole function, y of x,
+can be described as f of g of x,
+
+373
+00:18:53 --> 00:18:57
+then you would basically multiply dy,
+u times the udx.
+
+374
+00:18:57 --> 00:19:00
+And so very concretely here,
+this is sort of high school level,
+
+375
+00:19:00 --> 00:19:05
+but we&#39;ll define it properly in
+order to show the chain rule.
+
+376
+00:19:05 --> 00:19:08
+So here,
+you can basically define u as g(x),
+
+377
+00:19:08 --> 00:19:11
+which is just the inside in
+the parentheses here, so x cubed + 7.
+
+378
+00:19:11 --> 00:19:14
+It can have y as a function of f(u),
+
+379
+00:19:14 --> 00:19:18
+where we use 5 times u,
+just replacing the inside definition here.
+
+380
+00:19:18 --> 00:19:21
+So it&#39;s very simple,
+just replacing things.
+
+381
+00:19:21 --> 00:19:23
+And now, we can take the derivative
+with respect to u and
+
+382
+00:19:23 --> 00:19:26
+we can take the derivative
+with respect to x(u).
+
+383
+00:19:26 --> 00:19:29
+And then we just multiply these two terms,
+and we plug in u again.
+
+384
+00:19:29 --> 00:19:32
+So in that sense, we all know,
+in theory, the chain rule.
+
+385
+00:19:32 --> 00:19:34
+But, now we&#39;re gonna have the softmax, and
+
+386
+00:19:34 --> 00:19:36
+we&#39;re gonna have lots of matrices and
+so on.
+
+387
+00:19:36 --> 00:19:38
+So, we have to be very,
+very careful about our notation.
+
+388
+00:19:38 --> 00:19:40
+And we also have to be
+careful about understanding,
+
+389
+00:19:40 --> 00:19:45
+which parameters appear inside
+what other higher level elements.
+
+390
+00:19:45 --> 00:19:47
+So, f for instance is a function of x.
+
+391
+00:19:47 --> 00:19:50
+So, if you&#39;re trying to take
+a derivative with respect to x,
+
+392
+00:19:50 --> 00:19:54
+of this overall soft max you&#39;re gonna have
+to sum over all of the different classes
+
+393
+00:19:54 --> 00:19:55
+inside which x appears.
+
+394
+00:19:55 --> 00:19:57
+And you&#39;ll see here,
+this first application, but
+
+395
+00:19:57 --> 00:20:01
+not just of fy again this is just
+a subscript the y element of the effector
+
+396
+00:20:01 --> 00:20:05
+which is the function of x, but
+also multiply it then here by this.
+
+397
+00:20:05 --> 00:20:10
+So, when you write this out,
+another tip that can be helpful is for
+
+398
+00:20:10 --> 00:20:13
+this softmax part of he derivative
+is to actually think of two cases.
+
+399
+00:20:13 --> 00:20:15
+One where c = y, the correct class,
+
+400
+00:20:15 --> 00:20:19
+and one where it&#39;s basically all
+the other incorrect classes.
+
+401
+00:20:19 --> 00:20:23
+And as you write this out,
+you will observe and
+
+402
+00:20:23 --> 00:20:24
+come up with something like this.
+
+403
+00:20:24 --> 00:20:27
+So, don&#39;t just write that as your thing
+you have to put in your problems,
+
+404
+00:20:27 --> 00:20:29
+the steps on how to get there.
+
+405
+00:20:29 --> 00:20:33
+Bur, basically at some point you
+observe this kinda pattern when you now
+
+406
+00:20:33 --> 00:20:36
+try to look at all the derivatives
+with respect to all the elements of f.
+
+407
+00:20:36 --> 00:20:38
+And now,
+when you have this you realize ,okay at
+
+408
+00:20:38 --> 00:20:40
+the correct class we&#39;re
+actually subtracting one here,
+
+409
+00:20:40 --> 00:20:42
+and all the incorrect classes,
+you will not do anything.
+
+410
+00:20:42 --> 00:20:44
+Now, the problem is when
+you implement this,
+
+411
+00:20:44 --> 00:20:46
+it kind of looks like
+a bunch of if statements.
+
+412
+00:20:46 --> 00:20:48
+If y equals the correct class for
+
+413
+00:20:48 --> 00:20:52
+my training set, then, subtract 1,
+that&#39;s not gonna be very efficient.
+
+414
+00:20:52 --> 00:20:55
+Also, you&#39;re gonna go insane if you try
+to actually write down equations for
+
+415
+00:20:55 --> 00:20:57
+more complex neural network
+architectures ever.
+
+416
+00:20:57 --> 00:21:01
+And so, instead, what we wanna do is
+always try to vectorize a lot of our
+
+417
+00:21:01 --> 00:21:03
+notation, as well as our implementation.
+
+418
+00:21:03 --> 00:21:05
+And so, what this means here,
+in this case,
+
+419
+00:21:05 --> 00:21:08
+is you can actually observe that,
+well, this 1 is exactly 1,
+
+420
+00:21:08 --> 00:21:12
+where t, our hot to target distribution,
+also happens to be 1.
+
+421
+00:21:12 --> 00:21:17
+And so, what you&#39;re gonna wanna do,
+is basically
+
+422
+00:21:17 --> 00:21:23
+describe this as y(hat)- t, so
+it&#39;s the same thing as this.
+
+423
+00:21:23 --> 00:21:24
+And don&#39;t worry if you don&#39;t
+understand how we got there,
+
+424
+00:21:24 --> 00:21:26
+cuz that&#39;s part of your problem set.
+
+425
+00:21:26 --> 00:21:27
+You have to, at some point,
+
+426
+00:21:27 --> 00:21:30
+see this equation while you&#39;re
+taking those derivatives.
+
+427
+00:21:30 --> 00:21:35
+And now, the very first baby step towards
+back-propagation is actually to define
+
+428
+00:21:35 --> 00:21:39
+this term, in terms of a simpler single
+variable and we&#39;ll call this delta.
+
+429
+00:21:39 --> 00:21:42
+We&#39;ll get good, we&#39;ll become good friends
+with deltas because they are sort of our
+
+430
+00:21:42 --> 00:21:42
+error signals.
+
+431
+00:21:42 --> 00:21:46
+Now, the last couple of tips.
+
+432
+00:21:46 --> 00:21:47
+Tip number six.
+
+433
+00:21:47 --> 00:21:51
+When you start with this chain rule, you
+might want to sometimes use explicit sums,
+
+434
+00:21:51 --> 00:21:53
+before and
+look at all the partial derivatives.
+
+435
+00:21:53 --> 00:21:55
+And if you do that a couple of times
+at some point you see a pattern, and
+
+436
+00:21:55 --> 00:21:59
+then you try to think of how to
+extrapolate from those patterns of
+
+437
+00:21:59 --> 00:22:03
+single partial derivatives,
+into vector and matrix notation.
+
+438
+00:22:03 --> 00:22:08
+So, for example,
+you&#39;ll see something like this here,
+
+439
+00:22:08 --> 00:22:11
+in at some point in your derivation.
+
+440
+00:22:11 --> 00:22:17
+S,o the overall derivative with respect to
+x of our overall objective function for
+
+441
+00:22:17 --> 00:22:22
+one element, for one element from our
+training set x and y is this sum.
+
+442
+00:22:22 --> 00:22:24
+And it turns out when you
+think about this for a while,
+
+443
+00:22:24 --> 00:22:29
+you take here this row vector but
+then you transpose it,
+
+444
+00:22:29 --> 00:22:33
+and becomes an inner product, well if you
+do that multiple times for all the C&#39;s and
+
+445
+00:22:33 --> 00:22:37
+you wanna get in the end a whole vector
+out, it turns out you can actually just
+
+446
+00:22:37 --> 00:22:41
+re-write the sum as W
+transpose* the delta.
+
+447
+00:22:41 --> 00:22:45
+So, this is one error signal here
+that we got from our softmax,
+
+448
+00:22:45 --> 00:22:49
+and we multiply the transpose of
+our softmax weights with this.
+
+449
+00:22:49 --> 00:22:50
+And again,
+if some of these are not clear and
+
+450
+00:22:50 --> 00:22:51
+you&#39;re confused,
+write them out into full sum,
+
+451
+00:22:51 --> 00:22:55
+and then you&#39;ll see that it&#39;s really
+just re-write this in vector notation.
+
+452
+00:22:55 --> 00:23:01
+All right, now what is the dimensionality
+of the window vector gradient?
+
+453
+00:23:01 --> 00:23:06
+So in the end, we have this derivative
+of the overall cost here for
+
+454
+00:23:06 --> 00:23:08
+one element of our training
+set with respect to x.
+
+455
+00:23:08 --> 00:23:08
+But x is a window.
+
+456
+00:23:08 --> 00:23:11
+All right, so
+each say we have a window of five words.
+
+457
+00:23:11 --> 00:23:14
+And each word is d-dimensional.
+
+458
+00:23:14 --> 00:23:18
+Now, what should be the dimensionality
+of this derivative of this gradient?
+
+459
+00:23:18 --> 00:23:20
+That&#39;s right,
+it&#39;s five times the dimensionality.
+
+460
+00:23:20 --> 00:23:24
+And that&#39;s another really good way, and
+one of the reasons we make you implement
+
+461
+00:23:24 --> 00:23:29
+this from scratch, if you have any kinda
+parameter, and you have a gradient for
+
+462
+00:23:29 --> 00:23:32
+that parameter, and they&#39;re not the same
+dimensionality, you&#39;ll also know you
+
+463
+00:23:32 --> 00:23:36
+screwed up and there&#39;s some mistake or
+bug in either your code or your map.
+
+464
+00:23:36 --> 00:23:39
+So, it&#39;s very simple debugging skill.
+
+465
+00:23:39 --> 00:23:41
+And way to check your own equations.
+
+466
+00:23:41 --> 00:23:45
+So, the final derivative with respect
+to this window is now this five
+
+467
+00:23:45 --> 00:23:48
+vector because we had five d-dimensional
+vectors that we concatenated.
+
+468
+00:23:48 --> 00:23:51
+Now, of course the tricky bit is,
+
+469
+00:23:51 --> 00:23:53
+you actually wanna update your word
+vectors and not the whole window, right?
+
+470
+00:23:53 --> 00:23:55
+The window is just this
+intermediate step also.
+
+471
+00:23:55 --> 00:23:57
+So really, what you wanna do is update and
+
+472
+00:23:57 --> 00:24:00
+take derivatives with respect to each
+of the elements of your word vectors.
+
+473
+00:24:00 --> 00:24:05
+And so it turns out, very simply,
+that can be done by just splitting
+
+474
+00:24:05 --> 00:24:10
+that error that you&#39;ve got on the gradient
+overall, at the whole window and that&#39;s
+
+475
+00:24:10 --> 00:24:15
+just basically the concatenation of the
+reduced of all the different word vectors.
+
+476
+00:24:15 --> 00:24:18
+And those you can use to update your word
+vectors, as you train the whole system.
+
+477
+00:24:18 --> 00:24:22
+All right, any questions?
+
+478
+00:24:22 --> 00:24:22
+Is there a mathematical what?
+
+479
+00:24:22 --> 00:24:26
+Is there a mathematical notation for
+the word vector t,
+
+480
+00:24:26 --> 00:24:29
+other than it&#39;s just variable t?
+
+481
+00:24:29 --> 00:24:31
+Or that seems like a fine notation.
+
+482
+00:24:31 --> 00:24:34
+You can see this as a probability
+distribution, that is very peaked.
+
+483
+00:24:34 --> 00:24:37
+&gt;&gt; Yeah.
+&gt;&gt; That&#39;s all, there&#39;s nothing else to it.
+
+484
+00:24:37 --> 00:24:39
+Just a single vector with all zeroes,
+except in one location.
+
+485
+00:24:39 --> 00:24:41
+&gt;&gt; So I&#39;ll just write that down?
+
+486
+00:24:41 --> 00:24:42
+&gt;&gt; You can write that up, yeah.
+
+487
+00:24:42 --> 00:24:45
+You can always just write out and
+it&#39;s also something very important.
+
+488
+00:24:45 --> 00:24:50
+You always wanna define everything, so
+that you make sure that the TAs know that
+
+489
+00:24:50 --> 00:24:53
+you&#39;re thinking about the right thing,
+as you&#39;re writing out your derivatives,
+
+490
+00:24:53 --> 00:24:55
+you write out the dimensionality,
+you define them properly,
+
+491
+00:24:55 --> 00:24:57
+you can use dot, dot,
+dot if it&#39;s a larger dimensional vector.
+
+492
+00:24:57 --> 00:25:05
+You can just define t as your
+target distribution [INAUDIBLE]
+
+493
+00:25:05 --> 00:25:05
+&gt;&gt; The question is,
+
+494
+00:25:05 --> 00:25:06
+do we still have two vectors for
+each word?
+
+495
+00:25:06 --> 00:25:07
+Great question, no.
+
+496
+00:25:07 --> 00:25:11
+We essentially, when we did glove and
+word2vec, and had these two u&#39;s and v&#39;s,
+
+497
+00:25:11 --> 00:25:15
+for all subsequent lectures from now on,
+we&#39;ll just assume we have the sum of u and
+
+498
+00:25:15 --> 00:25:17
+v and that&#39;s our single vector x,
+for each word.
+
+499
+00:25:17 --> 00:25:19
+So, the question is does this gradient
+appear in lots of other windows
+
+500
+00:25:19 --> 00:25:19
+and it does.
+
+501
+00:25:19 --> 00:25:21
+So, if you, the answer is yes.
+
+502
+00:25:21 --> 00:25:26
+If you have the word &quot;in,&quot; that vector
+here and the gradients will appear
+
+503
+00:25:26 --> 00:25:30
+in all the windows that have
+the word &quot;in&quot; inside of them.
+
+504
+00:25:30 --> 00:25:31
+And same with museums and so on.
+
+505
+00:25:31 --> 00:25:34
+And so as you do stochastic gradient
+descent you look at one window at a time,
+
+506
+00:25:34 --> 00:25:37
+you update it, then you go to the next
+window, you update it and so on.
+
+507
+00:25:37 --> 00:25:38
+Great questions.
+
+508
+00:25:38 --> 00:25:39
+All right.
+
+509
+00:25:39 --> 00:25:44
+Now, let&#39;s look at how we update
+these concatenated word vectors.
+
+510
+00:25:44 --> 00:25:46
+So basically, as we&#39;re training this,
+if we train it for
+
+511
+00:25:46 --> 00:25:49
+instance with sentiment we&#39;ll push all
+the positive words in one direction and
+
+512
+00:25:49 --> 00:25:51
+the other words in other direction.
+
+513
+00:25:51 --> 00:25:55
+If we train it, for
+named entity recognition and
+
+514
+00:25:55 --> 00:25:59
+eventually our model can learn that seeing
+something like in as the word just before
+
+515
+00:25:59 --> 00:26:02
+the center word, would be indicative for
+that center word to be a location.
+
+516
+00:26:02 --> 00:26:05
+So now what&#39;s missing for
+training this full window model?
+
+517
+00:26:05 --> 00:26:10
+Well mainly the gradient of J with
+respect to the softmax weights W.
+
+518
+00:26:10 --> 00:26:12
+And so
+we basically will take similar steps.
+
+519
+00:26:12 --> 00:26:14
+We&#39;ll write down all the partial
+derivatives with respect to Wij
+
+520
+00:26:14 --> 00:26:14
+first and so on.
+
+521
+00:26:14 --> 00:26:17
+And then we have our full gradient for
+this entire model.
+
+522
+00:26:17 --> 00:26:19
+And again, this will be very sparse, and
+
+523
+00:26:19 --> 00:26:23
+you&#39;re gonna wanna have some clever ways
+of implementing these word vector updates.
+
+524
+00:26:23 --> 00:26:28
+So you don&#39;t send a bunch of zeros
+around at every single window,
+
+525
+00:26:28 --> 00:26:31
+Cuz each window will
+only have a few words.
+
+526
+00:26:31 --> 00:26:35
+So in fact, it&#39;s so important for
+your code in the problem set to think
+
+527
+00:26:35 --> 00:26:38
+carefully through your
+matrix implementations,
+
+528
+00:26:38 --> 00:26:41
+that it&#39;s worth to spend two or
+three slides on this.
+
+529
+00:26:41 --> 00:26:46
+So there are essentially two very
+expensive operations in the softmax.
+
+530
+00:26:46 --> 00:26:48
+The matrix multiplication and
+the exponent.
+
+531
+00:26:48 --> 00:26:53
+Actually later in the lecture, we&#39;ll
+find a way to deal with the exponent.
+
+532
+00:26:53 --> 00:26:59
+But the matrix multiplication can also
+be implemented much more efficiently.
+
+533
+00:26:59 --> 00:27:02
+So you might be tempted in the beginning
+to think this is probability for
+
+534
+00:27:02 --> 00:27:04
+this class and
+this is the probability for that class.
+
+535
+00:27:04 --> 00:27:07
+And so implemented a for
+loop of all my different classes and
+
+536
+00:27:07 --> 00:27:11
+then I&#39;ll take derivatives or
+matrix multiplications one row at a time.
+
+537
+00:27:11 --> 00:27:15
+And that is going to be very,
+very inefficient.
+
+538
+00:27:15 --> 00:27:19
+So let&#39;s go through some very simple
+Python code here to show you what I mean.
+
+539
+00:27:19 --> 00:27:22
+So essentially,
+always looping over these word vectors
+
+540
+00:27:22 --> 00:27:25
+instead of concatenating
+everything into one large matrix.
+
+541
+00:27:25 --> 00:27:29
+And then multiplying these is
+always going to be more efficient.
+
+542
+00:27:29 --> 00:27:34
+So let&#39;s assume we have 500
+windows that we want to classify,
+
+543
+00:27:34 --> 00:27:39
+and let&#39;s assume each window
+has a dimensionality of 300.
+
+544
+00:27:39 --> 00:27:41
+These are reasonable numbers, and
+
+545
+00:27:41 --> 00:27:44
+let&#39;s assume we have five
+classes in our softmax.
+
+546
+00:27:44 --> 00:27:48
+And so at some point during
+the computation, we now have two options.
+
+547
+00:27:48 --> 00:27:49
+So W here are weights for the softmax.
+
+548
+00:27:49 --> 00:27:53
+It&#39;s gonna be C many rows and
+d many columns.
+
+549
+00:27:53 --> 00:27:56
+Now the word vectors here that
+you concatenated for each window.
+
+550
+00:27:56 --> 00:28:00
+We can either have the list of
+a bunch of separate word vectors,
+
+551
+00:28:00 --> 00:28:04
+or we can have one large matrix
+that&#39;s going to be d times n.
+
+552
+00:28:04 --> 00:28:07
+So d many rows and n many windows.
+
+553
+00:28:07 --> 00:28:12
+So we have 500 windows, so
+we have 500 columns here in this 1 matrix.
+
+554
+00:28:12 --> 00:28:18
+And now essentially, we can multiply
+the W here for each vector separately,
+
+555
+00:28:18 --> 00:28:22
+or we can do this one matrix
+multiplication entirely.
+
+556
+00:28:22 --> 00:28:27
+And you literally have
+a 12x speed difference.
+
+557
+00:28:27 --> 00:28:29
+And sadly with these larger models,
+one iteration or
+
+558
+00:28:29 --> 00:28:33
+something might take a day, eventually for
+more complex models large data sets.
+
+559
+00:28:33 --> 00:28:35
+So the difference is between
+literally 12 days or
+
+560
+00:28:35 --> 00:28:38
+1 day of you iterating and
+making your deadlines and everything.
+
+561
+00:28:38 --> 00:28:41
+So it&#39;s super important,
+and now sometimes people
+
+562
+00:28:41 --> 00:28:45
+are tripped up by what does it
+mean to multiply and do this here.
+
+563
+00:28:45 --> 00:28:49
+Essentially, it&#39;s the same
+thing that we&#39;ve done here for
+
+564
+00:28:49 --> 00:28:54
+one softmax, but
+what we did is we actually concatenated.
+
+565
+00:28:54 --> 00:28:57
+A lot of different input vectors x, and so
+
+566
+00:28:57 --> 00:29:03
+we&#39;ll get a lot of different
+unnormalized scores out at the end.
+
+567
+00:29:03 --> 00:29:05
+And then we can tease them apart again for
+them.
+
+568
+00:29:05 --> 00:29:10
+So you have here, c times t dimensional
+matrix for the d dimensional input.
+
+569
+00:29:10 --> 00:29:12
+So using the same notation, yeah,
+
+570
+00:29:12 --> 00:29:17
+dimensional of each window times d times
+n matrix to get a c times n matrix.
+
+571
+00:29:17 --> 00:29:22
+So these are all
+the probabilities here for
+
+572
+00:29:22 --> 00:29:25
+your N many training samples.
+
+573
+00:29:25 --> 00:29:25
+Any questions around that?
+
+574
+00:29:25 --> 00:29:31
+So it&#39;s super important, all your code
+will be way too slow if you don&#39;t do this.
+
+575
+00:29:31 --> 00:29:35
+And so
+this is very much an implementation trick.
+
+576
+00:29:35 --> 00:29:37
+And so in most of the equations,
+
+577
+00:29:37 --> 00:29:42
+we&#39;re not gonna actually go there cuz
+that makes everything more complicated.
+
+578
+00:29:42 --> 00:29:45
+And the equations look at only
+a singular example at a time, but
+
+579
+00:29:45 --> 00:29:48
+in the end you&#39;re gonna wanna
+vectorize all your code.
+
+580
+00:29:48 --> 00:29:52
+Yeah, matrices are your friend,
+use them as much as you can.
+
+581
+00:29:52 --> 00:29:56
+Also in many cases, especially for
+this problem set where you really
+
+582
+00:29:56 --> 00:30:00
+understand the nuts and bolts of how
+to train and optimize your models.
+
+583
+00:30:00 --> 00:30:03
+You will come across a lot
+of different choices.
+
+584
+00:30:03 --> 00:30:05
+It&#39;s like,
+I could implement it this way or that way.
+
+585
+00:30:05 --> 00:30:07
+And you can go to your TA and ask,
+should I implement this way or that way?
+
+586
+00:30:07 --> 00:30:13
+But you can also just use time it
+as your magic Python and just let,
+
+587
+00:30:13 --> 00:30:18
+make a very informed decision and
+gain intuition yourself.
+
+588
+00:30:18 --> 00:30:21
+And just basically wanna
+speed test a lot of different
+
+589
+00:30:21 --> 00:30:24
+options that you have in
+your code a lot of the time.
+
+590
+00:30:24 --> 00:30:28
+All right, so
+this is was just a pure softmax,
+
+591
+00:30:28 --> 00:30:32
+and now the softmax alone
+is not play powerful.
+
+592
+00:30:32 --> 00:30:36
+Because it really only gets with this
+linear decision boundaries in your
+
+593
+00:30:36 --> 00:30:37
+original space.
+
+594
+00:30:37 --> 00:30:40
+If you have very, very little
+training data that could be okay, and
+
+595
+00:30:40 --> 00:30:44
+you kind of used a not so powerful model
+almost as an abstract regularizer.
+
+596
+00:30:44 --> 00:30:46
+But with more data,
+it&#39;s actually quite limiting.
+
+597
+00:30:46 --> 00:30:50
+So if we have here a bunch of words and
+we don&#39;t wanna update our word vectors,
+
+598
+00:30:50 --> 00:30:54
+softmax would only give us this linear
+decision boundary which is kind of lame.
+
+599
+00:30:54 --> 00:30:57
+And it would be way better if we could
+
+600
+00:30:57 --> 00:31:01
+correctly classify these
+points here as well.
+
+601
+00:31:01 --> 00:31:05
+And so basically, this is one of the many
+motivations for using neural networks.
+
+602
+00:31:05 --> 00:31:09
+Cuz neural networks will give us much
+more complex decision boundaries and
+
+603
+00:31:09 --> 00:31:12
+allow us to fit much more complex
+functions to our training data.
+
+604
+00:31:12 --> 00:31:13
+And you could be snarky and
+
+605
+00:31:13 --> 00:31:16
+actually rename neural networks
+which sounds really cool.
+
+606
+00:31:16 --> 00:31:17
+It&#39;s just general function approximators.
+
+607
+00:31:17 --> 00:31:23
+Just wouldn&#39;t have quite the same ring to
+it, but it&#39;s essentially what they are.
+
+608
+00:31:23 --> 00:31:27
+So let&#39;s define how we get from
+the symbol of logistic regression to
+
+609
+00:31:27 --> 00:31:30
+a neural network and beyond,
+and deep neural nets.
+
+610
+00:31:30 --> 00:31:32
+So let&#39;s demystify the whole
+thing by starting,
+
+611
+00:31:32 --> 00:31:33
+defining again some of the terminology.
+
+612
+00:31:33 --> 00:31:38
+And we can have more fun with the math,
+and then one and a half lectures from now.
+
+613
+00:31:38 --> 00:31:39
+We can just basically use
+all of these Lego blocks.
+
+614
+00:31:39 --> 00:31:42
+So bear with me,
+this is going to be tough.
+
+615
+00:31:42 --> 00:31:46
+And try to concentrate and
+ask questions if you have any,
+
+616
+00:31:46 --> 00:31:52
+cuz we&#39;ll keep building now a pretty
+awesome large model that&#39;s really useful.
+
+617
+00:31:52 --> 00:31:56
+So we&#39;ll have inputs, we&#39;ll have
+a bias unit, we&#39;ll have an activation
+
+618
+00:31:56 --> 00:32:00
+function and output for each single
+neuron in our larger neuron network.
+
+619
+00:32:00 --> 00:32:03
+So let&#39;s define a single neuron first.
+
+620
+00:32:03 --> 00:32:07
+Basically, you can see it as
+a binary logistic regression unit.
+
+621
+00:32:07 --> 00:32:09
+We&#39;re going to have inside,
+
+622
+00:32:09 --> 00:32:14
+again a set of weights that we
+have in a product with our input.
+
+623
+00:32:14 --> 00:32:16
+So we have the input x
+here to this neuron.
+
+624
+00:32:16 --> 00:32:17
+And in the end,
+we&#39;re going to add a bias term.
+
+625
+00:32:17 --> 00:32:19
+So we have an always on feature, and
+
+626
+00:32:19 --> 00:32:22
+that kind of defines how likely
+should this neuron fire.
+
+627
+00:32:22 --> 00:32:26
+And by firing, I mean have a very
+high probability that&#39;s close to one.
+
+628
+00:32:26 --> 00:32:27
+For being on.
+
+629
+00:32:27 --> 00:32:32
+And f here is always, from now on,
+going to be this element wise function.
+
+630
+00:32:32 --> 00:32:38
+In our case here the sigmoid that just
+squashes whatever this sum gives us in our
+
+631
+00:32:38 --> 00:32:43
+product plus the bias term and basically
+just squashes it to be between 0 and 1.
+
+632
+00:32:43 --> 00:32:45
+All right, so this is the definition
+of the single neuron.
+
+633
+00:32:45 --> 00:32:48
+Now if we feed a vector of inputs through
+all this different little logistic
+
+634
+00:32:48 --> 00:32:51
+regression functions and
+neurons, we get this output.
+
+635
+00:32:51 --> 00:32:56
+And now the main difference between
+just predicting directly a softmax and
+
+636
+00:32:56 --> 00:32:57
+standard machine learning and
+
+637
+00:32:57 --> 00:33:02
+deep learning is that we&#39;ll actually not
+force this to give directly the output.
+
+638
+00:33:02 --> 00:33:06
+But they will themselves be inputs to yet
+another neuron.
+
+639
+00:33:06 --> 00:33:10
+And it&#39;s a loss function on top of that
+neuron such as cross entropy that will
+
+640
+00:33:10 --> 00:33:14
+now govern what these
+intermediate hidden neurons.
+
+641
+00:33:14 --> 00:33:17
+Or in the hidden layer what they
+will actually try to achieve.
+
+642
+00:33:17 --> 00:33:20
+And the model can decide itself
+what it should represent,
+
+643
+00:33:20 --> 00:33:24
+how it should transform this input
+inside these hidden units here
+
+644
+00:33:24 --> 00:33:28
+in order to give us a lower
+error at the final output.
+
+645
+00:33:28 --> 00:33:31
+And it&#39;s really just this
+concatenation of these hidden neurons,
+
+646
+00:33:31 --> 00:33:33
+these little binary
+logistic regression units
+
+647
+00:33:33 --> 00:33:37
+that will allow us to build very
+deep neural network architectures.
+
+648
+00:33:37 --> 00:33:42
+Now again, for sanity&#39;s sake, we&#39;re
+going to have to use matrix notation cuz
+
+649
+00:33:42 --> 00:33:46
+all of this can be very simply described
+in terms of matrix multiplication.
+
+650
+00:33:46 --> 00:33:50
+So a1 here is where going to be the final
+
+651
+00:33:50 --> 00:33:54
+activation of the first neuron,
+a2 in second neuron and so on.
+
+652
+00:33:54 --> 00:33:58
+So instead of writing out the inner
+product here, or writing even this
+
+653
+00:33:58 --> 00:34:03
+as an inner product plus the bias term
+we&#39;re going to use matrix notation.
+
+654
+00:34:03 --> 00:34:07
+And it&#39;s very important now to pay
+attention to this intermediate variables
+
+655
+00:34:07 --> 00:34:08
+that we&#39;ll define because
+we&#39;ll see these over and
+
+656
+00:34:08 --> 00:34:11
+over again as we use a chain
+rule to take derivatives.
+
+657
+00:34:11 --> 00:34:17
+So we&#39;ll define z here as W
+times x plus the bias vector.
+
+658
+00:34:17 --> 00:34:21
+So we&#39;ll basically have here as
+many bias terms and this vector has
+
+659
+00:34:21 --> 00:34:25
+the same dimensionality as the number
+of neurons that we have in this layer.
+
+660
+00:34:25 --> 00:34:29
+And W will have number of rows for
+the number of neurons that we have
+
+661
+00:34:29 --> 00:34:33
+times number of columns for
+the input dimensionality of x.
+
+662
+00:34:33 --> 00:34:35
+And then, whenever we write a of f(z),
+
+663
+00:34:35 --> 00:34:38
+what that means here is that we&#39;ll
+actually apply f element wise.
+
+664
+00:34:38 --> 00:34:44
+So f(z) when z is a vector is just f(z1),
+f(z2) and f(z3).
+
+665
+00:34:44 --> 00:34:48
+And now you might ask, well, why do we
+have all this added complexity here
+
+666
+00:34:48 --> 00:34:51
+with this sigmoid function.
+
+667
+00:34:51 --> 00:34:54
+Later on we can actually have other
+kinds of so called non linearities.
+
+668
+00:34:54 --> 00:34:57
+This f function and
+it turns out that if we don&#39;t have
+
+669
+00:34:57 --> 00:35:00
+the non-linearities in between and
+we will just stack a couple of
+
+670
+00:35:00 --> 00:35:03
+this linear layers together it wouldn&#39;t
+add a very different function.
+
+671
+00:35:03 --> 00:35:06
+In fact it would be continuing to
+just be a single linear function.
+
+672
+00:35:06 --> 00:35:09
+And intuitively as you
+have more hidden neurons,
+
+673
+00:35:09 --> 00:35:11
+you can fit more and
+more complex functions.
+
+674
+00:35:11 --> 00:35:13
+So this is like a decision boundary
+in a three dimensional space,
+
+675
+00:35:13 --> 00:35:15
+you can think of it also in
+terms of simple regression.
+
+676
+00:35:15 --> 00:35:17
+If you had just a single hidden neuron,
+
+677
+00:35:17 --> 00:35:19
+you kinda see here almost
+an inverted sigmoid.
+
+678
+00:35:19 --> 00:35:23
+If you have three hidden neurons,
+you could fit this kind of more complex
+
+679
+00:35:23 --> 00:35:27
+functions and with ten neurons,
+each neuron can start to essentially,
+
+680
+00:35:27 --> 00:35:30
+over fit and try to be very good
+at fitting exactly one point.
+
+681
+00:35:30 --> 00:35:34
+All right, now let&#39;s revisit our
+single window classifier and
+
+682
+00:35:34 --> 00:35:38
+instead of slapping a softmax directly
+onto the word vectors we&#39;re now going
+
+683
+00:35:38 --> 00:35:43
+to have an intermediate hidden layer
+between the word vectors and the output.
+
+684
+00:35:43 --> 00:35:47
+And that&#39;s when we really start to
+gain an accuracy and expressive power.
+
+685
+00:35:47 --> 00:35:50
+So let&#39;s define a single
+layer neural network.
+
+686
+00:35:50 --> 00:35:52
+We have our input x that will be again,
+
+687
+00:35:52 --> 00:35:56
+our window, the concatenation
+of multiple word vectors.
+
+688
+00:35:56 --> 00:36:00
+We&#39;ll define z and we&#39;ll define a as
+element wise on the areas a and z.
+
+689
+00:36:00 --> 00:36:05
+And now, we can use this
+neural activation vector a as
+
+690
+00:36:05 --> 00:36:09
+input to our final classification layer.
+
+691
+00:36:09 --> 00:36:12
+The default that we&#39;ve had so
+far was the softmax, but
+
+692
+00:36:12 --> 00:36:13
+let&#39;s not rederive the softmax.
+
+693
+00:36:13 --> 00:36:16
+We&#39;ve done it multiple times now,
+you&#39;ll do it again in a problem set and
+
+694
+00:36:16 --> 00:36:18
+introduce an even simpler one and
+
+695
+00:36:18 --> 00:36:22
+walk through all the glory details
+of that simple classifier.
+
+696
+00:36:22 --> 00:36:25
+And that will be a simple,
+unnormalized score.
+
+697
+00:36:25 --> 00:36:30
+And this case here, this will
+essentially be the right mechanism for
+
+698
+00:36:30 --> 00:36:31
+various simple binary
+classification problems,
+
+699
+00:36:31 --> 00:36:34
+where you don&#39;t even care that much
+about this probability z is 0.8.
+
+700
+00:36:34 --> 00:36:37
+You really just cares like, is it one,
+is it in this class, or is it not?
+
+701
+00:36:37 --> 00:36:42
+And so we&#39;ll define the objective function
+for this new output layer in a second.
+
+702
+00:36:42 --> 00:36:44
+Well, let&#39;s first understand
+the feed-forward process.
+
+703
+00:36:44 --> 00:36:48
+And well feed-forward process is what you
+will end up using a test time and for
+
+704
+00:36:48 --> 00:36:51
+each element also in training
+before you can take derivative.
+
+705
+00:36:51 --> 00:36:55
+Always be feed-forward and
+then backward to take the derivatives.
+
+706
+00:36:55 --> 00:36:57
+So what we wanna do here is for
+
+707
+00:36:57 --> 00:37:01
+example, take basically each window and
+then score it.
+
+708
+00:37:01 --> 00:37:05
+And say if the score is high we want to
+train the model such that it would assign
+
+709
+00:37:05 --> 00:37:11
+high scores to windows where the center
+word is a named entity location.
+
+710
+00:37:11 --> 00:37:16
+Such as Paris, or London, or Germany,
+or Stanford, or something like that.
+
+711
+00:37:16 --> 00:37:18
+Now we will often use and
+
+712
+00:37:18 --> 00:37:23
+you&#39;ll see a in a lot of papers this kind
+of graph, so it&#39;s good to get used to it.
+
+713
+00:37:23 --> 00:37:25
+There are various other kinds,
+and we&#39;ll try to introduce them
+
+714
+00:37:25 --> 00:37:28
+slowly throughout the lecture but
+this is the most common one.
+
+715
+00:37:28 --> 00:37:33
+So we&#39;ll define bottom up,
+what each of these layers will do and
+
+716
+00:37:33 --> 00:37:36
+then we&#39;ll take the derivatives and
+learn how to optimize it.
+
+717
+00:37:36 --> 00:37:40
+Now x window here is the concatenation
+of all our word vectors.
+
+718
+00:37:40 --> 00:37:43
+So let&#39;s hear, and
+I&#39;ll ask you a question in a second,
+
+719
+00:37:43 --> 00:37:46
+let&#39;s try to figure out the dimensionality
+here of all our parameters so that you&#39;re,
+
+720
+00:37:46 --> 00:37:48
+I know you&#39;re with me.
+
+721
+00:37:48 --> 00:37:52
+So let&#39;s say each of our word
+vectors here is four dimensional and
+
+722
+00:37:52 --> 00:37:55
+we have five of these word vectors in
+each window that are concatenated.
+
+723
+00:37:55 --> 00:37:58
+So x is a 20 dimensional vector.
+
+724
+00:37:58 --> 00:38:00
+And again,
+we&#39;ll define it as column vectors.
+
+725
+00:38:00 --> 00:38:03
+And then lets say we have
+in our first hidden layer,
+
+726
+00:38:03 --> 00:38:05
+lets say we have eight units here.
+
+727
+00:38:05 --> 00:38:10
+So you want an eight unit hidden layer
+as our intermediate representation.
+
+728
+00:38:10 --> 00:38:14
+And then our final scores just
+again a simple single number.
+
+729
+00:38:14 --> 00:38:19
+Now what&#39;s the dimensionality
+of our W given what I just said?
+
+730
+00:38:19 --> 00:38:22
+20 dimensional input, eight hidden units.
+
+731
+00:38:22 --> 00:38:23
+20 rows and eight columns.
+
+732
+00:38:23 --> 00:38:24
+We have one more transfer,
+[LAUGH] that&#39;s right.
+
+733
+00:38:24 --> 00:38:27
+So it&#39;s going to be eight rows and
+20 columns, right?
+
+734
+00:38:27 --> 00:38:30
+And you can always
+whenever you&#39;re unsure and
+
+735
+00:38:30 --> 00:38:34
+you have something like this then
+this will have some n times d.
+
+736
+00:38:34 --> 00:38:38
+And then multiply this and then this
+will have, this will always be d,
+
+737
+00:38:38 --> 00:38:40
+and so these two always
+have to be the same, right?
+
+738
+00:38:40 --> 00:38:44
+So all right, now
+
+739
+00:38:44 --> 00:38:47
+what&#39;s the main intuition behind this
+extra layer, especially for NLP?
+
+740
+00:38:47 --> 00:38:49
+Well, that will allow
+us to learn non-linear
+
+741
+00:38:49 --> 00:38:51
+interactions between these
+different input words.
+
+742
+00:38:51 --> 00:38:54
+Whereas before, we could only say
+well if in appears in this location,
+
+743
+00:38:54 --> 00:38:59
+always increase the probability
+that the next word is a location.
+
+744
+00:38:59 --> 00:39:04
+Now we can learn things and patterns like,
+if in is in the second position, increase
+
+745
+00:39:04 --> 00:39:08
+the probability of this being the location
+only if museum is also the first vector.
+
+746
+00:39:08 --> 00:39:11
+So we can learn interactions
+between these different inputs.
+
+747
+00:39:11 --> 00:39:13
+And now we&#39;ll eventually make
+our model more accurate.
+
+748
+00:39:13 --> 00:39:13
+Great question.
+
+749
+00:39:13 --> 00:39:14
+So do I have a second W there.
+
+750
+00:39:14 --> 00:39:18
+So the second layer here the scores
+are unnormalized, so it&#39;ll just be U and
+
+751
+00:39:18 --> 00:39:22
+because we just have a single U, this will
+just be a single column vector and we&#39;ll
+
+752
+00:39:22 --> 00:39:26
+transpose that to get our inner product
+to get a single number out for the score.
+
+753
+00:39:26 --> 00:39:28
+Sorry, yeah, so the question was
+do we have a second W vector.
+
+754
+00:39:28 --> 00:39:31
+So yeah, that&#39;s in some
+sense our second matrix, but
+
+755
+00:39:31 --> 00:39:35
+because we only have one hidden neuron in
+that layer, we only need a single vector.
+
+756
+00:39:35 --> 00:39:35
+Wonderful.
+
+757
+00:39:35 --> 00:39:38
+All right, so,
+now let&#39;s define the max-margin loss.
+
+758
+00:39:38 --> 00:39:43
+It&#39;s actually a super powerful loss
+function often is even more robust
+
+759
+00:39:43 --> 00:39:48
+than the cross entropy error in softmax,
+and is quite powerful and useful.
+
+760
+00:39:48 --> 00:39:52
+So let&#39;s define here two examples.
+
+761
+00:39:52 --> 00:39:56
+Basically, you want to give
+a high score to windows,
+
+762
+00:39:56 --> 00:39:58
+where the center word is a location.
+
+763
+00:39:58 --> 00:40:01
+And we wanna give low scores to corrupt or
+
+764
+00:40:01 --> 00:40:05
+incorrect windows where the center
+word is not a named entity location.
+
+765
+00:40:05 --> 00:40:08
+So museum is technically a location,
+but it&#39;s not a named entity location.
+
+766
+00:40:08 --> 00:40:09
+And so the idea for
+
+767
+00:40:09 --> 00:40:13
+this training objective of max-margin is
+to essentially try to make the score of
+
+768
+00:40:13 --> 00:40:18
+the true windows larger than the ones of
+the corrupt windows smaller or lower.
+
+769
+00:40:18 --> 00:40:18
+Until they&#39;re good enough.
+
+770
+00:40:18 --> 00:40:24
+And we define good enough as being
+different by the value of one.
+
+771
+00:40:24 --> 00:40:25
+And this one here is a margin.
+
+772
+00:40:25 --> 00:40:27
+You can often see it as
+a hyperparameter too and
+
+773
+00:40:27 --> 00:40:31
+set it to m and try different ones but
+in many cases one works fine.
+
+774
+00:40:31 --> 00:40:33
+This is continuous and
+we&#39;ll be able to use SGD.
+
+775
+00:40:33 --> 00:40:39
+So now what&#39;s the intuition behind the
+softmax, sorry the max-margin loss here?
+
+776
+00:40:39 --> 00:40:42
+If you have for
+instance a very simple data set and
+
+777
+00:40:42 --> 00:40:45
+you have here a couple
+of training samples.
+
+778
+00:40:45 --> 00:40:50
+And here you have the other class c,
+what a standard
+
+779
+00:40:50 --> 00:40:56
+softmax may give you is a decision
+boundary that looks like this.
+
+780
+00:40:56 --> 00:40:58
+It&#39;s like perfectly separates the two.
+
+781
+00:40:58 --> 00:40:59
+It&#39;s a very simple training example.
+
+782
+00:40:59 --> 00:41:01
+Most standard softmax
+classifiers will be able to
+
+783
+00:41:01 --> 00:41:03
+perfectly separate these two classes.
+
+784
+00:41:03 --> 00:41:05
+And again, this is just for
+illustration in two dimensions.
+
+785
+00:41:05 --> 00:41:07
+These are much higher
+dimensional problems and so on.
+
+786
+00:41:07 --> 00:41:09
+But a lot of the intuition
+carries through.
+
+787
+00:41:09 --> 00:41:12
+So now here we have our decision
+boundary and this is the softmax.
+
+788
+00:41:12 --> 00:41:14
+Now, the problem is maybe that
+was your training data set.
+
+789
+00:41:14 --> 00:41:19
+But your test set, actually,
+might include some other ones that
+
+790
+00:41:19 --> 00:41:23
+are quite similar to those stuff you saw
+at training, but a little different.
+
+791
+00:41:23 --> 00:41:26
+And now this kind of decision
+boundary is not very robust.
+
+792
+00:41:26 --> 00:41:31
+In contrast to this, what the max margin
+
+793
+00:41:31 --> 00:41:36
+loss will attempt to do is to
+try to increase the margin
+
+794
+00:41:36 --> 00:41:41
+between the closest points
+of your training data set.
+
+795
+00:41:41 --> 00:41:46
+So if you have a couple of points here and
+you have different points here.
+
+796
+00:41:46 --> 00:41:50
+We&#39;ll try to maximize the distance between
+
+797
+00:41:50 --> 00:41:54
+the closest points here, and
+essentially be more robust.
+
+798
+00:41:54 --> 00:41:57
+So then if at test time you have some
+things that are kinda similar, but
+
+799
+00:41:57 --> 00:42:01
+not quite there, you&#39;re more likely
+to also correctly classify them.
+
+800
+00:42:01 --> 00:42:03
+So it&#39;s a really great lost or
+objective function.
+
+801
+00:42:03 --> 00:42:07
+Now in our case here when we say a sc for
+one corrupt window.
+
+802
+00:42:07 --> 00:42:10
+In many cases in practice we&#39;re
+actually going to have a sum over
+
+803
+00:42:10 --> 00:42:11
+multiple of these.
+
+804
+00:42:11 --> 00:42:14
+And you can think of this similar to the
+skip-gram model where we sample randomly
+
+805
+00:42:14 --> 00:42:16
+a couple of corrupt examples.
+
+806
+00:42:16 --> 00:42:18
+So you really only need for
+this kind of training
+
+807
+00:42:18 --> 00:42:21
+a bunch of true examples of this
+is a location in this context.
+
+808
+00:42:21 --> 00:42:24
+And then all the other windows
+where you don&#39;t have that
+
+809
+00:42:24 --> 00:42:26
+as your training data are essentially
+part of your negative class.
+
+810
+00:42:26 --> 00:42:28
+All right, any questions around
+the max-margin objective function?
+
+811
+00:42:28 --> 00:42:30
+We&#39;re gonna take a lot of
+derivatives of it now.
+
+812
+00:42:30 --> 00:42:32
+That&#39;s right, is the corrupt
+window just a negative class?
+
+813
+00:42:32 --> 00:42:33
+Yes, that&#39;s exactly right.
+
+814
+00:42:33 --> 00:42:37
+So you can think of any other window that
+doesn&#39;t have as its center location just
+
+815
+00:42:37 --> 00:42:38
+as the other class.
+
+816
+00:42:38 --> 00:42:41
+All right, now how do we optimize this?
+
+817
+00:42:41 --> 00:42:45
+We&#39;re going to take very similar steps to
+what we&#39;ve done with cross entropy, but
+
+818
+00:42:45 --> 00:42:50
+now we actually have this hidden layer and
+we&#39;ll take our second to last step towards
+
+819
+00:42:50 --> 00:42:54
+the full back-propagation algorithm
+which we&#39;ll cover in the next lecture.
+
+820
+00:42:54 --> 00:42:58
+So let&#39;s assume our cost
+J here is larger than 0.
+
+821
+00:42:58 --> 00:42:59
+So what does that mean?
+
+822
+00:42:59 --> 00:43:03
+In the very beginning you will initialize
+all your parameters here again.
+
+823
+00:43:03 --> 00:43:06
+Either randomly or maybe you&#39;ll initialize
+your word vectors to be reasonable.
+
+824
+00:43:06 --> 00:43:10
+But they&#39;re not gonna be quite perfect at
+learning in this context in the window
+
+825
+00:43:10 --> 00:43:11
+what is location and what isn&#39;t.
+
+826
+00:43:11 --> 00:43:16
+And so in the beginning all your scores
+are likely going to be low cuz all
+
+827
+00:43:16 --> 00:43:21
+our parameters, U and W and b have been
+initialized to small, random numbers.
+
+828
+00:43:21 --> 00:43:25
+And so I&#39;m unlikely going to be great
+at distinguishing the window with
+
+829
+00:43:25 --> 00:43:28
+a correct location at center
+versus one that is corrupt.
+
+830
+00:43:28 --> 00:43:33
+And so basically,
+we will be in this regime.
+
+831
+00:43:33 --> 00:43:36
+After a while of training, eventually
+you&#39;re gonna get better and better.
+
+832
+00:43:36 --> 00:43:38
+And then intuitively
+if your score here for
+
+833
+00:43:38 --> 00:43:43
+instance of the good window is five and
+one of the corrupt is just two,
+
+834
+00:43:43 --> 00:43:46
+then you&#39;ll see 1- 5 + 2 is less than 0 so
+
+835
+00:43:46 --> 00:43:50
+you just basically have 0
+loss on those elements.
+
+836
+00:43:50 --> 00:43:54
+And that&#39;s another great property of
+this objective function which is over
+
+837
+00:43:54 --> 00:43:58
+time you can start ignoring more and more
+of your training set cuz it&#39;s good enough.
+
+838
+00:43:58 --> 00:44:02
+It will assign 0 cost as in 0
+
+839
+00:44:02 --> 00:44:07
+error to these examples and so
+you can start to focus on your objective
+
+840
+00:44:07 --> 00:44:12
+function only on the things that the model
+still has trouble to distinguish.
+
+841
+00:44:12 --> 00:44:16
+All right, so let&#39;s in the very
+beginning assume most of our examples
+
+842
+00:44:16 --> 00:44:18
+will J will be larger than 0 for them.
+
+843
+00:44:18 --> 00:44:21
+And so what we&#39;re gonna have to do now
+is take derivatives with respect to
+
+844
+00:44:21 --> 00:44:22
+all the parameters of our model.
+
+845
+00:44:22 --> 00:44:23
+And so what are those?
+
+846
+00:44:23 --> 00:44:26
+Those are U, W, b and our word vectors x.
+
+847
+00:44:26 --> 00:44:31
+So we always start from the top and then
+we go down because we&#39;ll start to reuse
+
+848
+00:44:31 --> 00:44:35
+different elements and just the simple
+combination of taking derivatives and
+
+849
+00:44:35 --> 00:44:38
+reusing variables is going to
+lead us to back propagation.
+
+850
+00:44:38 --> 00:44:40
+So derivative of s with respect to U.
+
+851
+00:44:40 --> 00:44:42
+Well, what was s?
+
+852
+00:44:42 --> 00:44:45
+s was just u transpose times a and so
+
+853
+00:44:45 --> 00:44:47
+we all know that derivative
+of that is just a.
+
+854
+00:44:47 --> 00:44:52
+So that was easy, first element,
+first derivative super straight forward.
+
+855
+00:44:52 --> 00:44:55
+Now it&#39;s important when we
+take the next derivative
+
+856
+00:44:55 --> 00:44:57
+to also be aware of all our definitions.
+
+857
+00:44:57 --> 00:45:01
+How we define these functions that
+we&#39;re taking derivatives off.
+
+858
+00:45:01 --> 00:45:07
+So s is basically U transpose a,
+a was f(z) and z was just Wx + b.
+
+859
+00:45:07 --> 00:45:09
+All right,
+it&#39;s very important to just keep track.
+
+860
+00:45:09 --> 00:45:10
+That&#39;s like almost 80% of the work.
+
+861
+00:45:10 --> 00:45:13
+Now, let&#39;s take
+the derivative like I said,
+
+862
+00:45:13 --> 00:45:16
+first partial of only one
+element of W to gain intuitions.
+
+863
+00:45:16 --> 00:45:22
+And then we can put it back together and
+have a more complex matrix notation.
+
+864
+00:45:22 --> 00:45:26
+So we&#39;ll observe for
+Wij that it will actually only appear
+
+865
+00:45:26 --> 00:45:30
+in the ith activation of our hidden layer.
+
+866
+00:45:30 --> 00:45:34
+So for example, let&#39;s say we have a very
+simple input with a three dimensional x.
+
+867
+00:45:34 --> 00:45:39
+And we have two hidden units,
+and this one final score U.
+
+868
+00:45:39 --> 00:45:43
+Then we&#39;ll observe that if we take
+the derivative with respect to W23.
+
+869
+00:45:43 --> 00:45:46
+So the second row and
+the third column of W,
+
+870
+00:45:46 --> 00:45:49
+well that actually only is needed in a2.
+
+871
+00:45:49 --> 00:45:52
+You can compute a1 without using W23.
+
+872
+00:45:52 --> 00:45:53
+So what does that mean?
+
+873
+00:45:53 --> 00:45:56
+That means if we take
+the derivative of weight Wij,
+
+874
+00:45:56 --> 00:46:01
+we really only need to look at
+the ith element of the vector a.
+
+875
+00:46:01 --> 00:46:03
+And hence, we don&#39;t need to look
+at this whole inner product.
+
+876
+00:46:03 --> 00:46:04
+So what&#39;s the next step?
+
+877
+00:46:04 --> 00:46:08
+Well as we&#39;re taking derivatives with W,
+we need to be again aware of where does W
+
+878
+00:46:08 --> 00:46:11
+appear and all the other parameters
+are essentially constant.
+
+879
+00:46:11 --> 00:46:14
+So U here is not something
+we&#39;re taking a derivative off.
+
+880
+00:46:14 --> 00:46:17
+So what we can do is just take it out,
+just as like a single number, right.
+
+881
+00:46:17 --> 00:46:20
+We&#39;ll just get it outside,
+put the derivative inside here.
+
+882
+00:46:20 --> 00:46:25
+And now, we just need to very
+carefully define our ai.
+
+883
+00:46:25 --> 00:46:28
+So a subscript i, so
+that&#39;s where Wij appears.
+
+884
+00:46:28 --> 00:46:33
+Now, ai was this function,
+and we defined it as f of zi.
+
+885
+00:46:33 --> 00:46:36
+So why don&#39;t we just
+write this carefully out,
+
+886
+00:46:36 --> 00:46:40
+and now this is first application
+of the chain rule with
+
+887
+00:46:40 --> 00:46:45
+derivative of ai with respect to zi,
+and then zi with respect to Wij.
+
+888
+00:46:45 --> 00:46:48
+So this is single application
+of the chain rule.
+
+889
+00:46:48 --> 00:46:52
+And then end of it it looks kind of
+overwhelming, but each step is very clear.
+
+890
+00:46:52 --> 00:46:56
+And each step is simple, we&#39;re really
+writing out all the glory details.
+
+891
+00:46:56 --> 00:47:01
+So application of the chain rule,
+now we&#39;re going to define ai.
+
+892
+00:47:01 --> 00:47:08
+Well ai is just f of zi, and f was just an
+element y function on a single number zi.
+
+893
+00:47:08 --> 00:47:11
+So we can just rewrite ai with
+its definition of f of zi,
+
+894
+00:47:11 --> 00:47:13
+and we keep this one intact, all right?
+
+895
+00:47:13 --> 00:47:18
+And now derivative of f,
+we can just for now assume is f prime.
+
+896
+00:47:18 --> 00:47:19
+Just a single number, take derivative.
+
+897
+00:47:19 --> 00:47:20
+We&#39;ll just define this as f prime for now.
+
+898
+00:47:20 --> 00:47:24
+It&#39;s also just a single number,
+so no harm done.
+
+899
+00:47:24 --> 00:47:26
+Now we&#39;re still in this part here,
+
+900
+00:47:26 --> 00:47:30
+where we basically wanna take
+the derivative of zi with respect to Wij.
+
+901
+00:47:30 --> 00:47:34
+Well let&#39;s define what zi was,
+zi was just here.
+
+902
+00:47:34 --> 00:47:41
+The W of the ith row times x
+plus the ith element of b.
+
+903
+00:47:41 --> 00:47:43
+So let&#39;s just replace zi
+with it&#39;s definition.
+
+904
+00:47:43 --> 00:47:44
+Any questions so far?
+
+905
+00:47:44 --> 00:47:47
+All right,
+
+906
+00:47:47 --> 00:47:51
+good or not?
+
+907
+00:47:51 --> 00:47:55
+So we have our f prime and
+we have now the derivative
+
+908
+00:47:55 --> 00:48:00
+with respect to Wij of just
+this inner product here.
+
+909
+00:48:00 --> 00:48:03
+And we can again,
+very carefully write out well,
+
+910
+00:48:03 --> 00:48:07
+the inner product is just this
+row times this column vector.
+
+911
+00:48:07 --> 00:48:11
+That&#39;s just the sum, and now when we
+take the derivative with respect to Wij,
+
+912
+00:48:11 --> 00:48:13
+all the other Ws are constants.
+
+913
+00:48:13 --> 00:48:18
+They fall out, and so
+basically it&#39;s only the xk,
+
+914
+00:48:18 --> 00:48:23
+the only one that actually appears
+in the sum with Wij is xj and
+
+915
+00:48:23 --> 00:48:27
+so basically this derivative is just Xj.
+
+916
+00:48:27 --> 00:48:32
+All right, so now we have this
+whole expressions of just taking
+
+917
+00:48:32 --> 00:48:38
+carefully chain rule multiplications
+definitions of all our terms and so on.
+
+918
+00:48:38 --> 00:48:43
+And now basically, what we&#39;re gonna want
+to do is simplify this a little bit,
+
+919
+00:48:43 --> 00:48:46
+cuz we might want to
+reuse different parts.
+
+920
+00:48:46 --> 00:48:52
+And so we can define, this first term here
+actually happens to only use subindices i.
+
+921
+00:48:52 --> 00:48:54
+And it doesn&#39;t use any other subindex.
+
+922
+00:48:54 --> 00:48:58
+So we&#39;ll just define Uif prime of zi for
+
+923
+00:48:58 --> 00:49:01
+all the different is as delta i.
+
+924
+00:49:01 --> 00:49:06
+At first notational simplicity and
+xj is our local input signal.
+
+925
+00:49:06 --> 00:49:08
+And one thing that&#39;s very helpful for
+
+926
+00:49:08 --> 00:49:13
+you to do is actually look at also the
+derivative of the logistic function here.
+
+927
+00:49:13 --> 00:49:18
+Which can be very conveniently computed
+in terms of the original values.
+
+928
+00:49:18 --> 00:49:20
+And remember f of z here, or
+
+929
+00:49:20 --> 00:49:24
+f of zi of each element is
+always just a single number.
+
+930
+00:49:24 --> 00:49:26
+And we&#39;ve already computed it
+during forward propagation.
+
+931
+00:49:26 --> 00:49:34
+So we wanna ideally use hidden activation
+functions that are very fast to compute.
+
+932
+00:49:34 --> 00:49:37
+And here, we don&#39;t need to compute
+another exponent or anything.
+
+933
+00:49:37 --> 00:49:40
+We&#39;re not gonna recompute f of zi cuz
+we already did that in the forward
+
+934
+00:49:40 --> 00:49:41
+propagation step.
+
+935
+00:49:41 --> 00:49:41
+All right,
+
+936
+00:49:41 --> 00:49:46
+now we have the partial derivative
+here with respect to one element of W.
+
+937
+00:49:46 --> 00:49:50
+But of course, we wanna have the whole
+gradient for the whole matrix.
+
+938
+00:49:50 --> 00:49:55
+So now the question is,
+with the definitions of this delta i for
+
+939
+00:49:55 --> 00:49:59
+all the different elements of
+i of this matrix and xj for
+
+940
+00:49:59 --> 00:50:02
+all the different elements of the input.
+
+941
+00:50:02 --> 00:50:07
+What would be a good way of trying to
+combine all of these different elements
+
+942
+00:50:07 --> 00:50:12
+to get a single gradient for the whole
+matrix W, if we have two vectors.
+
+943
+00:50:12 --> 00:50:13
+That&#39;s right.
+
+944
+00:50:13 --> 00:50:18
+So essentially, we can use delta
+times x transpose, namely the outer
+
+945
+00:50:18 --> 00:50:23
+product to get all the combinations
+of all elements i and all elements j.
+
+946
+00:50:23 --> 00:50:26
+And so this again might seem
+like a little bit like magic.
+
+947
+00:50:26 --> 00:50:29
+But if you just think again of
+the definition of the outer product here.
+
+948
+00:50:29 --> 00:50:33
+And you write it out in terms of all
+the indices, you&#39;ll see that turns out
+
+949
+00:50:33 --> 00:50:37
+to be exactly what we would want in
+one very nice, very simple equation.
+
+950
+00:50:37 --> 00:50:42
+So we can kind of think of this delta
+term actually as the responsibility of
+
+951
+00:50:42 --> 00:50:47
+the error signal that&#39;s now arriving from
+our overall loss into this layer of W.
+
+952
+00:50:47 --> 00:50:51
+And that will eventually
+lead us to flow graphs.
+
+953
+00:50:51 --> 00:50:54
+And that will eventually lead us to you
+not having to actually go through all this
+
+954
+00:50:54 --> 00:50:55
+misery of taking all these derivatives.
+
+955
+00:50:55 --> 00:50:57
+And being able to abstract it
+away with software packages.
+
+956
+00:50:57 --> 00:51:00
+But this is really the nuts and
+bolts of how this works, yeah?
+
+957
+00:51:00 --> 00:51:05
+Yeah, the question is, this outer product
+will get all the elements of i and j?
+
+958
+00:51:05 --> 00:51:05
+And that&#39;s right.
+
+959
+00:51:05 --> 00:51:09
+So when we have delta times x transposed.
+
+960
+00:51:09 --> 00:51:14
+Then now we have basically here,
+x is usually this vector.
+
+961
+00:51:14 --> 00:51:18
+So now let&#39;s take the right notation.
+
+962
+00:51:18 --> 00:51:23
+So we wanna have derivative
+with respect to W.
+
+963
+00:51:23 --> 00:51:30
+W was a, 2x3 dimension matrix for
+example, 2x3.
+
+964
+00:51:30 --> 00:51:31
+We should be very careful of our notation.
+
+965
+00:51:31 --> 00:51:32
+2x3.
+
+966
+00:51:32 --> 00:51:37
+So now,
+the derivative of j with respect to our w
+
+967
+00:51:37 --> 00:51:40
+has to, in the end, also be a 2x3 matrix.
+
+968
+00:51:40 --> 00:51:46
+And if we have delta times x transposed,
+then that means we&#39;ll have
+
+969
+00:51:46 --> 00:51:50
+to have a two-dimensional delta, which is
+exactly the dimensions that are coming in.
+
+970
+00:51:50 --> 00:51:53
+[INAUDIBLE] Signal that I
+mentions that we have for
+
+971
+00:51:53 --> 00:51:55
+the number of hidden units that we have.
+
+972
+00:51:55 --> 00:52:00
+Times this one dimensional,
+basically row vector times
+
+973
+00:52:00 --> 00:52:05
+xt which is a 1 x 3 dimensional
+vector that we transpose.
+
+974
+00:52:05 --> 00:52:08
+And so, what does that mean?
+
+975
+00:52:08 --> 00:52:12
+Well, that&#39;s basically multiplying now,
+standard matrix multiplication.
+
+976
+00:52:12 --> 00:52:16
+You should write that.
+
+977
+00:52:16 --> 00:52:22
+So now the last term that we haven&#39;t
+taken derivatives of off the [INAUDIBLE],
+
+978
+00:52:22 --> 00:52:26
+is our bi and
+it&#39;ll eventually be very similar.
+
+979
+00:52:26 --> 00:52:28
+We&#39;re going to go through it.
+
+980
+00:52:28 --> 00:52:32
+We can pull Ui out, we&#39;re going to
+take f prime, assume that&#39;s the same.
+
+981
+00:52:32 --> 00:52:34
+So now, this is our delta i.
+
+982
+00:52:34 --> 00:52:35
+We&#39;ll observe something very similar.
+
+983
+00:52:35 --> 00:52:37
+These are very similar steps for bi.
+
+984
+00:52:37 --> 00:52:39
+But in the end, we&#39;re going to
+just end up with this term and
+
+985
+00:52:39 --> 00:52:40
+that&#39;s just going to be one.
+
+986
+00:52:40 --> 00:52:43
+And so,
+the derivative of our bi element here,
+
+987
+00:52:43 --> 00:52:48
+is just delta i and we can again
+use all the elements of delta,
+
+988
+00:52:48 --> 00:52:51
+to have the entire gradient for
+the update of b.
+
+989
+00:52:51 --> 00:52:52
+Any questions?
+
+990
+00:52:52 --> 00:52:57
+Excellent, so this is essentially,
+almost back-propagation.
+
+991
+00:52:57 --> 00:53:00
+We’ve so far only taken derivatives and
+using the chain rule.
+
+992
+00:53:00 --> 00:53:01
+And first thing, when I went through this,
+
+993
+00:53:01 --> 00:53:05
+this is like a lot of the magic of deep
+learning, is just becoming a lot clear.
+
+994
+00:53:05 --> 00:53:09
+We’ve just taken derivatives, we have
+an objective function and then we update
+
+995
+00:53:09 --> 00:53:12
+based on our derivatives, all
+the parameters of these large functions.
+
+996
+00:53:12 --> 00:53:16
+Now the main remaining trick, is to re-use
+derivatives that we&#39;ve computed for
+
+997
+00:53:16 --> 00:53:19
+the higher layers in computing
+derivatives for the lower layers.
+
+998
+00:53:19 --> 00:53:22
+It&#39;s very much an efficiency trick.
+
+999
+00:53:22 --> 00:53:25
+You could not use it and it would
+just be very, very inefficient to do.
+
+1000
+00:53:25 --> 00:53:28
+But this is the main insight
+
+1001
+00:53:28 --> 00:53:32
+of why we re-named taking
+derivatives as back propagation.
+
+1002
+00:53:32 --> 00:53:35
+So what is the last derivatives
+that we need to take?
+
+1003
+00:53:35 --> 00:53:37
+For this model, well again,
+it&#39;s in terms of our word vectors.
+
+1004
+00:53:37 --> 00:53:39
+So let&#39;s go through all of those.
+
+1005
+00:53:39 --> 00:53:43
+Basically, we&#39;ll have to take the
+derivative of the score with respect to
+
+1006
+00:53:43 --> 00:53:45
+every single element of our word vectors.
+
+1007
+00:53:45 --> 00:53:47
+Where again, we concatenated all
+of them into a single window.
+
+1008
+00:53:47 --> 00:53:48
+And now, the problem here is that
+
+1009
+00:53:48 --> 00:53:52
+each word vector actually
+appears in both of these terms.
+
+1010
+00:53:52 --> 00:53:58
+And both hidden units use all of
+the elements of the input here.
+
+1011
+00:53:58 --> 00:54:01
+So we can&#39;t just look at a single element.
+
+1012
+00:54:01 --> 00:54:07
+We&#39;ll really have to sum over, both of the
+activation units in the simple case here,
+
+1013
+00:54:07 --> 00:54:10
+where we just have two hidden units and
+three dimensional inputs.
+
+1014
+00:54:10 --> 00:54:13
+Keeps it a little simpler,
+and there&#39;s less notation.
+
+1015
+00:54:13 --> 00:54:15
+So then, we basically start with this.
+
+1016
+00:54:15 --> 00:54:20
+I have to take derivatives with
+respect to both of the activations.
+
+1017
+00:54:20 --> 00:54:22
+And now, we&#39;re just going to go
+through similar kinds of steps.
+
+1018
+00:54:22 --> 00:54:22
+We have s.
+
+1019
+00:54:22 --> 00:54:25
+We defined s as u transpose
+times our activation.
+
+1020
+00:54:25 --> 00:54:33
+That was just Ui then ai
+was just f of w and so on.
+
+1021
+00:54:33 --> 00:54:37
+Now, what we&#39;ll observe as we&#39;re going
+through all these similar steps again is
+
+1022
+00:54:37 --> 00:54:44
+that, we&#39;ll actually see the same
+term here reused from before.
+
+1023
+00:54:44 --> 00:54:47
+It&#39;s Ui x F prime of Zi.
+
+1024
+00:54:47 --> 00:54:49
+This is exactly the same.
+
+1025
+00:54:49 --> 00:54:50
+That we&#39;ve seen here.
+
+1026
+00:54:50 --> 00:54:53
+F prime of Zi.
+
+1027
+00:54:53 --> 00:54:55
+And what that means is,
+we can reuse that same delta.
+
+1028
+00:54:55 --> 00:54:57
+And that&#39;s really one of the big insights.
+
+1029
+00:54:57 --> 00:55:01
+Fairly trivial but very exciting,
+cuz it makes it a lot faster.
+
+1030
+00:55:01 --> 00:55:02
+But, what&#39;s still different now,
+
+1031
+00:55:02 --> 00:55:04
+is that of course we have to take
+the the derivative with respect.
+
+1032
+00:55:04 --> 00:55:08
+To each of these, to this inner product
+here in Xj, where we basically dumped
+
+1033
+00:55:08 --> 00:55:12
+the bias term, cuz that&#39;s just a constant,
+when we were taking this derivative.
+
+1034
+00:55:12 --> 00:55:15
+And so, this one here again,
+Xj is just inner product,
+
+1035
+00:55:15 --> 00:55:19
+it&#39;s the jth element of this matrix
+W that&#39;s the relevant one for
+
+1036
+00:55:19 --> 00:55:22
+this inner product,
+let me take the derivative.
+
+1037
+00:55:22 --> 00:55:27
+So now we have this sum here, and
+now comes again this tricky bit of trying
+
+1038
+00:55:27 --> 00:55:32
+to simplify this sum into something
+simpler in terms of matrix products.
+
+1039
+00:55:32 --> 00:55:37
+And again, the reason we&#39;re getting
+towards back propagation is that we&#39;re
+
+1040
+00:55:37 --> 00:55:42
+reusing here these previous error signals,
+and elements of the derivative.
+
+1041
+00:55:42 --> 00:55:46
+Now, the simplest, the first thing we&#39;ll
+observe here as we&#39;re doing this sum, is
+
+1042
+00:55:46 --> 00:55:52
+that sum is actually also a simple inner
+product, where we now take the jth column.
+
+1043
+00:55:52 --> 00:55:55
+So this again, this dot notation
+when the dot is after the first, and
+
+1044
+00:55:55 --> 00:55:57
+next we take the row,
+here we take the column.
+
+1045
+00:55:57 --> 00:55:58
+So it&#39;s a column vector.
+
+1046
+00:55:58 --> 00:55:59
+But then of course we transpose it, so
+
+1047
+00:55:59 --> 00:56:02
+it&#39;s a simple inner product for
+getting us a single number.
+
+1048
+00:56:02 --> 00:56:08
+Just the derivative of this element of
+the word vectors and the word window.
+
+1049
+00:56:08 --> 00:56:08
+Yes.
+
+1050
+00:56:08 --> 00:56:08
+Great question.
+
+1051
+00:56:08 --> 00:56:10
+So once we have the derivatives for
+
+1052
+00:56:10 --> 00:56:13
+all these different variables, what&#39;s
+the sequence in which we update them, and
+
+1053
+00:56:13 --> 00:56:15
+there&#39;s really no sequence we
+update them all in parallel.
+
+1054
+00:56:15 --> 00:56:19
+We just take one step in all the elements
+that we now had a variable in or
+
+1055
+00:56:19 --> 00:56:21
+have seen that parameter in.
+
+1056
+00:56:21 --> 00:56:24
+And the complexity there,
+is in standard machine learning you&#39;ll see
+
+1057
+00:56:24 --> 00:56:26
+in many models just like
+standard logistic regression,
+
+1058
+00:56:26 --> 00:56:29
+you see all your parameters like
+your W in all the examples.
+
+1059
+00:56:29 --> 00:56:32
+And ours, it&#39;s a little more complex,
+because most words you won&#39;t see in
+
+1060
+00:56:32 --> 00:56:36
+a specific window and so, you only update
+the words that you see in that window.
+
+1061
+00:56:36 --> 00:56:40
+And if you assumed all the other ones,
+you&#39;d just have very, very large,
+
+1062
+00:56:40 --> 00:56:44
+quite sparse updates, and that&#39;s not
+very RAM efficient, great question.
+
+1063
+00:56:44 --> 00:56:47
+So now we have this simple
+multiplication here and
+
+1064
+00:56:47 --> 00:56:49
+the sum is just is just inner product.
+
+1065
+00:56:49 --> 00:56:52
+So far so simple, and we have our D
+dimension vector which I mentioned,
+
+1066
+00:56:52 --> 00:56:52
+is two dimensions.
+
+1067
+00:56:52 --> 00:56:54
+We have the sum over two elements.
+
+1068
+00:56:54 --> 00:56:55
+So, so far so good.
+
+1069
+00:56:55 --> 00:57:00
+Now, really, we would like to get the full
+gradient here with respect to all
+
+1070
+00:57:00 --> 00:57:04
+XJs for J equals one to three and
+its simple case, or
+
+1071
+00:57:04 --> 00:57:09
+five D if we have a five
+word large window.
+
+1072
+00:57:09 --> 00:57:15
+So now the question is, how do we
+combine this single element here.
+
+1073
+00:57:15 --> 00:57:22
+Into a vector that eventually gives us all
+the different gradients for all the xij.
+
+1074
+00:57:22 --> 00:57:29
+And j equals 1 to however long our window
+is Is anybody follow along this closely?
+
+1075
+00:57:29 --> 00:57:30
+That&#39;s right.
+
+1076
+00:57:30 --> 00:57:31
+W transposed delta.
+
+1077
+00:57:31 --> 00:57:32
+Well done.
+
+1078
+00:57:32 --> 00:57:38
+So basically our final derivative and
+final gradient here for.
+
+1079
+00:57:38 --> 00:57:43
+Our score s with respect to the entire
+window, is just W transpose times delta.
+
+1080
+00:57:43 --> 00:57:47
+Super simple very fast to implement,
+I can easily think about how to vectorize
+
+1081
+00:57:47 --> 00:57:51
+this again by concatenating multiple
+deltas from multiple Windows and so on.
+
+1082
+00:57:51 --> 00:57:54
+And it can be very efficiently,
+like implemented and derived.
+
+1083
+00:57:54 --> 00:57:57
+All right, now the error message is
+delta that arrives at this hidden layer,
+
+1084
+00:57:57 --> 00:58:00
+has of course the same dimensionality as
+its hidden layer because we&#39;re updating
+
+1085
+00:58:00 --> 00:58:00
+all the windows.
+
+1086
+00:58:00 --> 00:58:03
+And now from the previous slides we
+also know that when we update a window,
+
+1087
+00:58:03 --> 00:58:06
+it really means we now cut up that final
+
+1088
+00:58:06 --> 00:58:10
+gradient here into the different chunks
+for each specific word in that window,
+
+1089
+00:58:10 --> 00:58:13
+and that&#39;s how we update our
+first large neural network.
+
+1090
+00:58:13 --> 00:58:16
+So let&#39;s put all of this together again.
+
+1091
+00:58:16 --> 00:58:21
+So, our full objective function
+here was this max and I started
+
+1092
+00:58:21 --> 00:58:25
+out with saying let&#39;s assume it&#39;s larger
+than zero so you have this identity here.
+
+1093
+00:58:25 --> 00:58:28
+So this is simple indicator function if.
+
+1094
+00:58:28 --> 00:58:31
+The indication is true,
+then it&#39;s one and if not, it&#39;s zero.
+
+1095
+00:58:31 --> 00:58:35
+And then you can essentially
+ignore that pair of correct
+
+1096
+00:58:35 --> 00:58:38
+and corrupt windows x and
+xc, respectively.
+
+1097
+00:58:38 --> 00:58:40
+So our final gradient when we have
+
+1098
+00:58:40 --> 00:58:45
+these kinds of max margin functions
+is essentially implemented this way.
+
+1099
+00:58:45 --> 00:58:50
+And we can very efficiently
+multiply all of this stuff.
+
+1100
+00:58:50 --> 00:58:51
+All right.
+
+1101
+00:58:51 --> 00:58:53
+So this is just that, this is not right.
+
+1102
+00:58:53 --> 00:58:55
+This is our [INAUDIBLE] But you still
+have to take the derivative here,
+
+1103
+00:58:55 --> 00:58:59
+but basically this indicator function is
+the main novelty that we haven&#39;t seen yet.
+
+1104
+00:58:59 --> 00:59:02
+All right.
+
+1105
+00:59:02 --> 00:59:03
+Yeah.
+
+1106
+00:59:03 --> 00:59:13
+&gt;&gt; [INAUDIBLE]
+
+1107
+00:59:13 --> 00:59:13
+&gt;&gt; Yeah, it&#39;s a long question.
+
+1108
+00:59:13 --> 00:59:19
+The gist of the question is how to we make
+sure we don&#39;t get stuck in local optima.
+
+1109
+00:59:19 --> 00:59:23
+And you&#39;ve kinda answered it a little
+bit already which is indeed because of
+
+1110
+00:59:23 --> 00:59:27
+the stochasticity you keep making updates
+anyway it&#39;s very hard to get stuck.
+
+1111
+00:59:27 --> 00:59:31
+In fact, the smaller your,
+the more stochastic you are,
+
+1112
+00:59:31 --> 00:59:34
+as in the fewer windows you look at
+each time you want to make an update,
+
+1113
+00:59:34 --> 00:59:35
+the less likely you&#39;re getting stuck.
+
+1114
+00:59:35 --> 00:59:38
+If you had tried to get through all the
+windows and then make one gigantic update,
+
+1115
+00:59:38 --> 00:59:41
+so it&#39;s actually very inefficient and
+much more likely to get you stuck.
+
+1116
+00:59:41 --> 00:59:44
+And then the other observation
+that it&#39;s just slowly coming
+
+1117
+00:59:44 --> 00:59:46
+through some of the theory that
+we couldn&#39;t get into this class.
+
+1118
+00:59:46 --> 00:59:49
+Is that it turns out a lot of the local
+optima are actually pretty good.
+
+1119
+00:59:49 --> 00:59:50
+And in many cases,
+
+1120
+00:59:50 --> 00:59:53
+not even that far away from what you
+might think the global optima would be.
+
+1121
+00:59:53 --> 00:59:57
+Also, you&#39;ll observe a lot of times,
+and we&#39;ll go through this in some
+
+1122
+00:59:57 --> 01:00:00
+of the project advice in many cases,
+you can actually perfectly fit.
+
+1123
+01:00:00 --> 01:00:01
+We have a powerful enough
+neural network model.
+
+1124
+01:00:01 --> 01:00:05
+You can often perfectly fit your input and
+your training dataset.
+
+1125
+01:00:05 --> 01:00:08
+And you&#39;ll actually, eventually spend
+most of your time thinking about how to
+
+1126
+01:00:08 --> 01:00:12
+regularize your models better and often,
+at least, even more stochasticity.
+
+1127
+01:00:12 --> 01:00:14
+We&#39;ll get through some of those.
+
+1128
+01:00:14 --> 01:00:14
+But yeah, good question.
+
+1129
+01:00:14 --> 01:00:18
+Yeah, in the end, we just have all
+these updates and it&#39;s all very simple.
+
+1130
+01:00:18 --> 01:00:19
+All right, so let&#39;s summarize.
+
+1131
+01:00:19 --> 01:00:21
+This was a pretty epic lecture.
+
+1132
+01:00:21 --> 01:00:23
+Well done for sticking through it.
+
+1133
+01:00:23 --> 01:00:27
+Congrats again, this was our super
+useful basic components lecture.
+
+1134
+01:00:27 --> 01:00:29
+And now this window model is actually
+really the first one that you
+
+1135
+01:00:29 --> 01:00:31
+might observe and practice and
+you might actually want to implement.
+
+1136
+01:00:31 --> 01:00:32
+In a real life setting.
+
+1137
+01:00:32 --> 01:00:32
+So to recap,
+
+1138
+01:00:32 --> 01:00:36
+we&#39;ve learned word vector training,
+we learned how to combine Windows.
+
+1139
+01:00:36 --> 01:00:38
+We have the softmax and
+the cross entropy error and
+
+1140
+01:00:38 --> 01:00:39
+we went through some of the details there.
+
+1141
+01:00:39 --> 01:00:42
+Have the scores and the max margin loss,
+and we have the neural network, and it&#39;s
+
+1142
+01:00:42 --> 01:00:46
+really these two steps here that you have
+to combine differently for problem set.
+
+1143
+01:00:46 --> 01:00:48
+Number one and
+especially number two in that.
+
+1144
+01:00:48 --> 01:00:50
+So, we just have one more
+math heavy lecture and
+
+1145
+01:00:50 --> 01:00:53
+after that we can have fun and
+combine all these things together.
+
+1146
+01:00:53 --> 01:00:53
+Thanks.
+
