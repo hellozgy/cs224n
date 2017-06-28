@@ -4,7 +4,7 @@ word2vec/
 **/*.rar
 
 **/data/
-**/.datasets/
+**/datasets/
 
 **/__pycache__/
 **/.idea/
