@@ -1,0 +1,7 @@
+*
+!.gitignore
+!/assignment*/*.py
+!/assignment*/*.txt
+!/assignment*/*.pdf
+!/assignment*/*.sh
+!/assignment*/utils/*.py
