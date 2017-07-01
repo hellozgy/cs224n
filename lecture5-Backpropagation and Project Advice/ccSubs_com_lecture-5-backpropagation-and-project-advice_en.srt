@@ -1,0 +1,5486 @@
+1
+0:00:00 --> 0:00:05
+Downloaded from ccSubs.com
+
+2
+00:00:00 --> 00:00:04
+[MUSIC]
+
+3
+00:00:04 --> 00:00:07
+&gt;&gt; Stanford University.
+
+4
+00:00:07 --> 00:00:10
+&gt;&gt; About the full back
+propagation algorithm.
+
+5
+00:00:10 --> 00:00:15
+And I promise you as the last bit of
+super heavy math- After that you can have
+
+6
+00:00:15 --> 00:00:20
+a warm fuzzy feeling around most of the
+state of the art deep learning techniques.
+
+7
+00:00:20 --> 00:00:22
+Both for natural language processing and
+even a little bit for
+
+8
+00:00:22 --> 00:00:23
+computer vision a lot of other places.
+
+9
+00:00:23 --> 00:00:28
+So, I know this can be a lot if you&#39;re not
+super familiar with multivariate calculus.
+
+10
+00:00:28 --> 00:00:32
+And so, I&#39;ll actually describe
+backprop in four different ways today.
+
+11
+00:00:32 --> 00:00:36
+And hopefully bring most
+of you into the backprop
+
+12
+00:00:36 --> 00:00:41
+the group of people who know
+back propagation really well.
+
+13
+00:00:41 --> 00:00:44
+So 4 different descriptions of
+essentially the same thing.
+
+14
+00:00:44 --> 00:00:49
+But hopefully, some will resonate
+more with some folks than others.
+
+15
+00:00:49 --> 00:00:52
+And so to show you that afterwards
+we can have a lot more fun.
+
+16
+00:00:52 --> 00:00:55
+Well, actually then the second sort of,
+well, not quite half, but
+
+17
+00:00:55 --> 00:00:58
+maybe the last third,
+talk about the projects and
+
+18
+00:00:58 --> 00:01:00
+encourage you to get
+started on the project.
+
+19
+00:01:00 --> 00:01:03
+Give you some advice on what the projects
+
+20
+00:01:03 --> 00:01:07
+will likely entail if you choose to do
+a project instead of the last problem set.
+
+21
+00:01:07 --> 00:01:10
+Maybe one small hint for problem set one.
+
+22
+00:01:10 --> 00:01:13
+Again, it&#39;s super important to understand
+the math and dimensionality, and if you do
+
+23
+00:01:13 --> 00:01:17
+that on paper, and then you still have
+some trouble in the implementation.
+
+24
+00:01:17 --> 00:01:21
+It can be very helpful to
+essentially set break points and
+
+25
+00:01:21 --> 00:01:25
+then print out the shape of all the
+various derivatives you may be computing,
+
+26
+00:01:25 --> 00:01:28
+and that can help you in your
+debugging process a little bit.
+
+27
+00:01:28 --> 00:01:31
+All right, are there any questions around
+organization, problem sets, one, no?
+
+28
+00:01:31 --> 00:01:34
+All right, my project,
+
+29
+00:01:34 --> 00:01:36
+my office hours going to be a half
+hour after the class ends today.
+
+30
+00:01:36 --> 00:01:41
+So if you have project questions,
+I&#39;ll be there after the class.
+
+31
+00:01:41 --> 00:01:44
+All right, let&#39;s go to explanation
+number 1 for back propagation.
+
+32
+00:01:44 --> 00:01:47
+And again, just to motivate you of
+why we want to go through this.
+
+33
+00:01:47 --> 00:01:51
+Why do I torture some of you
+with all these derivatives?
+
+34
+00:01:51 --> 00:01:54
+It is really important to have an actual
+understanding of the math behind
+
+35
+00:01:54 --> 00:01:55
+most of deep learning.
+
+36
+00:01:55 --> 00:01:59
+And in many cases, in the future, you will
+kind of abstract the way backpropagation.
+
+37
+00:01:59 --> 00:02:02
+You&#39;ll just kind of assume it
+works based on a framework,
+
+38
+00:02:02 --> 00:02:03
+software package that you might use.
+
+39
+00:02:03 --> 00:02:06
+But that sometimes leads you to not
+understand why your model might not
+
+40
+00:02:06 --> 00:02:07
+be working, right?
+
+41
+00:02:07 --> 00:02:09
+In theory,
+you say it&#39;s just abstracted away,
+
+42
+00:02:09 --> 00:02:10
+I don&#39;t have to worry about it anymore.
+
+43
+00:02:10 --> 00:02:16
+But really in practice, in the
+optimization you might run into problems.
+
+44
+00:02:16 --> 00:02:18
+And if you don&#39;t understand
+the actual back propagation,
+
+45
+00:02:18 --> 00:02:19
+you don&#39;t know why you
+will have these problems.
+
+46
+00:02:19 --> 00:02:23
+And so in addition to that, we kinda wanna
+prepare you to not just be a user of
+
+47
+00:02:23 --> 00:02:26
+deep learning, but
+maybe even eventually do research.
+
+48
+00:02:26 --> 00:02:30
+In this field and maybe think of and
+implement and be very,
+
+49
+00:02:30 --> 00:02:32
+very good at debugging
+completely new kinds of models.
+
+50
+00:02:32 --> 00:02:36
+And you&#39;ll observe that depending on which
+software package you&#39;ll use in the future,
+
+51
+00:02:36 --> 00:02:39
+not everything is de facto supported
+in some of these frameworks.
+
+52
+00:02:39 --> 00:02:43
+So if you want to create a completely new
+model that&#39;s sort of outside the convex
+
+53
+00:02:43 --> 00:02:45
+Known things, you will need to implement,
+the forward and
+
+54
+00:02:45 --> 00:02:49
+the backward propagation for a new
+sub-module that you might have invented.
+
+55
+00:02:49 --> 00:02:53
+So, you just have to trust me
+a little bit in why it&#39;s useful.
+
+56
+00:02:53 --> 00:02:54
+Hopefully this helps.
+
+57
+00:02:54 --> 00:02:58
+So last time we ended with
+this kind of neural network,
+
+58
+00:02:58 --> 00:03:00
+where we had a single hidden layer.
+
+59
+00:03:00 --> 00:03:03
+And we derive all the gradients for
+
+60
+00:03:03 --> 00:03:06
+all the different parameters of this
+model, namely the word vectors here.
+
+61
+00:03:06 --> 00:03:11
+The W, the weight matrix for
+our single hidden layer and
+
+62
+00:03:11 --> 00:03:15
+the U for the simple linear layer here.
+
+63
+00:03:15 --> 00:03:20
+And we defined this objective function and
+we ended up writing,
+
+64
+00:03:20 --> 00:03:24
+for instance, one such derivative here
+fully out where we have the indicator
+
+65
+00:03:24 --> 00:03:26
+function whether we&#39;re in this regime or
+if it&#39;s zero.
+
+66
+00:03:26 --> 00:03:29
+And if it&#39;s above zero,
+then this was the derivative.
+
+67
+00:03:29 --> 00:03:33
+In here, I just rewrote the same
+derivative twice, essentially showing you
+
+68
+00:03:33 --> 00:03:37
+that instead of having to recompute,
+this if you had basically
+
+69
+00:03:37 --> 00:03:40
+stored during forward propagation
+the activations of this,
+
+70
+00:03:40 --> 00:03:45
+this is exactly the same thing,
+so f(Wx + b) we defined
+
+71
+00:03:45 --> 00:03:49
+as our hidden activation, a, then you
+could reuse those to compute derivatives.
+
+72
+00:03:49 --> 00:03:53
+Alright, now we&#39;re going to take it up
+a notch and add an additional hidden
+
+73
+00:03:53 --> 00:03:57
+layer to that exact same model, and it&#39;s
+the same kind of layer but in out that
+
+74
+00:03:57 --> 00:04:01
+we have 2, we have to be very careful here
+about our superscript which will indicate.
+
+75
+00:04:01 --> 00:04:02
+The layers that we&#39;re in.
+
+76
+00:04:02 --> 00:04:03
+So it&#39;s the same kind
+of window definition,
+
+77
+00:04:03 --> 00:04:07
+we&#39;ll go over corpus, we&#39;ll select
+samples for our positive class and
+
+78
+00:04:07 --> 00:04:11
+everything that doesn&#39;t for instance have
+an entity will be our negative class.
+
+79
+00:04:11 --> 00:04:15
+Everything else is the same, but
+we&#39;re adding one hidden layer to this.
+
+80
+00:04:15 --> 00:04:16
+And so, let&#39;s go through the definition.
+
+81
+00:04:16 --> 00:04:21
+We&#39;ll define x here, our Windows and
+our word vectors that we concatenated,
+
+82
+00:04:21 --> 00:04:24
+as our first activations,
+our first hidden layer.
+
+83
+00:04:24 --> 00:04:28
+And now to compute to intermediate
+representation for our second layer,
+
+84
+00:04:28 --> 00:04:32
+just a linear part of that,
+we basically have here W1.
+
+85
+00:04:32 --> 00:04:34
+A superscript matrix times x plus b1.
+
+86
+00:04:34 --> 00:04:38
+And then to compute the activations A,
+superscript two of that will apply
+
+87
+00:04:38 --> 00:04:41
+the element-wise nonlinearities,
+such as the sigmoid function.
+
+88
+00:04:41 --> 00:04:46
+All right, and
+then we&#39;ll define this here as z3,
+
+89
+00:04:46 --> 00:04:50
+same idea but this could potentially have
+different dimensionalities, w1, w2 for
+
+90
+00:04:50 --> 00:04:52
+instance don&#39;t have to have
+exactly the same dimensionality.
+
+91
+00:04:52 --> 00:04:54
+Do the same thing again,
+element wise nonlinearity and
+
+92
+00:04:54 --> 00:04:55
+we have the same linear layer at the top.
+
+93
+00:04:55 --> 00:05:00
+All right, are there any questions
+around the definition of this here?
+
+94
+00:05:00 --> 00:05:02
+&gt;&gt; [INAUDIBLE]
+&gt;&gt; The question is do those two element
+
+95
+00:05:02 --> 00:05:03
+wise functions here have to be the same?
+
+96
+00:05:03 --> 00:05:04
+And the answer is they do not.
+
+97
+00:05:04 --> 00:05:08
+And if fact this is something
+that you could cross-validate and
+
+98
+00:05:08 --> 00:05:10
+try as different
+hyper-parameters of the model.
+
+99
+00:05:10 --> 00:05:12
+We so far have only introduced
+to you the sigmoid.
+
+100
+00:05:12 --> 00:05:14
+So let&#39;s assume for now, it&#39;s the same.
+
+101
+00:05:14 --> 00:05:18
+But in a later lecture, I think next week,
+we&#39;ll describe a lot of other
+
+102
+00:05:18 --> 00:05:23
+kinds of non-linearities.
+
+103
+00:05:23 --> 00:05:24
+Yeah.
+
+104
+00:05:24 --> 00:05:26
+How do you choose which
+of these functions.
+
+105
+00:05:26 --> 00:05:28
+We&#39;ll go into all of that once
+we know that we have which or
+
+106
+00:05:28 --> 00:05:29
+what the options are.
+
+107
+00:05:29 --> 00:05:32
+The best answer usually is,
+you let your data speak for
+
+108
+00:05:32 --> 00:05:36
+yourself and you run experiments
+with a lot of different options.
+
+109
+00:05:36 --> 00:05:38
+Once you do that, after a while you gain,
+again, certain intuitions.
+
+110
+00:05:38 --> 00:05:40
+And you don&#39;t have to redo it every time.
+
+111
+00:05:40 --> 00:05:43
+Especially if you have ten layers, you
+don&#39;t wanna go through the cross-product
+
+112
+00:05:43 --> 00:05:45
+of five different nonlinearities.
+
+113
+00:05:45 --> 00:05:46
+And then all the different variations.
+
+114
+00:05:46 --> 00:05:49
+Usually, you get diminishing returns for
+some of those type of parameters.
+
+115
+00:05:49 --> 00:05:49
+&gt;&gt; Question.
+
+116
+00:05:49 --> 00:05:54
+&gt;&gt; Yeah?
+[INAUDIBLE]
+
+117
+00:05:54 --> 00:05:54
+&gt;&gt; Sorry, I didn&#39;t hear you.
+
+118
+00:05:54 --> 00:05:56
+Right.
+
+119
+00:05:56 --> 00:06:02
+So the question
+
+120
+00:06:02 --> 00:06:08
+is,could we put the b into the w?
+
+121
+00:06:08 --> 00:06:08
+And if that&#39;s confusing,
+
+122
+00:06:08 --> 00:06:13
+you could essentially assume
+that b is this biased term here.
+
+123
+00:06:13 --> 00:06:15
+Is another element of this W matrix,
+
+124
+00:06:15 --> 00:06:19
+if we add a single one to every
+activation that we have here.
+
+125
+00:06:19 --> 00:06:23
+So, if a two frame,
+
+126
+00:06:23 --> 00:06:25
+since we just added one here, then we
+could get rid of this bias term and
+
+127
+00:06:25 --> 00:06:29
+we&#39;d have an additional Row or
+column depending on what we have in W.
+
+128
+00:06:29 --> 00:06:32
+So yes, we could fold b into W
+to simplify the notation, but
+
+129
+00:06:32 --> 00:06:36
+then as we&#39;re taking derivatives we want
+to keep everything separate and clear.
+
+130
+00:06:36 --> 00:06:38
+And you&#39;ll usually back propagate
+through these activations,
+
+131
+00:06:38 --> 00:06:40
+whereas you don&#39;t back
+propagate through b.
+
+132
+00:06:40 --> 00:06:42
+So for this math,
+it&#39;s better to keep them separate.
+
+133
+00:06:42 --> 00:06:43
+Yeah.
+
+134
+00:06:43 --> 00:06:47
+So U transpose is our last,
+the question is what&#39;s U transposed?
+
+135
+00:06:47 --> 00:06:50
+And U transpose is our last layer,
+if you will.
+
+136
+00:06:50 --> 00:06:54
+But there&#39;s no non-linearity with it,
+and it&#39;s just a single vector.
+
+137
+00:06:54 --> 00:06:58
+And so because by default here in
+the notation of the class we assume these
+
+138
+00:06:58 --> 00:06:59
+are column vectors.
+
+139
+00:06:59 --> 00:07:01
+We transpose it so
+that we have a simple inner product.
+
+140
+00:07:01 --> 00:07:04
+So it&#39;s just another set of
+parameters that will score
+
+141
+00:07:04 --> 00:07:07
+the final activations to be
+high if they&#39;re a named entity,
+
+142
+00:07:07 --> 00:07:10
+if there&#39;s a named entity of
+the center of this window.
+
+143
+00:07:10 --> 00:07:11
+And scored low if not.
+
+144
+00:07:11 --> 00:07:11
+That&#39;s correct.
+
+145
+00:07:11 --> 00:07:13
+It is just a score that
+we&#39;re trying to maximize and
+
+146
+00:07:13 --> 00:07:16
+we compute that final score
+with this inner product.
+
+147
+00:07:16 --> 00:07:18
+And so these activations
+are now something that we
+
+148
+00:07:18 --> 00:07:21
+compute in this pretty complex
+neural network function, yeah.
+
+149
+00:07:21 --> 00:07:22
+Here everything is a column vector,
+that&#39;s correct.
+
+150
+00:07:22 --> 00:07:24
+All the x&#39;s are column vectors.
+
+151
+00:07:24 --> 00:07:25
+So the question is,
+
+152
+00:07:25 --> 00:07:29
+is there a particular reason of why we
+chose a linear layer as the last layer?
+
+153
+00:07:29 --> 00:07:31
+And the answer here is to
+simplify the math a little bit.
+
+154
+00:07:31 --> 00:07:35
+And because and to introduce to you
+another kind of objective function,
+
+155
+00:07:35 --> 00:07:40
+not everything has to be normalized and
+basically summed to 1 as probabilities.
+
+156
+00:07:40 --> 00:07:44
+If you just care about finding one
+thing versus a lot of other things,
+
+157
+00:07:44 --> 00:07:48
+like I just want to find named entities
+that are locations as center words.
+
+158
+00:07:48 --> 00:07:50
+And if it&#39;s high, then that&#39;s likely one.
+
+159
+00:07:50 --> 00:07:53
+And if it&#39;s low,
+then it&#39;s likely not a center location.
+
+160
+00:07:53 --> 00:07:54
+Then that&#39;s all you need to do.
+
+161
+00:07:54 --> 00:07:59
+And in some sense, you could add here
+a sigmoid after this, and then call it
+
+162
+00:07:59 --> 00:08:04
+a probability, and then use standard
+cross entropy loss to, in your model.
+
+163
+00:08:04 --> 00:08:07
+There&#39;s no reason of why
+you shouldn&#39;t do it.
+
+164
+00:08:07 --> 00:08:12
+That&#39;s something you have to do in the
+problem sets, trying to combine, we derive
+
+165
+00:08:12 --> 00:08:16
+that, we help you derive the softmax and
+cross entropy pair optimization.
+
+166
+00:08:16 --> 00:08:20
+And then we going through this and
+hopefully you can combine the two and
+
+167
+00:08:20 --> 00:08:21
+you&#39;ll see how both work.
+
+168
+00:08:21 --> 00:08:23
+But it&#39;s essentially
+a modeling decision and
+
+169
+00:08:23 --> 00:08:25
+it&#39;s not wrong to apply a sigmoid here.
+
+170
+00:08:25 --> 00:08:27
+And then call this a probability,
+instead of a score.
+
+171
+00:08:27 --> 00:08:31
+All right, so now,
+we have this two layer neural network, and
+
+172
+00:08:31 --> 00:08:36
+we essentially did most of the work
+already to derive the final things here.
+
+173
+00:08:36 --> 00:08:40
+We already knew how to
+derive our U gradients.
+
+174
+00:08:40 --> 00:08:44
+And what used to be just
+W is not W superscript 2,
+
+175
+00:08:44 --> 00:08:47
+but just because we add the superscript
+all the math is the same.
+
+176
+00:08:47 --> 00:08:50
+So here, same derivation that we did for
+
+177
+00:08:50 --> 00:08:54
+W, it&#39;s just now sitting
+on a2 instead of on just a.
+
+178
+00:08:54 --> 00:08:59
+And so what we did here, basically,
+follows directly to what we now have.
+
+179
+00:08:59 --> 00:09:03
+It&#39;s the same thing, but we now have
+to be careful to add these superscripts
+
+180
+00:09:03 --> 00:09:05
+depending on where we
+are in the neural network.
+
+181
+00:09:05 --> 00:09:09
+And we&#39;ll have the same definition
+here when we multiply Ui and
+
+182
+00:09:09 --> 00:09:13
+f prime of zi superscript 3, we&#39;ll
+just call that delta superscript 3 and
+
+183
+00:09:13 --> 00:09:14
+subscript i, for the ith element.
+
+184
+00:09:14 --> 00:09:18
+And this is going to give us the partial
+derivative with respect to Wij,
+
+185
+00:09:18 --> 00:09:19
+the i jth element of the W matrix.
+
+186
+00:09:19 --> 00:09:21
+So this one we&#39;ve already
+derived in all its glory.
+
+187
+00:09:21 --> 00:09:26
+I&#39;m just putting here again
+with the right superscripts.
+
+188
+00:09:26 --> 00:09:29
+Now, the total function
+that we have is this one.
+
+189
+00:09:29 --> 00:09:33
+And, again, we have here this same
+derivative, I just copied it over.
+
+190
+00:09:33 --> 00:09:37
+And in matrix notation, we have to
+find this as the outer product here.
+
+191
+00:09:37 --> 00:09:41
+That would give us the cross product,
+all the pairs of i and
+
+192
+00:09:41 --> 00:09:44
+j to have the full
+gradient of the W2 matrix.
+
+193
+00:09:44 --> 00:09:47
+So this one was exactly as before, except
+that we now add the superscript a2 here.
+
+194
+00:09:47 --> 00:09:48
+Now, in terms of the notation,
+
+195
+00:09:48 --> 00:09:51
+we defined this delta i in
+terms of all these elements.
+
+196
+00:09:51 --> 00:09:54
+And these are basically,
+if you think about it, two vectors.
+
+197
+00:09:54 --> 00:09:57
+This Ui we could write as the full U.
+
+198
+00:09:57 --> 00:09:59
+All the elements of the u vector.
+
+199
+00:09:59 --> 00:10:03
+And f prime of zi we could
+write as f prime of z3 where
+
+200
+00:10:03 --> 00:10:06
+we basically drop the index and assume
+this is just one vector of a bunch of
+
+201
+00:10:06 --> 00:10:11
+element wise applications of this gradient
+function of this derivative here.
+
+202
+00:10:11 --> 00:10:14
+So we&#39;ll introduce now this notation
+which will come in very handy.
+
+203
+00:10:14 --> 00:10:17
+And we call the Hadamard product or
+element-wise product.
+
+204
+00:10:17 --> 00:10:19
+Sometimes you&#39;ll see it as little circles.
+
+205
+00:10:19 --> 00:10:22
+Sometimes it&#39;s a circle with a cross or
+with a dot inside.
+
+206
+00:10:22 --> 00:10:23
+Whenever you see these
+in backprop derivatives,
+
+207
+00:10:23 --> 00:10:24
+it&#39;s usually means the same thing.
+
+208
+00:10:24 --> 00:10:28
+Which we just element-wise multiply all
+the elements of the two vectors with one
+
+209
+00:10:28 --> 00:10:28
+another.
+
+210
+00:10:28 --> 00:10:31
+So this is how we&#39;ll define
+from now on this delta,
+
+211
+00:10:31 --> 00:10:34
+the air signal that&#39;s
+coming in at this layer.
+
+212
+00:10:34 --> 00:10:37
+So the last missing piece for
+back propagation and
+
+213
+00:10:37 --> 00:10:43
+to understand it is essentially
+the gradient with respect to W1,
+
+214
+00:10:43 --> 00:10:46
+the second layer now,
+that we&#39;re moving through.
+
+215
+00:10:46 --> 00:10:50
+Any questions around the Hadamard product,
+the outer product from the W?
+
+216
+00:10:50 --> 00:10:50
+Yeah?
+
+217
+00:10:50 --> 00:10:50
+It is no longer what?
+
+218
+00:10:50 --> 00:10:50
+Sorry it&#39;s.
+
+219
+00:10:50 --> 00:10:51
+Associated, so yes.
+
+220
+00:10:51 --> 00:10:55
+So the question is once you use the
+Hadamard product, how is this related to
+
+221
+00:10:55 --> 00:10:58
+the matrix multiplication here or
+the vector, outer product?
+
+222
+00:10:58 --> 00:11:01
+And so
+you basically first have to compute this.
+
+223
+00:11:01 --> 00:11:03
+And then you have the full
+delta definition.
+
+224
+00:11:03 --> 00:11:09
+And then you can multiply these and
+outer product to get the gradient.
+
+225
+00:11:09 --> 00:11:09
+Yeah.
+
+226
+00:11:09 --> 00:11:13
+Sure, so the question is, could you
+assume that these are diagonal matrices?
+
+227
+00:11:13 --> 00:11:15
+And yes, it&#39;s this kind of the same thing.
+
+228
+00:11:15 --> 00:11:19
+But in terms of the multiplication
+you have to then make sure your
+
+229
+00:11:19 --> 00:11:23
+diagonal matrix is efficiently implemented
+when it&#39;s multiplied with another vector.
+
+230
+00:11:23 --> 00:11:26
+And as you write this out,
+if this is confusing,
+
+231
+00:11:26 --> 00:11:29
+write out what it means to
+have a matrix times this.
+
+232
+00:11:29 --> 00:11:31
+And what if this is
+just a diagonal matrix?
+
+233
+00:11:31 --> 00:11:35
+And what do you get versus just
+multiplying each of these elements with
+
+234
+00:11:35 --> 00:11:35
+one another?
+
+235
+00:11:35 --> 00:11:37
+So just write out the definitions
+of the matrix product and
+
+236
+00:11:37 --> 00:11:39
+then you&#39;ll observe that you
+could think of it this way.
+
+237
+00:11:39 --> 00:11:42
+But then really this f prime here,
+
+238
+00:11:42 --> 00:11:47
+is just as a single vector
+why apply the derivative
+
+239
+00:11:47 --> 00:11:53
+function to a bunch of zeros,
+in this case, zero, two so.
+
+240
+00:11:53 --> 00:11:58
+All right, so the last missing piece,
+W1, the gradient for it.
+
+241
+00:11:58 --> 00:12:01
+And so the main thing we have to figure
+out now is what&#39;s the bottom layer&#39;s
+
+242
+00:12:01 --> 00:12:04
+error message delta 2 that&#39;s coming in?
+
+243
+00:12:04 --> 00:12:06
+And I&#39;m not going to go
+through all the indices again.
+
+244
+00:12:06 --> 00:12:08
+It would take a while and
+it&#39;s kind of repetitive.
+
+245
+00:12:08 --> 00:12:11
+And it&#39;s very, very similar to what
+we&#39;ve done in the last lecture.
+
+246
+00:12:11 --> 00:12:15
+But essentially,
+we had already arrived at this expression.
+
+247
+00:12:15 --> 00:12:18
+As the next lower update.
+
+248
+00:12:18 --> 00:12:21
+And in our previous model,
+we would just arrive,
+
+249
+00:12:21 --> 00:12:25
+that would be the signal that
+arrives at the word vectors.
+
+250
+00:12:25 --> 00:12:30
+So our final word vector
+update was defined this way.
+
+251
+00:12:30 --> 00:12:32
+And what we now basically
+have to do is once more,
+
+252
+00:12:32 --> 00:12:36
+just apply the chain rule because instead
+of having coming up at the word vectors.
+
+253
+00:12:36 --> 00:12:38
+Instead, we&#39;re actually
+coming up at another layer.
+
+254
+00:12:38 --> 00:12:42
+So basically, you can kind of call
+it a local gradient also, but
+
+255
+00:12:42 --> 00:12:48
+it&#39;s when you multiply whatever error
+signal comes from the top layer,
+
+256
+00:12:48 --> 00:12:52
+you multiply that with your local error
+signal, in this case, f prime here.
+
+257
+00:12:52 --> 00:12:58
+Then together, you&#39;ll get the update for
+either the weights that are at that layer,
+
+258
+00:12:58 --> 00:13:02
+or the intermediate term for
+the gradient for lower layers.
+
+259
+00:13:02 --> 00:13:03
+So that&#39;s what we mean by our signal.
+
+260
+00:13:03 --> 00:13:06
+And it might help in the next definition,
+
+261
+00:13:06 --> 00:13:11
+it might give you a better explanation
+of this in backprop number two.
+
+262
+00:13:11 --> 00:13:12
+All right, so almost there.
+
+263
+00:13:12 --> 00:13:14
+Basically, we apply the chain rule again.
+
+264
+00:13:14 --> 00:13:17
+And if the chain rule for such a complex
+function is maybe less intuitive,
+
+265
+00:13:17 --> 00:13:19
+so one thing that helped
+me many years ago,
+
+266
+00:13:19 --> 00:13:24
+is to essentially assume all of these
+are scalars, just single variable.
+
+267
+00:13:24 --> 00:13:28
+And then derive all this,
+assuming it just, U, W,
+
+268
+00:13:28 --> 00:13:30
+and x are all just single numbers.
+
+269
+00:13:30 --> 00:13:34
+And then derive it,
+that will help you gain some intuition.
+
+270
+00:13:34 --> 00:13:39
+And then you&#39;ll observe in the end that
+the final delta 2 is essentially similar
+
+271
+00:13:39 --> 00:13:44
+to what we had derived in a very detailed
+way, which is W2 transposed times delta 3,
+
+272
+00:13:44 --> 00:13:49
+and then Hadamard product times f
+prime of Z2 which is that layer here.
+
+273
+00:13:49 --> 00:13:53
+And this is basically it,
+if you understand these two equations, and
+
+274
+00:13:53 --> 00:13:57
+you feel you can derive them now,
+then you will know all the updates for
+
+275
+00:13:57 --> 00:13:59
+all standard multilayer neural networks.
+
+276
+00:13:59 --> 00:14:03
+You will, in the end,
+always arrive at these two equations.
+
+277
+00:14:03 --> 00:14:07
+And that is, if you wanna
+compute the error signal that&#39;s
+
+278
+00:14:07 --> 00:14:11
+coming into a new layer,
+then you&#39;ll have some form of W,
+
+279
+00:14:11 --> 00:14:17
+of the high layer transposed times
+the error signal that&#39;s coming in there.
+
+280
+00:14:17 --> 00:14:24
+Hadamard product with element y&#39;s
+derivatives here of f in the f prime.
+
+281
+00:14:24 --> 00:14:28
+And in the final update for each W,
+will always be this outer product
+
+282
+00:14:28 --> 00:14:31
+of delta error signal times
+the activation at that layer.
+
+283
+00:14:31 --> 00:14:35
+And here, I include also our
+standard regularization term.
+
+284
+00:14:35 --> 00:14:40
+And you can even describe the top and
+bottom layers this way.
+
+285
+00:14:40 --> 00:14:42
+And then lead to word vectors and
+the linear layer, but
+
+286
+00:14:42 --> 00:14:44
+they just have a very simple delta.
+
+287
+00:14:44 --> 00:14:48
+All right, now, for some of you, just like
+all right, now I understand everything,
+
+288
+00:14:48 --> 00:14:50
+and it&#39;s great that I fully
+understand back propagation.
+
+289
+00:14:50 --> 00:14:53
+But judging from Piazza and
+
+290
+00:14:53 --> 00:14:58
+just from previous years, it&#39;s also
+quite a lot to wrap your head around.
+
+291
+00:14:58 --> 00:15:02
+And so I will go through three
+additional explanations now,
+
+292
+00:15:02 --> 00:15:04
+of this exact same algorithm.
+
+293
+00:15:04 --> 00:15:08
+And there, we&#39;re going through much
+simpler functions not full neural
+
+294
+00:15:08 --> 00:15:11
+networks, but
+much simpler kinds of functions.
+
+295
+00:15:11 --> 00:15:15
+But maybe for some, it will help to wrap
+their heads around sort of the general
+
+296
+00:15:15 --> 00:15:19
+idea of these error signals through
+these simpler kinds of functions.
+
+297
+00:15:19 --> 00:15:22
+So instead of having a crazy neural
+network with lots of matrices and
+
+298
+00:15:22 --> 00:15:23
+hidden layers.
+
+299
+00:15:23 --> 00:15:26
+We&#39;ll just kinda look at
+a simple function like this, and
+
+300
+00:15:26 --> 00:15:28
+we&#39;ll arrive at a similar kind of idea.
+
+301
+00:15:28 --> 00:15:32
+Namely, recursively applying and
+computing these error signals or
+
+302
+00:15:32 --> 00:15:36
+local gradients as we
+move through a network.
+
+303
+00:15:36 --> 00:15:40
+Now, the networks in this idea seen
+function as circuits are going to be much,
+
+304
+00:15:40 --> 00:15:41
+much simpler.
+
+305
+00:15:41 --> 00:15:46
+And these are examples from another
+lecture on Git learning for
+
+306
+00:15:46 --> 00:15:47
+convolutional neural networks and
+
+307
+00:15:47 --> 00:15:52
+computer vision, and we&#39;re basically
+copying here some of their slides.
+
+308
+00:15:52 --> 00:15:59
+And so let&#39;s take, for example, this very
+simple function, f of three variables.
+
+309
+00:15:59 --> 00:16:02
+And this simple function
+is just x plus y times z.
+
+310
+00:16:02 --> 00:16:06
+And let&#39;s assume we start with
+some random initial values for
+
+311
+00:16:06 --> 00:16:09
+x, y, and z from which we start and
+wanna compute derivatives.
+
+312
+00:16:09 --> 00:16:13
+Now, just as before with a complex neural
+network, we can define intermediate
+
+313
+00:16:13 --> 00:16:16
+terms but now, the intermediate
+terms are very, very simple.
+
+314
+00:16:16 --> 00:16:19
+So we&#39;ll just take q, for instance,
+and we define q as x plus y,
+
+315
+00:16:19 --> 00:16:20
+this local computation.
+
+316
+00:16:20 --> 00:16:24
+And now,
+we can look at the partial derivatives
+
+317
+00:16:24 --> 00:16:28
+here of q with respect to x and
+with respect to y.
+
+318
+00:16:28 --> 00:16:31
+They&#39;re very simple,
+it&#39;s just addition, right, just one.
+
+319
+00:16:31 --> 00:16:33
+And we can also define f now,
+in terms of q times z,
+
+320
+00:16:33 --> 00:16:37
+where we use our intermediately
+defined function here.
+
+321
+00:16:37 --> 00:16:41
+And here, we&#39;re kind of simplifying q, it
+should be q is a function of x and y, but
+
+322
+00:16:41 --> 00:16:42
+we just drop that.
+
+323
+00:16:42 --> 00:16:47
+And we can also define our partials of f,
+our overall function with respect to q.
+
+324
+00:16:47 --> 00:16:50
+Now, again, to connect that
+to what we looked at before.
+
+325
+00:16:50 --> 00:16:54
+F could be our lost function, x, y, z
+could be parameters of this and we wanna,
+
+326
+00:16:54 --> 00:16:56
+for instance, minimize our lost function.
+
+327
+00:16:56 --> 00:17:01
+So now, what we want is, we want the final
+updates to update these variables.
+
+328
+00:17:01 --> 00:17:03
+So we&#39;ll start with at the very top.
+
+329
+00:17:03 --> 00:17:10
+Just a df by df which is just 1,
+so it&#39;s not much there.
+
+330
+00:17:10 --> 00:17:13
+We usually start with that.
+
+331
+00:17:13 --> 00:17:17
+And now, we want to update and
+learn how do we update our z vectors?
+
+332
+00:17:17 --> 00:17:22
+So we look at dfdz, and what is that?
+
+333
+00:17:22 --> 00:17:30
+Well, we wrote down here all our different
+derivatives, so df by dz is just q.
+
+334
+00:17:30 --> 00:17:34
+And we define q as x + y, and x and
+
+335
+00:17:34 --> 00:17:37
+y is minus 2 and 5.
+
+336
+00:17:37 --> 00:17:40
+And so the gradient or
+the partial derivative here is just 3.
+
+337
+00:17:40 --> 00:17:45
+All right, so far we&#39;re just very
+simple q times derivative z, that&#39;s it.
+
+338
+00:17:45 --> 00:17:50
+All right, now,
+we can move also through this circuit.
+
+339
+00:17:50 --> 00:17:53
+And are there questions around just
+the description of this circuit,
+
+340
+00:17:53 --> 00:17:54
+of this function in terms of the circuit?
+
+341
+00:17:54 --> 00:18:01
+All right, so now, let&#39;s look at the dfdq
+which is the element here of the circuit,
+
+342
+00:18:01 --> 00:18:06
+this node in the circuit
+description of this function.
+
+343
+00:18:06 --> 00:18:12
+Now, the dfdq is again, quite simple
+we already wrote it right here.
+
+344
+00:18:12 --> 00:18:15
+It&#39;s just z, and z is just minus 4.
+
+345
+00:18:15 --> 00:18:18
+But now, the chain rule,
+we have to multiply and
+
+346
+00:18:18 --> 00:18:22
+this is essentially a delta
+kind of error message.
+
+347
+00:18:22 --> 00:18:26
+We multiply what we have from
+the higher node in the circuit, but
+
+348
+00:18:26 --> 00:18:28
+that&#39;s in this case, is just 1.
+
+349
+00:18:28 --> 00:18:33
+And so the overall is just z times 1,
+and z is minus 4, z is minus 4.
+
+350
+00:18:33 --> 00:18:37
+And now,
+we&#39;re going to move through this plus
+
+351
+00:18:37 --> 00:18:41
+node to compute the next
+lower derivatives here.
+
+352
+00:18:41 --> 00:18:47
+And this is, we end up at the final
+nodes here, the final leaf nodes if you
+
+353
+00:18:47 --> 00:18:52
+will of this tree structure,
+and we wanna compute the dfdy.
+
+354
+00:18:52 --> 00:18:57
+Now dfdy,
+We basically wanna use the chain rule,
+
+355
+00:18:57 --> 00:19:02
+and we&#39;re going to multiply what
+we have in the previous one, dfdq,
+
+356
+00:19:02 --> 00:19:08
+which is the error signal coming from here
+times dqdy, which is the local error,
+
+357
+00:19:08 --> 00:19:12
+the local gradient,
+it&#39;s not really the full gradient right,
+
+358
+00:19:12 --> 00:19:15
+this is the local part
+of the gradient dqdy.
+
+359
+00:19:15 --> 00:19:19
+So we multiply these two terms,
+the dfdq we wrote down here,
+
+360
+00:19:19 --> 00:19:23
+that says z minus 4, times dqdy,
+as you wrote down here.
+
+361
+00:19:23 --> 00:19:26
+It&#39;s just one, so
+minus 4 times 1, we got minus 4.
+
+362
+00:19:26 --> 00:19:29
+And we can do the same thing for
+x, again, apply the chain rule.
+
+363
+00:19:29 --> 00:19:35
+All right, so in general, in this way of
+seeing all these functions as circuits,
+
+364
+00:19:35 --> 00:19:38
+we basically always have
+some kind of input so
+
+365
+00:19:38 --> 00:19:43
+each node in the circuit and
+we compute some kind of output.
+
+366
+00:19:43 --> 00:19:46
+And what&#39;s important is we can
+compute our local gradients here
+
+367
+00:19:46 --> 00:19:48
+directly during the forward propagation.
+
+368
+00:19:48 --> 00:19:51
+We don&#39;t need to know this
+local part of the gradient.
+
+369
+00:19:51 --> 00:19:52
+We don&#39;t need to know what&#39;s up before.
+
+370
+00:19:52 --> 00:19:54
+But in general, we will run this forward.
+
+371
+00:19:54 --> 00:19:56
+We&#39;ll around some of these values.
+
+372
+00:19:56 --> 00:20:00
+And then in back propagation,
+we get the gradient signals from any
+
+373
+00:20:00 --> 00:20:05
+element upstream from each of
+these nodes in the circuits.
+
+374
+00:20:05 --> 00:20:08
+And essentially then,
+use the chain rule and
+
+375
+00:20:08 --> 00:20:11
+multiply all of these
+to compute the updates.
+
+376
+00:20:11 --> 00:20:15
+All right, any questions around
+the definition of the circuits for
+
+377
+00:20:15 --> 00:20:16
+simple functions?
+
+378
+00:20:16 --> 00:20:18
+It&#39;s very hard to take this
+kind of abstraction, and
+
+379
+00:20:18 --> 00:20:19
+then get all the way to this full update.
+
+380
+00:20:19 --> 00:20:23
+Therefore, a full near
+layer neural network, but
+
+381
+00:20:23 --> 00:20:29
+it&#39;s very good to gain intuition of
+what&#39;s really going on, on a high level.
+
+382
+00:20:29 --> 00:20:30
+&gt;&gt; All right, so now,
+
+383
+00:20:30 --> 00:20:34
+let&#39;s go through a little more complex
+example of what this looks like.
+
+384
+00:20:34 --> 00:20:38
+And I think of at the end of that you
+kind of gain some good intuition of how
+
+385
+00:20:38 --> 00:20:40
+we basically do forward propagation, and
+
+386
+00:20:40 --> 00:20:45
+recursively call these kinds of
+circuits to compute the full update.
+
+387
+00:20:45 --> 00:20:49
+So here,
+we have a little bit more of a complex
+
+388
+00:20:49 --> 00:20:53
+function namely actually our sigmoid
+function that we had before.
+
+389
+00:20:53 --> 00:20:54
+Usually when we have our sigmoid function,
+
+390
+00:20:54 --> 00:20:56
+this was one activation
+of one hidden layer.
+
+391
+00:20:56 --> 00:21:00
+In most cases, x was our input and
+w were the weights.
+
+392
+00:21:00 --> 00:21:04
+So we defined this already, and now,
+let&#39;s assume we just want to compute
+
+393
+00:21:04 --> 00:21:08
+the partial derivatives with respect
+to all the elements, w and x.
+
+394
+00:21:08 --> 00:21:12
+And let&#39;s assume x and w are just,
+x is two-dimensional, and
+
+395
+00:21:12 --> 00:21:13
+w is three-dimensional.
+
+396
+00:21:13 --> 00:21:16
+And we have here the bias term
+as just an extra element of w.
+
+397
+00:21:16 --> 00:21:20
+So now, if you take this whole function,
+we&#39;re gonna now compute or
+
+398
+00:21:20 --> 00:21:21
+define this as a circuit.
+
+399
+00:21:21 --> 00:21:26
+That one description that&#39;s the most
+detailed description of this function
+
+400
+00:21:26 --> 00:21:30
+as a circuit would look like this,
+where you basically recursively
+
+401
+00:21:30 --> 00:21:34
+divide this function into all
+the separate actions that you might take.
+
+402
+00:21:34 --> 00:21:36
+And you can compute gradients and
+
+403
+00:21:36 --> 00:21:40
+the local gradients at each
+note in this kind of circuit.
+
+404
+00:21:40 --> 00:21:45
+So the last operation to compute
+the final output f here of this function,
+
+405
+00:21:45 --> 00:21:47
+is 1 over whatever is in here.
+
+406
+00:21:47 --> 00:21:52
+And so that&#39;s our last element of
+the circuit, and from the bottom it
+
+407
+00:21:52 --> 00:21:57
+starts with multiplying these two numbers,
+multiplying these two numbers,
+
+408
+00:21:57 --> 00:22:01
+and then adding to their summation
+this w2 install, all right?
+
+409
+00:22:01 --> 00:22:04
+Are there any questions around
+the description of the circuit?
+
+410
+00:22:04 --> 00:22:09
+All right, so now, let&#39;s assume we
+start with these simple numbers here,
+
+411
+00:22:09 --> 00:22:15
+so w2, w0 starts at 2, x0 starts at minus
+1, minus 3, minus 2, and minus 3 here.
+
+412
+00:22:15 --> 00:22:18
+So we just move forward through
+the circuit to compute our forward
+
+413
+00:22:18 --> 00:22:19
+propagation, right?
+
+414
+00:22:19 --> 00:22:25
+So this is a relatively simple
+concatenation of functions.
+
+415
+00:22:25 --> 00:22:28
+And now, we wanna compute all our partial
+
+416
+00:22:28 --> 00:22:32
+derivatives with respect to all
+these different elements here.
+
+417
+00:22:32 --> 00:22:37
+So we&#39;ll now go backwards and recursively
+backwards through this circuit, and
+
+418
+00:22:37 --> 00:22:39
+apply the chain rule every time.
+
+419
+00:22:39 --> 00:22:44
+So let&#39;s start the final value to the
+forward propagation numbers here in green,
+
+420
+00:22:44 --> 00:22:48
+at the top the final
+value of this is 0.73.
+
+421
+00:22:48 --> 00:22:55
+And again, the first delta derivative of
+just the function with itself, is just 1.
+
+422
+00:22:55 --> 00:23:00
+And now, we hit this node in a circuit,
+and we want to now compute
+
+423
+00:23:00 --> 00:23:02
+the derivative of this function,
+and the function&#39;s 1 over x.
+
+424
+00:23:02 --> 00:23:05
+And so the derivative is
+just minus 1 over x squared.
+
+425
+00:23:05 --> 00:23:10
+x is 1.73, and so we basically compute
+
+426
+00:23:10 --> 00:23:17
+minus 1 divided by 1.37,
+sorry, 1.37 squared.
+
+427
+00:23:17 --> 00:23:21
+And then we multiply using a chain rule,
+
+428
+00:23:21 --> 00:23:27
+the gradient signal here from
+the top that goes into this node.
+
+429
+00:23:27 --> 00:23:32
+So now, you multiple these two,
+and you get the number minus 0.53.
+
+430
+00:23:32 --> 00:23:38
+Now, we&#39;re moved to the next node,
+so this node here,
+
+431
+00:23:38 --> 00:23:43
+we just sum up a constant
+with the value x,
+
+432
+00:23:43 --> 00:23:47
+and so the derivative of that is just 1.
+
+433
+00:23:47 --> 00:23:51
+So we multiply, use the chain rule,
+multiply these two elements,
+
+434
+00:23:51 --> 00:23:55
+the error signal or
+gradient signal from the top as it moves
+
+435
+00:23:55 --> 00:24:00
+through this element of the circuit,
+which is just minus 0.3 times 1 so
+
+436
+00:24:00 --> 00:24:04
+we get again minus 0.53, sorry.
+
+437
+00:24:04 --> 00:24:05
+Now, we move through the exponent.
+
+438
+00:24:05 --> 00:24:06
+It&#39;s a little more interesting.
+
+439
+00:24:06 --> 00:24:09
+So here, derivative of e to
+the x is just e to the x.
+
+440
+00:24:09 --> 00:24:14
+And we have the incoming value
+which is minus 1, so that&#39;s our x.
+
+441
+00:24:14 --> 00:24:18
+So we have e to the minus
+1 times minus 0.53,
+
+442
+00:24:18 --> 00:24:23
+the gradient signal from
+the higher node in this circuit.
+
+443
+00:24:23 --> 00:24:27
+And we basically continue like this for
+a while, and
+
+444
+00:24:27 --> 00:24:31
+compute the same for plus,
+similar to this plus and so on.
+
+445
+00:24:31 --> 00:24:33
+And that the end, we arrive right here.
+
+446
+00:24:33 --> 00:24:37
+And our error signal is 0.2, and
+we have this multiplication here.
+
+447
+00:24:37 --> 00:24:42
+And we know in multiplication, the partial
+
+448
+00:24:42 --> 00:24:48
+of w0 times x0 partial with
+respect to x0 is just w0.
+
+449
+00:24:48 --> 00:24:55
+And so we multiply 0.2 times the value
+here which is 2 and we get 0.4.
+
+450
+00:24:55 --> 00:25:00
+And now, we have an update for
+this parameter after we&#39;ve moved
+
+451
+00:25:00 --> 00:25:05
+recursively through the circuit
+all the way to where it was used.
+
+452
+00:25:05 --> 00:25:08
+And this is essentially the same thing
+that we&#39;ve done for the very complex
+
+453
+00:25:08 --> 00:25:11
+neural network, but sort of one step
+at a time for a very simple function.
+
+454
+00:25:11 --> 00:25:15
+Any questions around this
+sort of circuit description
+
+455
+00:25:15 --> 00:25:18
+of the same back propagation at year.
+
+456
+00:25:18 --> 00:25:23
+Namely reusing the derivatives,
+multiplying local error signals
+
+457
+00:25:23 --> 00:25:28
+with the global error signals from
+higher Layers, where here, the layer
+
+458
+00:25:28 --> 00:25:31
+definition&#39;s a bit stretched, it&#39;s very,
+very simple kinds of operations.
+
+459
+00:25:31 --> 00:25:31
+Yeah?
+
+460
+00:25:31 --> 00:25:35
+That&#39;s right, so here,
+each time the sort of gradient,
+
+461
+00:25:35 --> 00:25:40
+the local gradient times the global or
+above higher layer gradient signal.
+
+462
+00:25:40 --> 00:25:42
+When you multiply them,
+you get an actual gradient.
+
+463
+00:25:42 --> 00:25:44
+So they&#39;re not really gradients, right,
+
+464
+00:25:44 --> 00:25:46
+they&#39;re sort of intermediate
+values of a gradient.
+
+465
+00:25:46 --> 00:25:46
+Yep.
+
+466
+00:25:46 --> 00:25:50
+So the question is we&#39;re
+using this kind of circuit
+
+467
+00:25:50 --> 00:25:55
+interpretation to compute derivatives and
+that&#39;s correct.
+
+468
+00:25:55 --> 00:25:59
+If you were to just do
+standard math on this equation
+
+469
+00:25:59 --> 00:26:01
+you would end up with something
+that looks exactly like this.
+
+470
+00:26:01 --> 00:26:04
+And you would also have
+similar kinds of numbers.
+
+471
+00:26:04 --> 00:26:07
+But we&#39;re making it a little
+more complicated, in some ways,
+
+472
+00:26:07 --> 00:26:11
+to compute the derivatives here,
+of each of the elements of this function.
+
+473
+00:26:11 --> 00:26:15
+We&#39;re kind of push the chain rule to its
+
+474
+00:26:15 --> 00:26:20
+maximum by defining every single
+operation as a separate function.
+
+475
+00:26:20 --> 00:26:23
+And then computing gradients at
+every single separate function.
+
+476
+00:26:23 --> 00:26:28
+And when you do that, even for this kind
+of simple function, you usually wouldn&#39;t
+
+477
+00:26:28 --> 00:26:32
+write out this complex thing and take
+a derivative with respect to this node,
+
+478
+00:26:32 --> 00:26:34
+which is just plus,
+cuz we all know how to do that.
+
+479
+00:26:34 --> 00:26:36
+And usually we just move
+through this very quickly but
+
+480
+00:26:36 --> 00:26:41
+the circuit definitions can help you
+understand the idea that at each node what
+
+481
+00:26:41 --> 00:26:46
+you end up getting is the local gradient
+times the gradient signal from the top.
+
+482
+00:26:46 --> 00:26:50
+So in the end you get the exact same
+updates as if you had just taken
+
+483
+00:26:50 --> 00:26:51
+the derivatives using
+the chain rule like this.
+
+484
+00:26:51 --> 00:26:56
+And in fact, the definition of the circuit
+can be arbitrary too and sometimes
+
+485
+00:26:56 --> 00:27:02
+it&#39;s a lot more work to write out all the
+different sub components of a function.
+
+486
+00:27:02 --> 00:27:04
+So for instance,
+we know if we just described
+
+487
+00:27:04 --> 00:27:09
+sigma of x as our sigmoid function, we
+could kind of combine all these different
+
+488
+00:27:09 --> 00:27:14
+elements of the circuit as
+just one node in the circuit.
+
+489
+00:27:14 --> 00:27:18
+And we know, with this one little
+trick here, the derivative
+
+490
+00:27:18 --> 00:27:22
+of sigma x with respect to x can actually
+be described in terms of sigma x.
+
+491
+00:27:22 --> 00:27:25
+So we don&#39;t need to do any extra
+computation like we did internally here,
+
+492
+00:27:25 --> 00:27:27
+take another exponent and so on.
+
+493
+00:27:27 --> 00:27:31
+We actually can just know, well if that
+was our value here of sigma x then
+
+494
+00:27:31 --> 00:27:35
+the derivative that will come out here
+is just 1- sigma x times sigma x.
+
+495
+00:27:35 --> 00:27:39
+And so we could, in theory, also define
+our circuit differently, and in fact
+
+496
+00:27:39 --> 00:27:43
+the circuits we eventually define are this
+whole thing is one neural network layer.
+
+497
+00:27:43 --> 00:27:47
+And internally we know exactly the kinds
+of messages that pass through such
+
+498
+00:27:47 --> 00:27:51
+a layer, or the error signals, or
+again, elements of the final gradients.
+
+499
+00:27:51 --> 00:27:51
+Yeah?
+
+500
+00:27:51 --> 00:27:52
+That&#39;s a good question, sorry, yes.
+
+501
+00:27:52 --> 00:27:54
+So the question is, we&#39;re talking
+about back propagation here, and
+
+502
+00:27:54 --> 00:27:54
+what is forward propagation?
+
+503
+00:27:54 --> 00:27:57
+Yeah, forward propagation just means
+computing the value of your overall
+
+504
+00:27:57 --> 00:27:57
+function.
+
+505
+00:27:57 --> 00:28:01
+The relationship between the two is
+forward propagation is what you compute,
+
+506
+00:28:01 --> 00:28:05
+what you do at test time, to compute
+the final output of your function.
+
+507
+00:28:05 --> 00:28:10
+So, you want the probability for
+this node to be a location, or for this
+
+508
+00:28:10 --> 00:28:14
+word to be a location, you&#39;d do forward
+propagation to compute that probability.
+
+509
+00:28:14 --> 00:28:17
+And the you do backward propagation to
+compute the gradients if you wanna train
+
+510
+00:28:17 --> 00:28:19
+and update your model if you have
+a training data set and so on.
+
+511
+00:28:19 --> 00:28:23
+That&#39;s right, the red numbers here at
+the bottom are all the partial derivatives
+
+512
+00:28:23 --> 00:28:25
+with respect to each of these parameters.
+
+513
+00:28:25 --> 00:28:30
+And here all the intermediate values
+that we use as that gradient flows
+
+514
+00:28:30 --> 00:28:36
+through the circuit to the parameters that
+we might wanna update, great question.
+
+515
+00:28:36 --> 00:28:36
+All right, so
+
+516
+00:28:36 --> 00:28:41
+essentially we recursively applied the
+chain rule as we moved through this graph.
+
+517
+00:28:41 --> 00:28:44
+And we end up with a similar
+kind of intuition,
+
+518
+00:28:44 --> 00:28:48
+as we did with the same,
+with just using math and
+
+519
+00:28:48 --> 00:28:52
+multivariate calculus, to arrive at these
+final gradients, to update our parameters.
+
+520
+00:28:52 --> 00:28:55
+All right,
+any questions around the circuit?
+
+521
+00:28:55 --> 00:28:58
+Interpretation of back propagation, yeah.
+
+522
+00:28:58 --> 00:29:03
+So here w2 is our bias term,
+it doesn&#39;t depend on the values of x,
+
+523
+00:29:03 --> 00:29:07
+we just add it, and
+w2 down here in the circuit.
+
+524
+00:29:07 --> 00:29:12
+So that is the last element we add
+after adding these two multiplications.
+
+525
+00:29:12 --> 00:29:15
+All right, so,
+now if that was too simple and
+
+526
+00:29:15 --> 00:29:18
+you wanna get a little
+bit high level again,
+
+527
+00:29:18 --> 00:29:23
+you can essentially think of these
+circuits also as flow graphs.
+
+528
+00:29:23 --> 00:29:28
+And circuit is the terminology that
+Andrej Karpathy used in 231 and
+
+529
+00:29:28 --> 00:29:32
+Yoshua Bengio, for instance,
+another very famous researcher in
+
+530
+00:29:32 --> 00:29:36
+deep learning uses the terminology
+of flow graphs, but, again,
+
+531
+00:29:36 --> 00:29:38
+we have the very similar kind of idea.
+
+532
+00:29:38 --> 00:29:39
+You start with some input x,
+
+533
+00:29:39 --> 00:29:42
+you do forward propagation to
+compute some kind of value.
+
+534
+00:29:42 --> 00:29:46
+You go through some intermediate variables
+y, and then, in back propagation,
+
+535
+00:29:46 --> 00:29:50
+you compute your gradients going backwards
+in the reverse order to what you&#39;ve
+
+536
+00:29:50 --> 00:29:52
+done during forward propagation.
+
+537
+00:29:52 --> 00:29:56
+And so this is if you just have one
+intermediate value now if x, and
+
+538
+00:29:56 --> 00:30:01
+this is something else important to
+know it for the circuits it&#39;s the same,
+
+539
+00:30:01 --> 00:30:04
+if x modifies two paths in
+your flow graph you end up,
+
+540
+00:30:04 --> 00:30:07
+based on the multiple variable Chain Rule.
+
+541
+00:30:07 --> 00:30:13
+You have to sum up the local air signals
+for both from both of the paths.
+
+542
+00:30:13 --> 00:30:16
+And in general,
+again you move backwards through them.
+
+543
+00:30:16 --> 00:30:21
+So usually as long as you have some
+kind of directed basically graph or
+
+544
+00:30:21 --> 00:30:24
+tree structure,
+you can always compute these flows and
+
+545
+00:30:24 --> 00:30:27
+these elements of your gradient.
+
+546
+00:30:27 --> 00:30:32
+And in general, if x goes through multiple
+different elements in your flow graph,
+
+547
+00:30:32 --> 00:30:35
+you just sum up all the partials this way.
+
+548
+00:30:35 --> 00:30:39
+And so this is another interpretation much
+more high level without defining exactly
+
+549
+00:30:39 --> 00:30:41
+what kinds of computation
+you have here at each node.
+
+550
+00:30:41 --> 00:30:45
+But in general you can define
+these kind of flow graphs and
+
+551
+00:30:45 --> 00:30:48
+each node is some kind
+of computational result.
+
+552
+00:30:48 --> 00:30:51
+And each arc here is some kind
+of dependency, so you need,
+
+553
+00:30:51 --> 00:30:53
+in order to compute this, you needed this.
+
+554
+00:30:53 --> 00:30:56
+And you can define more complex
+things where you have so
+
+555
+00:30:56 --> 00:31:00
+called short circuit connections, we&#39;ll
+define those much later in the class, but
+
+556
+00:31:00 --> 00:31:02
+in general,
+you move forward through your node.
+
+557
+00:31:02 --> 00:31:05
+So this is a more realistic example
+where we may have some input x,
+
+558
+00:31:05 --> 00:31:09
+we have some probability, or
+sorry some class y for our train data set.
+
+559
+00:31:09 --> 00:31:13
+And in forward propagation,
+we&#39;ll move these through a sigmoid neural
+
+560
+00:31:13 --> 00:31:16
+network layer here such
+as h is just sigma of Vx.
+
+561
+00:31:16 --> 00:31:18
+We dropped here The bias term.
+
+562
+00:31:18 --> 00:31:22
+And so, you can also describe your
+v as part of this flow graph.
+
+563
+00:31:22 --> 00:31:26
+You move through a next layer, and
+then you may have a softmax layer here,
+
+564
+00:31:26 --> 00:31:29
+similar to the one that you
+derived in problem set one.
+
+565
+00:31:29 --> 00:31:31
+And then you have your
+negative log likelihood, and
+
+566
+00:31:31 --> 00:31:36
+you compute that final cost function for
+this pair xy, for this training element.
+
+567
+00:31:36 --> 00:31:39
+And then back propagation again,
+you move backwards through the flow graph.
+
+568
+00:31:39 --> 00:31:44
+And you update your parameters as
+you move through the flow graph.
+
+569
+00:31:44 --> 00:31:48
+Now, before I go through the last and
+final explanation, the good news is you
+
+570
+00:31:48 --> 00:31:51
+won&#39;t actually have to do that for
+very complex neural networks.
+
+571
+00:31:51 --> 00:31:52
+It would be close to impossible for
+
+572
+00:31:52 --> 00:31:56
+the kinds of large complex neural
+networks to do this by hand.
+
+573
+00:31:56 --> 00:31:58
+Many years ago, when I had started my PhD,
+
+574
+00:31:58 --> 00:32:01
+there weren&#39;t any software packages
+with automatic differentiation.
+
+575
+00:32:01 --> 00:32:02
+So you did have to do that.
+
+576
+00:32:02 --> 00:32:04
+And it slowed us down a little bit.
+
+577
+00:32:04 --> 00:32:07
+But, nowadays,
+you can essentially automatically
+
+578
+00:32:07 --> 00:32:11
+infer your back propagation updates
+based on the forward propagation.
+
+579
+00:32:11 --> 00:32:13
+It&#39;s a completely deterministic process,
+and
+
+580
+00:32:13 --> 00:32:17
+so can use symbolic expressions for
+your forward prop.
+
+581
+00:32:17 --> 00:32:21
+And then have algorithms automatically
+determine your gradient, right?
+
+582
+00:32:21 --> 00:32:23
+The gradients always exist for
+these kinds of functions.
+
+583
+00:32:23 --> 00:32:25
+And so that will allow us
+to much faster prototyping.
+
+584
+00:32:25 --> 00:32:29
+And you&#39;ll get introduced
+next week to a tensor flow,
+
+585
+00:32:29 --> 00:32:33
+which is one such package that essentially
+takes all these headaches away from you.
+
+586
+00:32:33 --> 00:32:34
+But with this knowledge,
+
+587
+00:32:34 --> 00:32:38
+you&#39;ll actually know what&#39;s going on
+under the hood of these packages.
+
+588
+00:32:38 --> 00:32:41
+All right, any question around the flow
+graph interpretation of back propagation?
+
+589
+00:32:41 --> 00:32:41
+Yes?
+
+590
+00:32:41 --> 00:32:42
+It&#39;s actually in closed form.
+
+591
+00:32:42 --> 00:32:43
+Yeah, it&#39;s not numerically solved.
+
+592
+00:32:43 --> 00:32:47
+So sorry, the question was, the automatic
+differentiation, is it numeric or
+
+593
+00:32:47 --> 00:32:47
+symbolic?
+
+594
+00:32:47 --> 00:32:47
+It&#39;s usually symbolic.
+
+595
+00:32:47 --> 00:32:51
+All right, now, for the last and
+final explanation of the same idea.
+
+596
+00:32:51 --> 00:32:56
+But combining the idea of the flow graph
+with the math that you&#39;ve seen before,
+
+597
+00:32:56 --> 00:32:58
+and hopefully that will help.
+
+598
+00:32:58 --> 00:33:02
+So, let&#39;s bring back this complex
+two layer neural network.
+
+599
+00:33:02 --> 00:33:07
+Now, how can we describe this
+at a much simplified kind of
+
+600
+00:33:07 --> 00:33:12
+flow graph or circuit where we can combine
+in a lot of different elements instead of
+
+601
+00:33:12 --> 00:33:17
+writing every multiplication, summation,
+exponent, negation, and so and out?
+
+602
+00:33:17 --> 00:33:19
+This is the kind of flow
+graph that kind of yeah,
+
+603
+00:33:19 --> 00:33:21
+kind of combines these two worlds.
+
+604
+00:33:21 --> 00:33:24
+So we assumed here we had our delta
+
+605
+00:33:24 --> 00:33:28
+error signal coming from
+the simple score that we have.
+
+606
+00:33:28 --> 00:33:32
+And let&#39;s say that our final, we want all
+the updates, essentially, to W(2) and
+
+607
+00:33:32 --> 00:33:32
+W(1).
+
+608
+00:33:32 --> 00:33:38
+Now W(2), as we move through this
+linear score, the delta doesn&#39;t change.
+
+609
+00:33:38 --> 00:33:44
+And so the update that we get for W(2)
+here is just this outer product again.
+
+610
+00:33:44 --> 00:33:49
+And that&#39;s kind of, as we move through
+this very high level flow graph,
+
+611
+00:33:49 --> 00:33:55
+we basically now update W(2) once we get
+the error message from the layer above.
+
+612
+00:33:55 --> 00:33:57
+Now, as we move through W(2),
+
+613
+00:33:57 --> 00:34:02
+this kind of circuit will essentially
+just multiply the affine,
+
+614
+00:34:02 --> 00:34:09
+like as we move through this simple affine
+transformation this matrix vector product,
+
+615
+00:34:09 --> 00:34:14
+we&#39;re just required to transpose
+the forward propagation matrix.
+
+616
+00:34:14 --> 00:34:19
+And we arrived why this is before,
+but this is kind of the interpretation
+
+617
+00:34:19 --> 00:34:24
+of this flow graph in terms of a complex
+and large realistic neural network.
+
+618
+00:34:24 --> 00:34:27
+And so notice also that
+the dimensions here line up perfectly.
+
+619
+00:34:27 --> 00:34:34
+So the output here, we multiply this delta
+that has the dimensionality of the output.
+
+620
+00:34:34 --> 00:34:38
+With the transpose, we get exactly
+the dimensionality of the input of this W.
+
+621
+00:34:38 --> 00:34:39
+So it&#39;s quite intuitive, right?
+
+622
+00:34:39 --> 00:34:44
+You have the linear transformation,
+affine transformation through this W
+
+623
+00:34:44 --> 00:34:48
+as you move backwards to this W,
+you just multiply it with its transpose.
+
+624
+00:34:48 --> 00:34:53
+And now, we are hitting this
+element wise nonlinearity.
+
+625
+00:34:53 --> 00:34:56
+And so as we update the next delta,
+
+626
+00:34:56 --> 00:35:01
+we essentially have also
+an element wise derivative
+
+627
+00:35:01 --> 00:35:06
+here of each of the elements
+of this activation.
+
+628
+00:35:06 --> 00:35:09
+So as we&#39;re moving our error vector,
+error signal, or
+
+629
+00:35:09 --> 00:35:14
+global parts of the gradient through
+these point-wise nonlinearities, we need
+
+630
+00:35:14 --> 00:35:19
+to apply point-wise multiplications with
+the local gradients of the non-linearity.
+
+631
+00:35:19 --> 00:35:22
+And now we have this delta
+that&#39;s arrived at W(1).
+
+632
+00:35:22 --> 00:35:26
+And so W1 we can now compute
+the final gradient with respect to
+
+633
+00:35:26 --> 00:35:30
+W(1) as just the delta again times
+the activation of the previous layer,
+
+634
+00:35:30 --> 00:35:33
+which is a(1) and
+we have this outer product.
+
+635
+00:35:33 --> 00:35:36
+So this is combining the different
+interpretations that we&#39;ve learned.
+
+636
+00:35:36 --> 00:35:40
+We arrived through this through
+just multivariate calculus.
+
+637
+00:35:40 --> 00:35:45
+And now this is the flow graph or
+circuit interpretation of what&#39;s going on.
+
+638
+00:35:45 --> 00:35:45
+Yes?
+
+639
+00:35:45 --> 00:35:48
+&gt;&gt; If I mean point-wise non linearity,
+I mean coordinate wise, yes,
+
+640
+00:35:48 --> 00:35:49
+they are the same.
+
+641
+00:35:49 --> 00:35:53
+So, whenever we write f(z) here, and
+
+642
+00:35:53 --> 00:35:57
+z was a vector of z1, z2, for instance,
+
+643
+00:35:57 --> 00:36:01
+then we meant f(z1) and f(z2).
+
+644
+00:36:01 --> 00:36:03
+And the same is true if
+we write it like this.
+
+645
+00:36:03 --> 00:36:05
+And look at the partial derivatives.
+
+646
+00:36:05 --> 00:36:05
+Yeah?
+&gt;&gt; I know.
+
+647
+00:36:05 --> 00:36:08
+&gt;&gt; That&#39;s just, from matrix [INAUDIBLE].
+
+648
+00:36:08 --> 00:36:11
+It is, yes, so the question is the delta
+here the same as in the definition of
+
+649
+00:36:11 --> 00:36:12
+the two layer neural network?
+
+650
+00:36:12 --> 00:36:13
+And it is, yeah.
+
+651
+00:36:13 --> 00:36:14
+So this delta here is this and
+
+652
+00:36:14 --> 00:36:18
+you notice here that it&#39;s the same
+thing that we wrote before.
+
+653
+00:36:18 --> 00:36:20
+We have W(2) transpose times delta(3).
+
+654
+00:36:20 --> 00:36:25
+And then you have the Hadamard product
+with the element-wise derivatives here.
+
+655
+00:36:25 --> 00:36:27
+All right, congratulations!
+
+656
+00:36:27 --> 00:36:27
+You&#39;ve done it.
+So
+
+657
+00:36:27 --> 00:36:32
+now, understand the inner workings of
+most deep learning models out there.
+
+658
+00:36:32 --> 00:36:33
+And this was literally
+the hardest part of the class.
+
+659
+00:36:33 --> 00:36:36
+I think it&#39;s gonna go all uphill
+from here for many of you.
+
+660
+00:36:36 --> 00:36:41
+And everything from now on is really
+just more matrix multiplications and
+
+661
+00:36:41 --> 00:36:42
+this kind of back propagation.
+
+662
+00:36:42 --> 00:36:45
+It&#39;s really 90% of the state of
+the art models out there right now and
+
+663
+00:36:45 --> 00:36:47
+top new papers that
+are coming out this year.
+
+664
+00:36:47 --> 00:36:49
+You now can have a warm, fuzzy feeling,
+
+665
+00:36:49 --> 00:36:52
+as you look through the forward
+propagation definitions.
+
+666
+00:36:52 --> 00:36:59
+All right, with that, let&#39;s have a little
+intermission and look at a paper.
+
+667
+00:36:59 --> 00:37:01
+Take it away.
+&gt;&gt; Hi everyone.
+
+668
+00:37:01 --> 00:37:05
+So yeah, so let&#39;s take a break from neural
+networks, and let&#39;s talk about this
+
+669
+00:37:05 --> 00:37:09
+paper which came out from Facebook ARV
+search just this past summer.
+
+670
+00:37:09 --> 00:37:14
+So text classification is
+a really important topic in NLP.
+
+671
+00:37:14 --> 00:37:17
+Given a piece of text, we may wanna say,
+is this a positive sentiment or
+
+672
+00:37:17 --> 00:37:19
+does it have negative sentiment?
+
+673
+00:37:19 --> 00:37:22
+Is this spam or ham, or
+did JK Rowling actually write this?
+
+674
+00:37:22 --> 00:37:25
+And so
+this one&#39;s particular from a website and
+
+675
+00:37:25 --> 00:37:29
+it&#39;s basing [COUGH] an example
+of sentiment analysis.
+
+676
+00:37:29 --> 00:37:34
+And so if you recall from your
+problem set in problem four.
+
+677
+00:37:34 --> 00:37:38
+An easy way to featurize a sentence
+is to just average out all the word
+
+678
+00:37:38 --> 00:37:39
+vectors in a sentence.
+
+679
+00:37:39 --> 00:37:42
+And that&#39;s basically what
+the model from this paper does.
+
+680
+00:37:42 --> 00:37:45
+And so they use really low
+dimensional word vectors.
+
+681
+00:37:45 --> 00:37:48
+Take the average of them, kind of you
+know you lose the ordering of it and
+
+682
+00:37:48 --> 00:37:53
+then you get this low dimensional text
+vector which represents the sentence.
+
+683
+00:37:53 --> 00:37:58
+In order to kind of get some of
+the ordering back, they also use n-grams.
+
+684
+00:37:58 --> 00:38:02
+And so now that we have the text vector
+that&#39;s kind of like in the hidden layer.
+
+685
+00:38:02 --> 00:38:05
+We then feed it through a linear
+classifier which uses softmax compute
+
+686
+00:38:05 --> 00:38:07
+the probability over all
+the predictive classes.
+
+687
+00:38:07 --> 00:38:10
+The hidden representation is also
+shared by all the classifiers for
+
+688
+00:38:10 --> 00:38:11
+all the different categories.
+
+689
+00:38:11 --> 00:38:15
+Which helps the classifier use information
+about words learned from one category for
+
+690
+00:38:15 --> 00:38:16
+another category.
+
+691
+00:38:16 --> 00:38:18
+And so
+will look a little bit more familiar
+
+692
+00:38:18 --> 00:38:21
+to you now that you guys have gone
+through all the costs and whatnot.
+
+693
+00:38:21 --> 00:38:25
+So we minimize the negative flaws
+likelihood over all the classes, and
+
+694
+00:38:25 --> 00:38:28
+the model&#39;s trying to using
+stochastic gradient descent and
+
+695
+00:38:28 --> 00:38:31
+a linear decaying learning rate.
+
+696
+00:38:31 --> 00:38:34
+Another thing that makes it really fast
+is the use of the hierarchical softmax.
+
+697
+00:38:34 --> 00:38:37
+And so by using this, the classes
+are organized in like this tree kind of
+
+698
+00:38:37 --> 00:38:38
+fashion instead of just like in a list.
+
+699
+00:38:38 --> 00:38:42
+And so this also helps with the timing, so
+
+700
+00:38:42 --> 00:38:46
+we go from linear time
+to logarithmic time.
+
+701
+00:38:46 --> 00:38:49
+Because also the costs are organized
+in terms of how frequent they are.
+
+702
+00:38:49 --> 00:38:52
+So in case, we have maybe like a lot
+of class, but less of one class.
+
+703
+00:38:52 --> 00:38:55
+This helps kind of balance that out so
+NLP is really hot right now.
+
+704
+00:38:55 --> 00:39:00
+So in here the depth is much smaller,
+so we can access that cost a lot faster.
+
+705
+00:39:00 --> 00:39:03
+But maybe for some less popular topics,
+I just made some up here,
+
+706
+00:39:03 --> 00:39:04
+that&#39;s not actually my opinion.
+
+707
+00:39:04 --> 00:39:09
+But they have a much deeper depth
+because they are much more infrequent.
+
+708
+00:39:09 --> 00:39:11
+And so especially in this day and age when
+we&#39;re really crazy about neural networks,
+
+709
+00:39:11 --> 00:39:13
+the question is like how well
+does this stack up against them?
+
+710
+00:39:13 --> 00:39:16
+Because it uses a linear classifier, it
+doesn&#39;t really have all those layers for
+
+711
+00:39:16 --> 00:39:17
+neural network.
+
+712
+00:39:17 --> 00:39:20
+And as it turns out,
+this actually performs really well.
+
+713
+00:39:20 --> 00:39:24
+It&#39;s not only really fast, but it performs
+just as well if not sometimes better than
+
+714
+00:39:24 --> 00:39:25
+neural networks which is pretty crazy.
+
+715
+00:39:25 --> 00:39:26
+And so just a quick summary.
+
+716
+00:39:26 --> 00:39:30
+FastText, which is what they call their
+model is often on par with deep learning
+
+717
+00:39:30 --> 00:39:30
+classifiers.
+
+718
+00:39:30 --> 00:39:32
+It takes seconds to train,
+instead of days,
+
+719
+00:39:32 --> 00:39:35
+thanks to their use of low dimensional
+word vectors in the hierarchical softmax.
+
+720
+00:39:35 --> 00:39:39
+And another side bit, is that it can also
+learn vector representations of words in
+
+721
+00:39:39 --> 00:39:42
+different languages,
+with performs even better than word2vec.
+
+722
+00:39:42 --> 00:39:42
+Thank you.
+
+723
+00:39:42 --> 00:39:49
+&gt;&gt; [APPLAUSE]
+&gt;&gt; All right, and you know what&#39;s awesome?
+
+724
+00:39:49 --> 00:39:52
+Like this kind of equation you could
+totally derive all the gradients now too.
+
+725
+00:39:52 --> 00:39:56
+&gt;&gt; [LAUGH]
+&gt;&gt; Just another day in the office.
+
+726
+00:39:56 --> 00:40:00
+All right, so class project.
+
+727
+00:40:00 --> 00:40:06
+This is for many, the most lasting and
+fun part of the class.
+
+728
+00:40:06 --> 00:40:09
+But some people also don&#39;t
+have a research agenda or
+
+729
+00:40:09 --> 00:40:14
+some kind of interesting data set,
+so you don&#39;t have to do the project.
+
+730
+00:40:14 --> 00:40:18
+If you do a project,
+we want you to have a mandatory mentor.
+
+731
+00:40:18 --> 00:40:24
+The mentors that are pre-approved are all
+the PhD students, and Chris and me.
+
+732
+00:40:24 --> 00:40:27
+So we wanna really give
+you good advice and
+
+733
+00:40:27 --> 00:40:30
+we want you to meet your
+mentors frequently.
+
+734
+00:40:30 --> 00:40:33
+So think I&#39;ll have 25, Chris has 25, and
+
+735
+00:40:33 --> 00:40:37
+then I guess each of the PhD TAs
+also has at most 25 groups.
+
+736
+00:40:37 --> 00:40:39
+It&#39;s a very large class.
+
+737
+00:40:39 --> 00:40:42
+But yeah, so
+basically your class projects,
+
+738
+00:40:42 --> 00:40:46
+if you do decide to do it,
+is 30% of your final grade.
+
+739
+00:40:46 --> 00:40:50
+And sometimes real paper
+submissions come out from these.
+
+740
+00:40:50 --> 00:40:51
+It&#39;s really exciting, you get to travel.
+
+741
+00:40:51 --> 00:40:54
+You get probably paid,
+depending on who you&#39;re working with.
+
+742
+00:40:54 --> 00:40:57
+If you&#39;re a grad student and
+you write a paper,
+
+743
+00:40:57 --> 00:40:59
+to go to some fun places in the world.
+
+744
+00:40:59 --> 00:41:03
+And something that&#39;s really helpful for
+people&#39;s careers.
+
+745
+00:41:03 --> 00:41:04
+Sometimes these papers,
+
+746
+00:41:04 --> 00:41:08
+people get contacted from various
+companies once we put these papers up.
+
+747
+00:41:08 --> 00:41:09
+If you do a really good job,
+
+748
+00:41:09 --> 00:41:12
+it can have really lasting impact
+on the kinda work that you do.
+
+749
+00:41:12 --> 00:41:15
+So on the choice of doing assignment four,
+the final project.
+
+750
+00:41:15 --> 00:41:17
+We don&#39;t wanna force you
+to do the final project,
+
+751
+00:41:17 --> 00:41:20
+cuz some people just wanna learn
+the concepts and then move on with life.
+
+752
+00:41:20 --> 00:41:23
+And it can be a little painful to
+try to come up with something.
+
+753
+00:41:23 --> 00:41:25
+So there is a final project, and
+
+754
+00:41:25 --> 00:41:29
+we will ask you to sort of define
+your project with your mentor.
+
+755
+00:41:29 --> 00:41:30
+And then we might encourage you or
+
+756
+00:41:30 --> 00:41:32
+discourage you from moving
+forward with that project.
+
+757
+00:41:32 --> 00:41:35
+Some projects might be too large in
+scope or too small in scope, and so on.
+
+758
+00:41:35 --> 00:41:41
+And so do check with the TAs of whether
+the project is the right thing for you.
+
+759
+00:41:41 --> 00:41:46
+If you do a project, and if you decide
+to do it you really have to start early.
+
+760
+00:41:46 --> 00:41:50
+Ideally you will start meeting me today,
+or
+
+761
+00:41:50 --> 00:41:55
+latest like next week or
+two weeks and or the other TAs.
+
+762
+00:41:55 --> 00:42:01
+We write out a lot of the sort of
+organizational things on the website.
+
+763
+00:42:01 --> 00:42:03
+So let&#39;s look at the website really quick.
+
+764
+00:42:03 --> 00:42:05
+It&#39;s now linked from our main page.
+
+765
+00:42:05 --> 00:42:08
+So you can get a couple of different
+ideas from these top conferences.
+
+766
+00:42:08 --> 00:42:11
+So one project idea and
+we&#39;ll go into that a little bit later,
+
+767
+00:42:11 --> 00:42:14
+is to take one of these newest
+papers from the various groups or
+
+768
+00:42:14 --> 00:42:18
+various conferences and
+just try to replicate the results.
+
+769
+00:42:18 --> 00:42:22
+You will notice that despite having in
+theory, everything written in the paper,
+
+770
+00:42:22 --> 00:42:25
+if it&#39;s a nontrivial model
+there&#39;s a lot of subtle detail.
+
+771
+00:42:25 --> 00:42:28
+And it&#39;s hard to squeeze all of
+those details in eight pages.
+
+772
+00:42:28 --> 00:42:32
+So usually the maximum page them in so
+replicating sometimes,
+
+773
+00:42:32 --> 00:42:36
+this paper is sufficient enough for
+most papers in most projects.
+
+774
+00:42:36 --> 00:42:41
+So here, here&#39;s some very concrete
+papers that you can look at and
+
+775
+00:42:41 --> 00:42:43
+to get adheres from others.
+
+776
+00:42:43 --> 00:42:48
+And what&#39;s kind of interesting and
+new these days, this is by no means and
+
+777
+00:42:48 --> 00:42:53
+exclusive list,
+there a lot more other interesting papers.
+
+778
+00:42:53 --> 00:42:57
+So again here there sort of pre
+proofed mentors for projects.
+
+779
+00:42:57 --> 00:42:59
+You&#39;ll have to contact
+us through office hours.
+
+780
+00:42:59 --> 00:43:04
+And if you do a project
+in your project proposal,
+
+781
+00:43:04 --> 00:43:08
+you have to write out who the mentor is.
+
+782
+00:43:08 --> 00:43:11
+A lot of other mentors, we&#39;ll
+actually list probably next week now.
+
+783
+00:43:11 --> 00:43:14
+A list of potential projects that
+are coming from people who spend all their
+
+784
+00:43:14 --> 00:43:17
+time thinking about deep learning and NLP.
+
+785
+00:43:17 --> 00:43:21
+So if you don&#39;t have an idea, but you
+really do wanna do some interesting novel
+
+786
+00:43:21 --> 00:43:23
+research project,
+we&#39;ll post that link internally.
+
+787
+00:43:23 --> 00:43:27
+So that not the whole world sees it,
+but only the students in this class.
+
+788
+00:43:27 --> 00:43:30
+Cuz sometimes, the PhD students
+have some interesting novel idea.
+
+789
+00:43:30 --> 00:43:33
+They don&#39;t want it to get scooped and
+have some other researchers do that idea,
+
+790
+00:43:33 --> 00:43:35
+but they do wanna collaborate
+with students and youths.
+
+791
+00:43:35 --> 00:43:40
+So we&#39;ll keep those
+ideas under wraps here.
+
+792
+00:43:40 --> 00:43:41
+So yeah, this is your project proposal.
+
+793
+00:43:41 --> 00:43:43
+You have to define all these things, and
+
+794
+00:43:43 --> 00:43:47
+we&#39;ll go through that now in
+some of the details here.
+
+795
+00:43:47 --> 00:43:49
+And then you have a final submission,
+you have to write a report.
+
+796
+00:43:49 --> 00:43:52
+And then we&#39;ll also have
+a poster presentation,
+
+797
+00:43:52 --> 00:43:55
+where all the projects
+are basically being described.
+
+798
+00:43:55 --> 00:43:58
+You&#39;ll have to print a little poster,
+and we&#39;ll walk around.
+
+799
+00:43:58 --> 00:43:58
+It&#39;s usually quite fun.
+
+800
+00:43:58 --> 00:44:03
+Maybe we&#39;ll even come up with a prize for
+best poster, and best paper, and so on.
+
+801
+00:44:03 --> 00:44:06
+All right, so
+these are the organizational, Tips.
+
+802
+00:44:06 --> 00:44:10
+Posters and projects by the way
+I have maximum of three people.
+
+803
+00:44:10 --> 00:44:14
+If you have some insanely,
+well thought out plan,
+
+804
+00:44:14 --> 00:44:16
+we may make an exception and go to four.
+
+805
+00:44:16 --> 00:44:18
+But the standard default is three.
+
+806
+00:44:18 --> 00:44:22
+So the exception kind of has to be
+mailed to the TAs or Aston Piazza.
+
+807
+00:44:22 --> 00:44:24
+Any questions around the organizational
+aspects of the project?
+
+808
+00:44:24 --> 00:44:24
+Groups.
+
+809
+00:44:24 --> 00:44:26
+You can do groups of one, two, or three.
+
+810
+00:44:26 --> 00:44:27
+So it doesn&#39;t have to be three.
+
+811
+00:44:27 --> 00:44:30
+The bigger your group,
+the more we expect from the project.
+
+812
+00:44:30 --> 00:44:35
+And you have to also write out exactly
+what each person in the project has done.
+
+813
+00:44:35 --> 00:44:43
+You can actually use any kind of open
+source library and code that you want.
+
+814
+00:44:43 --> 00:44:45
+It&#39;s just a realistic research project.
+
+815
+00:44:45 --> 00:44:49
+But if you just take Kaldi,
+which is a speech recognition system, and
+
+816
+00:44:49 --> 00:44:50
+you say I did speech recognition.
+
+817
+00:44:50 --> 00:44:52
+And then really all you did
+was download the package and
+
+818
+00:44:52 --> 00:44:54
+run it, then that&#39;s not very impressive.
+
+819
+00:44:54 --> 00:44:58
+So the more you use,
+the more you also have to be careful and
+
+820
+00:44:58 --> 00:45:01
+say exactly what parts
+you actually implemented.
+
+821
+00:45:01 --> 00:45:04
+And in the code,
+you also have to submit your code, so
+
+822
+00:45:04 --> 00:45:08
+that we understand what you&#39;ve done and
+the results are real.
+
+823
+00:45:08 --> 00:45:12
+So this year we do want
+some language in there.
+
+824
+00:45:12 --> 00:45:13
+Some natural human language.
+
+825
+00:45:13 --> 00:45:14
+Last year I was a little more open.
+
+826
+00:45:14 --> 00:45:15
+It could be the language of music and
+so on now.
+
+827
+00:45:15 --> 00:45:16
+But this year it&#39;s [INAUDIBLE].
+
+828
+00:45:16 --> 00:45:19
+So we&#39;ve got to have some
+natural language in there, yeah.
+
+829
+00:45:19 --> 00:45:21
+But other than that,
+that can be done quite easily so
+
+830
+00:45:21 --> 00:45:24
+we&#39;ll go through the types of
+projects you might want to do.
+
+831
+00:45:24 --> 00:45:27
+And if you have a more theoretically
+inclined project where you
+
+832
+00:45:27 --> 00:45:31
+really are just faking out some clever
+way of doing a sarcastic ready to sent or
+
+833
+00:45:31 --> 00:45:33
+using different kinds of
+optimization functions.
+
+834
+00:45:33 --> 00:45:36
+An optimizers that we&#39;ll talk
+about leading the class to
+
+835
+00:45:36 --> 00:45:38
+then as long as you at least
+applied it in one experiment
+
+836
+00:45:38 --> 00:45:41
+to a natural language processing data set
+that would still be a pretty cool project.
+
+837
+00:45:41 --> 00:45:43
+So you can also apply
+it to genomics data and
+
+838
+00:45:43 --> 00:45:46
+to text data if you wanna have
+a little bit of that flavor.
+
+839
+00:45:46 --> 00:45:49
+But there is gonna be at least one
+experiment where you apply it to a text
+
+840
+00:45:49 --> 00:45:49
+data set.
+
+841
+00:45:49 --> 00:45:54
+All right, so now let&#39;s walk through the
+different kinds of projects that you might
+
+842
+00:45:54 --> 00:45:59
+wanna consider, and what might be entailed
+in such project to give you an idea.
+
+843
+00:45:59 --> 00:46:02
+Unless there are any other questions
+around the organization of the projects,
+
+844
+00:46:02 --> 00:46:02
+deadlines and so on.
+
+845
+00:46:02 --> 00:46:05
+So, let&#39;s start with
+the kind of simplest and
+
+846
+00:46:05 --> 00:46:10
+all the other ones are sort of bonuses
+on top of that simple kind of project.
+
+847
+00:46:10 --> 00:46:16
+And this is actually, I think generally,
+good advice, not just for a class project,
+
+848
+00:46:16 --> 00:46:20
+but in general, how to apply a deep
+learning algorithm to any kind of problem,
+
+849
+00:46:20 --> 00:46:23
+whether in academia or
+in industry, or elsewhere.
+
+850
+00:46:23 --> 00:46:26
+So, let&#39;s assume you want to
+
+851
+00:46:26 --> 00:46:29
+apply an existing neural
+network to an existing task.
+
+852
+00:46:29 --> 00:46:31
+So in our case, for instance,
+let&#39;s take summarization.
+
+853
+00:46:31 --> 00:46:34
+So you want to be able to
+take a long document and
+
+854
+00:46:34 --> 00:46:36
+summarize into a short paragraph.
+
+855
+00:46:36 --> 00:46:36
+Let&#39;s say that was your goal.
+
+856
+00:46:36 --> 00:46:40
+Now step one, after you define your task,
+is you have to define your dataset.
+
+857
+00:46:40 --> 00:46:44
+And that is actually, sadly,
+in many cases in both industry and
+
+858
+00:46:44 --> 00:46:48
+in academia,
+an incredibly time intensive problem.
+
+859
+00:46:48 --> 00:46:51
+And so, the simplest solution
+to that is you just search for
+
+860
+00:46:51 --> 00:46:52
+an existing academic dataset.
+
+861
+00:46:52 --> 00:46:56
+There&#39;s some people who&#39;ve
+worked in summarization before.
+
+862
+00:46:56 --> 00:46:58
+The nice thing is if you use
+an existing data set, for instance,
+
+863
+00:46:58 --> 00:47:02
+from the Document Understanding
+Conference, DUC here, then other people
+
+864
+00:47:02 --> 00:47:05
+have already applied some algorithms
+to it, you&#39;ll have some base lines,
+
+865
+00:47:05 --> 00:47:10
+you know what kind of metric or evaluation
+is reasonable versus close to random.
+
+866
+00:47:10 --> 00:47:12
+And so on,
+cuz sometimes that&#39;s not always obvious.
+
+867
+00:47:12 --> 00:47:14
+We don&#39;t always us just accuracy for
+instance.
+
+868
+00:47:14 --> 00:47:18
+So in that case, using an existing
+academic data set gets rid
+
+869
+00:47:18 --> 00:47:22
+of a lot of complexity.
+
+870
+00:47:22 --> 00:47:27
+However, it is really fun if you actually
+come up with your own kind of dataset too.
+
+871
+00:47:27 --> 00:47:31
+So maybe you&#39;re really excited about food,
+and you want to prowl Yelp, or
+
+872
+00:47:31 --> 00:47:35
+use a Yelp dataset for restaurant review,
+or something like that.
+
+873
+00:47:35 --> 00:47:38
+So, however,
+when you do decide to do that,
+
+874
+00:47:38 --> 00:47:42
+you definitely have to check in with your
+mentor, or with Chris and me, and others.
+
+875
+00:47:42 --> 00:47:45
+Because I sadly have seen several projects
+
+876
+00:47:45 --> 00:47:47
+in the last couple of years where
+people have this amazing idea.
+
+877
+00:47:47 --> 00:47:48
+I&#39;m excited, they&#39;re excited.
+
+878
+00:47:48 --> 00:47:53
+And then they spent 80% of the time
+on their project on a web crawler
+
+879
+00:47:53 --> 00:47:55
+getting not blocked from IP addresses,
+
+880
+00:47:55 --> 00:47:59
+writing multiple IP addresses,
+having multiple machines, and crawling.
+
+881
+00:47:59 --> 00:48:01
+And so on, then they realize,
+all right, it&#39;s super noisy.
+
+882
+00:48:01 --> 00:48:03
+Sometimes it&#39;s just the document
+they were hoping to get and
+
+883
+00:48:03 --> 00:48:03
+crawl, it&#39;s just a 404 page.
+
+884
+00:48:03 --> 00:48:04
+And now they&#39;ve filtered that.
+
+885
+00:48:04 --> 00:48:07
+And then they realize HTML,
+and they filter that.
+
+886
+00:48:07 --> 00:48:07
+And before you know it,
+
+887
+00:48:07 --> 00:48:10
+it&#39;s like, they have like three more days
+left to do any deep learning for NLP.
+
+888
+00:48:10 --> 00:48:14
+And so, it has happened before so
+don&#39;t fall into that trap.
+
+889
+00:48:14 --> 00:48:20
+If you do decide to do that, check with us
+and try to, before the milestone deadline.
+
+890
+00:48:20 --> 00:48:23
+For sure have the data set ready so
+you can actually do deep learning for NLP,
+
+891
+00:48:23 --> 00:48:27
+cuz sadly we just can&#39;t give you a good
+grade for a deep learning for NLP class if
+
+892
+00:48:27 --> 00:48:31
+you spend 95% of your time writing a web
+crawler and explaining your data set.
+
+893
+00:48:31 --> 00:48:35
+So in this case, for instance, you might
+say all right, I want to use Wikipedia.
+
+894
+00:48:35 --> 00:48:36
+Wikipedia slightly easier to crawl.
+
+895
+00:48:36 --> 00:48:39
+You can actually download sort of
+already pre-crawled versions of it.
+
+896
+00:48:39 --> 00:48:41
+Maybe you want to say my intro paragraph
+
+897
+00:48:41 --> 00:48:44
+is the summary of the whole
+rest of the article.
+
+898
+00:48:44 --> 00:48:47
+Not completely crazy to
+make that assumption, but
+
+899
+00:48:47 --> 00:48:49
+really you can be creative in this part.
+
+900
+00:48:49 --> 00:48:52
+You can try to connect it to your
+own research or your own job if your
+
+901
+00:48:52 --> 00:48:55
+a [INAUDIBLE] student, or
+just any kind of interest that you have.
+
+902
+00:48:55 --> 00:48:58
+Song lyrics come up from time
+to time it&#39;s really fun NLP
+
+903
+00:48:58 --> 00:49:01
+combine with language of music
+with natural language and so on.
+
+904
+00:49:01 --> 00:49:05
+So you can be creative here, and
+we kind of value a little bit of
+
+905
+00:49:05 --> 00:49:08
+the creativity this is like a task of
+data set we had never seen before and
+
+906
+00:49:08 --> 00:49:12
+you actually gain some interesting
+Linguistic insights or something.
+
+907
+00:49:12 --> 00:49:15
+That is the cool part of the project,
+right.
+
+908
+00:49:15 --> 00:49:16
+Any questions around defining a data set?
+
+909
+00:49:16 --> 00:49:21
+All right, so
+then you wanna define your metric.
+
+910
+00:49:21 --> 00:49:22
+This is also super important.
+
+911
+00:49:22 --> 00:49:25
+For instance, you have maybe
+have crawled your dataset and
+
+912
+00:49:25 --> 00:49:29
+let&#39;s say you did something simpler like
+restaurant star rating classification.
+
+913
+00:49:29 --> 00:49:32
+This is a review and I want to
+classify if this a four star review or
+
+914
+00:49:32 --> 00:49:35
+a one star review or a two or three.
+
+915
+00:49:35 --> 00:49:41
+And now you may have a class
+distribution where this is one star,
+
+916
+00:49:41 --> 00:49:48
+this is two stars, three and four,
+and now the majority are three.
+
+917
+00:49:48 --> 00:49:50
+Maybe that you troll kind of funny and
+
+918
+00:49:50 --> 00:49:53
+so really most of the reviews
+are three star reviews.
+
+919
+00:49:53 --> 00:49:58
+So this is just like number
+of reviews per star category.
+
+920
+00:49:58 --> 00:50:05
+And maybe 90% of the things you
+called are in the third class.
+
+921
+00:50:05 --> 00:50:07
+And then you write your report, you&#39;re
+super excited, it was a new data set,
+
+922
+00:50:07 --> 00:50:08
+you did well, you crawled it quickly.
+
+923
+00:50:08 --> 00:50:10
+And then all you give us
+is an accuracy metric, so
+
+924
+00:50:10 --> 00:50:13
+accuracy is total correct
+divided by total.
+
+925
+00:50:13 --> 00:50:15
+And now, let&#39;s say your accuracy is 90%.
+
+926
+00:50:15 --> 00:50:20
+It&#39;s 90% accurate, 90% of the cases
+gives you the ride star rating.
+
+927
+00:50:20 --> 00:50:23
+Sadly, it just always gives three.
+
+928
+00:50:23 --> 00:50:26
+It never gives any other result.
+
+929
+00:50:26 --> 00:50:29
+You&#39;re essentially overfit
+to your dataset and
+
+930
+00:50:29 --> 00:50:32
+your evaluation metric
+was completely bogus.
+
+931
+00:50:32 --> 00:50:35
+It&#39;s hard to know whether they basically
+could have implemented a one line
+
+932
+00:50:35 --> 00:50:38
+algorithm that&#39;s just as accurate as yours
+which is just, no matter what the input,
+
+933
+00:50:38 --> 00:50:38
+return three.
+
+934
+00:50:38 --> 00:50:42
+So hard to give a good grade on that and
+it&#39;s a very tricky trap to fall into.
+
+935
+00:50:42 --> 00:50:46
+I see it all the time in industry and
+for young researchers and so on.
+
+936
+00:50:46 --> 00:50:48
+So in this case, you should&#39;ve used,
+
+937
+00:50:48 --> 00:50:51
+does anybody know what kind
+of metric you should&#39;ve used?
+
+938
+00:50:51 --> 00:50:51
+F1, that&#39;s right.
+
+939
+00:50:51 --> 00:50:54
+So, and we&#39;ll go through some of
+these as we go through the class but
+
+940
+00:50:54 --> 00:50:56
+it&#39;s very important to
+define your metric well.
+
+941
+00:50:56 --> 00:50:58
+Now, for something as tricky as
+summarization, this isn&#39;t where you&#39;re
+
+942
+00:50:58 --> 00:51:00
+really just like, this is the class,
+this is the final answer.
+
+943
+00:51:00 --> 00:51:05
+You have to actually either extract or
+generate a longer sequence.
+
+944
+00:51:05 --> 00:51:08
+And there are a lot of different
+kinds of metrics you can use.
+
+945
+00:51:08 --> 00:51:13
+BLEU&#39;s n-gram overlap or Rouge share
+which is a Recall-Oriented Understudy for
+
+946
+00:51:13 --> 00:51:18
+Gisting Evaluation which essentially
+is just a metric to weigh differently
+
+947
+00:51:18 --> 00:51:23
+how many n-grams are correctly overlapping
+between a human generated summary.
+
+948
+00:51:23 --> 00:51:25
+For instance,
+your Wikipedia paragraph number one, and
+
+949
+00:51:25 --> 00:51:27
+whatever output your algorithm gives.
+
+950
+00:51:27 --> 00:51:28
+So, Rouge is the official metric for
+
+951
+00:51:28 --> 00:51:32
+summarization in different sub-communities
+and NOP have their own metrics and
+
+952
+00:51:32 --> 00:51:35
+it&#39;s important that you know
+what you&#39;re optimizing.
+
+953
+00:51:35 --> 00:51:39
+So, the machine translation, for
+instance, you might use BLEU scores,
+
+954
+00:51:39 --> 00:51:43
+BLEU scores are essentially also
+a type of n-gram overlap metric.
+
+955
+00:51:43 --> 00:51:45
+If you have a skewed data set,
+you wanna use F1.
+
+956
+00:51:45 --> 00:51:47
+And in some cases,
+you can just use accuracy.
+
+957
+00:51:47 --> 00:51:49
+And this is generally useful
+even if you&#39;re in industry and
+
+958
+00:51:49 --> 00:51:51
+later in life, you always wanna
+know what metric you&#39;re optimizing.
+
+959
+00:51:51 --> 00:51:55
+It&#39;s hard to do well if you don&#39;t know
+the metric that you&#39;re optimizing for,
+
+960
+00:51:55 --> 00:51:56
+both in life and deep learning projects.
+
+961
+00:51:56 --> 00:52:00
+All right so,
+let&#39;s say you defined your metric now,
+
+962
+00:52:00 --> 00:52:01
+you need to split your dataset.
+
+963
+00:52:01 --> 00:52:03
+And it&#39;s also very important step and
+
+964
+00:52:03 --> 00:52:09
+it&#39;s also something that you can
+easily make sort of honest mistakes.
+
+965
+00:52:09 --> 00:52:13
+Again, in advantage of taking pre-existing
+academic dataset is that in many cases,
+
+966
+00:52:13 --> 00:52:16
+it&#39;s already pre-split but not always.
+
+967
+00:52:16 --> 00:52:18
+And you don&#39;t wanna look at your
+
+968
+00:52:18 --> 00:52:21
+final test split until around
+1 week before the deadline.
+
+969
+00:52:21 --> 00:52:25
+So, let&#39;s say you have downloaded
+a lot of different articles and
+
+970
+00:52:25 --> 00:52:29
+now you basically have 100% of
+some articles you wanna summarize.
+
+971
+00:52:29 --> 00:52:32
+And normal split would be take 80% for
+training,
+
+972
+00:52:32 --> 00:52:36
+you take 10% for your validation and
+your development.
+
+973
+00:52:36 --> 00:52:39
+So, oftentimes this is called
+the validation split, or
+
+974
+00:52:39 --> 00:52:42
+the development split, or
+dev split, or various other terms.
+
+975
+00:52:42 --> 00:52:44
+And 10% for your final test split.
+
+976
+00:52:44 --> 00:52:49
+And so, the final one, you ideally get a
+sense of how your algorithm would work in
+
+977
+00:52:49 --> 00:52:54
+real life, on data you&#39;ve never
+seen before, you didn&#39;t try to chew
+
+978
+00:52:54 --> 00:52:58
+on your model like, how many layers should
+I use, how wide should each layer be?
+
+979
+00:52:58 --> 00:53:02
+You&#39;ll try a lot of these things,
+we&#39;ll describe these in the future.
+
+980
+00:53:02 --> 00:53:09
+But it&#39;s very important to correctly split
+and why do I make such a fuss about that?
+
+981
+00:53:09 --> 00:53:11
+Well, there too, you might make mistakes.
+
+982
+00:53:11 --> 00:53:14
+So let&#39;s say,
+you have unused text and let&#39;s say,
+
+983
+00:53:14 --> 00:53:18
+you crawled it in such a way there&#39;s a lot
+of mistakes that you can make if you try
+
+984
+00:53:18 --> 00:53:22
+to predict the soft market for instance,
+don&#39;t do that, it doesn&#39;t work.
+
+985
+00:53:22 --> 00:53:27
+But in many cases, you might say,
+or there some temporal sequence.
+
+986
+00:53:27 --> 00:53:32
+And now, you basically have all your
+dataset and the perfect thing to do
+
+987
+00:53:32 --> 00:53:37
+is actually do it like this, you take 80%
+of let&#39;s say, month January to May or
+
+988
+00:53:37 --> 00:53:40
+something and then,
+your final test split is from November.
+
+989
+00:53:40 --> 00:53:41
+That way you know there&#39;s no overlap.
+
+990
+00:53:41 --> 00:53:45
+But maybe you made a mistake and
+you said well, I crawled it this way, but
+
+991
+00:53:45 --> 00:53:47
+now I&#39;m just randomly sample.
+
+992
+00:53:47 --> 00:53:49
+So, as sample an article from here,
+and one from here, and one from here.
+
+993
+00:53:49 --> 00:53:53
+And then the random sample goes
+to the 80% of my training data.
+
+994
+00:53:53 --> 00:53:57
+And now, the test data and the development
+data might actually have some overlap.
+
+995
+00:53:57 --> 00:54:02
+Cuz if you&#39;re depending on how you
+chose your dataset maybe the another
+
+996
+00:54:02 --> 00:54:07
+article which just like a slight addition,
+like some update to an emerging story.
+
+997
+00:54:07 --> 00:54:09
+And now the summary is
+almost exact same but
+
+998
+00:54:09 --> 00:54:11
+the input document just
+changed a tiny bit.
+
+999
+00:54:11 --> 00:54:17
+And you have one article in your training
+set and another one in your test set.
+
+1000
+00:54:17 --> 00:54:20
+But the test set article is really only
+one extra paragraph on an emerging story
+
+1001
+00:54:20 --> 00:54:21
+and the rest is exactly the same.
+
+1002
+00:54:21 --> 00:54:23
+So now you have an overlap of your
+training and your testing data.
+
+1003
+00:54:23 --> 00:54:24
+And so in general,
+
+1004
+00:54:24 --> 00:54:29
+if this is your training data and
+this should be your test data.
+
+1005
+00:54:29 --> 00:54:31
+It should be not overlapping at all.
+
+1006
+00:54:31 --> 00:54:34
+And whenever you do really well, you run
+your first experiment and you get 90 F1.
+
+1007
+00:54:34 --> 00:54:38
+And things look just too good to be
+true sadly in many cases they are and
+
+1008
+00:54:38 --> 00:54:42
+you made some mistake where maybe your
+test set had some overlap for instance,
+
+1009
+00:54:42 --> 00:54:43
+with your training data.
+
+1010
+00:54:43 --> 00:54:47
+It&#39;s very important to be a little
+paranoid about that when your first couple
+
+1011
+00:54:47 --> 00:54:50
+of experiments turn out just
+to be too good to be true.
+
+1012
+00:54:50 --> 00:54:54
+That can mean either your training,
+your task is too simple,
+
+1013
+00:54:54 --> 00:54:58
+or you made a mistake in splitting and
+defining your dataset.
+
+1014
+00:54:58 --> 00:55:01
+All right, any questions around defining
+a metric or your dataset, yeah?
+
+1015
+00:55:01 --> 00:55:04
+So, if we split it temporally, wouldn&#39;t
+we learn a different distribution?
+
+1016
+00:55:04 --> 00:55:07
+That is correct,
+we would learn a different distribution,
+
+1017
+00:55:07 --> 00:55:08
+these are non-stationary.
+
+1018
+00:55:08 --> 00:55:12
+And that is kinda true for a lot of texts,
+but if you, ideally, when you built
+
+1019
+00:55:12 --> 00:55:16
+a deep learning system for an LP you
+want it to built it so that it&#39;s robust.
+
+1020
+00:55:16 --> 00:55:18
+It&#39;s robust to sum such changes over time.
+
+1021
+00:55:18 --> 00:55:21
+And you wanna make sure that when
+you run it in a real world setting,
+
+1022
+00:55:21 --> 00:55:25
+on something you&#39;ve never seen before,
+you&#39;ve shipped your software,
+
+1023
+00:55:25 --> 00:55:28
+it&#39;s doing something, it will still work.
+
+1024
+00:55:28 --> 00:55:30
+And this was the most realistic way
+
+1025
+00:55:30 --> 00:55:32
+to capture how well it
+would work in real life.
+
+1026
+00:55:32 --> 00:55:35
+Would it be appropriate to run both
+experiments as in both where you subsample
+
+1027
+00:55:35 --> 00:55:38
+randomly, and
+then you subsample temporally for your?
+
+1028
+00:55:38 --> 00:55:43
+You could do that, and the intuitive
+thing that is likely going to happen
+
+1029
+00:55:43 --> 00:55:48
+is if you sample randomly from all
+over the place, then you will probably
+
+1030
+00:55:48 --> 00:55:52
+do better than if you have this
+sort of more strict kind of split.
+
+1031
+00:55:52 --> 00:55:57
+But running an additional experiment will
+rarely ever get you points subtracted.
+
+1032
+00:55:57 --> 00:56:02
+You can always run more experiments,
+and we&#39;re trying really
+
+1033
+00:56:02 --> 00:56:07
+hard to help you get computing
+infrastructure and Cloud compute.
+
+1034
+00:56:07 --> 00:56:10
+So you don&#39;t feel restricted with
+the number of experiments you run.
+
+1035
+00:56:10 --> 00:56:13
+All right, now, number 5,
+establish a baseline.
+
+1036
+00:56:13 --> 00:56:16
+So, you basically wanna implement
+the simplest model first.
+
+1037
+00:56:16 --> 00:56:20
+This could just be a very simple logistic
+regression on unigrams or bigrams.
+
+1038
+00:56:20 --> 00:56:23
+Then, compute your metrics on your train
+data and your development data, so
+
+1039
+00:56:23 --> 00:56:26
+you understand whether you&#39;re
+overfitting or underfitting.
+
+1040
+00:56:26 --> 00:56:30
+If, for instance, you&#39;re training Metric.
+
+1041
+00:56:30 --> 00:56:33
+Let&#39;s say your loss is very,
+very low on training.
+
+1042
+00:56:33 --> 00:56:36
+You do very well on training, but
+you don&#39;t do very well on testing,
+
+1043
+00:56:36 --> 00:56:38
+then you&#39;re in an over fitting regime.
+
+1044
+00:56:38 --> 00:56:41
+If you do very well on training and well
+on testing, you&#39;re done, you&#39;re happy.
+
+1045
+00:56:41 --> 00:56:45
+But if your training loss can&#39;t be lower,
+so you&#39;re not even doing well on your
+
+1046
+00:56:45 --> 00:56:49
+training, that often means your
+model is not powerful enough.
+
+1047
+00:56:49 --> 00:56:52
+So it&#39;s very important to compute
+both the metrics on your training and
+
+1048
+00:56:52 --> 00:56:52
+your development split.
+
+1049
+00:56:52 --> 00:56:55
+And then, and this is something
+we value a lot in this class too.
+
+1050
+00:56:55 --> 00:56:58
+And it&#39;s something very important for
+you in both research and
+
+1051
+00:56:58 --> 00:57:01
+industries like you wanna analyze your
+errors carefully for that baseline.
+
+1052
+00:57:01 --> 00:57:05
+And if the metrics are amazing and
+there are no errors, you&#39;re done,.
+
+1053
+00:57:05 --> 00:57:06
+Probably a problem was too easy and
+
+1054
+00:57:06 --> 00:57:09
+you may wanna restart unless it&#39;s really
+a valuable problem for the world.
+
+1055
+00:57:09 --> 00:57:13
+And then maybe you can just really
+describe it carefully and you&#39;re done too.
+
+1056
+00:57:13 --> 00:57:17
+All right, now, any questions
+around establishing your baseline?
+
+1057
+00:57:17 --> 00:57:19
+It is very important to not just go in and
+add lots of bells and
+
+1058
+00:57:19 --> 00:57:22
+whistles that you&#39;ll learn about in
+the next couple of weeks in this class and
+
+1059
+00:57:22 --> 00:57:24
+create this monster of a model.
+
+1060
+00:57:24 --> 00:57:25
+You want to start with something simple,
+
+1061
+00:57:25 --> 00:57:28
+sanity check, make sure you didn&#39;t
+make mistakes in splitting your data.
+
+1062
+00:57:28 --> 00:57:29
+You have the right kind of metric.
+
+1063
+00:57:29 --> 00:57:34
+And in many cases, it&#39;s a good indicator
+for how successful your final project
+
+1064
+00:57:34 --> 00:57:40
+is if you can get this baseline
+In the first half of the quarter.
+
+1065
+00:57:40 --> 00:57:45
+Cuz that means you figured out a lot
+of these potential issues here.
+
+1066
+00:57:45 --> 00:57:47
+And you kind of have your right data set.
+
+1067
+00:57:47 --> 00:57:50
+You know what the metric is, you know what
+you&#39;re optimizing, and everything is good.
+
+1068
+00:57:50 --> 00:57:52
+So try to get to this point
+as quickly as possible.
+
+1069
+00:57:52 --> 00:57:54
+Cuz that is also not as interesting, and
+
+1070
+00:57:54 --> 00:57:57
+you can&#39;t really use that much
+knowledge from the class.
+
+1071
+00:57:57 --> 00:57:59
+Now then it gets more interesting.
+
+1072
+00:57:59 --> 00:58:02
+And now you can implement some
+existing neural network model that
+
+1073
+00:58:02 --> 00:58:03
+we taught you in class.
+
+1074
+00:58:03 --> 00:58:06
+For instance, this Window-based model if
+your task is named entity recognition.
+
+1075
+00:58:06 --> 00:58:09
+You can compute your metric
+again on your train AND dev set.
+
+1076
+00:58:09 --> 00:58:14
+Hopefully you&#39;ll see some interesting
+patterns such as usually train
+
+1077
+00:58:14 --> 00:58:20
+neural nets is quite easy in a sense
+that we lower the loss very well.
+
+1078
+00:58:20 --> 00:58:23
+And then we might not generalize
+as well in the development set.
+
+1079
+00:58:23 --> 00:58:27
+And then you&#39;ll play around
+with regularization techniques.
+
+1080
+00:58:27 --> 00:58:30
+And don&#39;t worry if some of the stuff
+I&#39;m saying now is kind of confusing.
+
+1081
+00:58:30 --> 00:58:31
+If you want to do this,
+
+1082
+00:58:31 --> 00:58:33
+we&#39;ll walk you through that as we&#39;re
+mentoring you through the project.
+
+1083
+00:58:33 --> 00:58:38
+And that&#39;s why each project has to
+have an assigned mentor that we trust.
+
+1084
+00:58:38 --> 00:58:41
+All right, then you analyze your
+output and your errors again.
+
+1085
+00:58:41 --> 00:58:42
+Very important, be close to your data.
+
+1086
+00:58:42 --> 00:58:46
+You can&#39;t give too many
+examples usually ever.
+
+1087
+00:58:46 --> 00:58:47
+And this is kind of the minimum bar for
+this class.
+
+1088
+00:58:47 --> 00:58:48
+So if you&#39;ve done this well and
+
+1089
+00:58:48 --> 00:58:53
+there&#39;s an interesting dataset, then
+your project is kind of in a safe haven.
+
+1090
+00:58:53 --> 00:58:56
+Now again it&#39;s very important
+to be close to your data.
+
+1091
+00:58:56 --> 00:58:57
+Once you have a metric and
+everything looks good,
+
+1092
+00:58:57 --> 00:59:01
+we still want you to visualize the kind
+of data, even if it&#39;s a known data set.
+
+1093
+00:59:01 --> 00:59:04
+We wanted you to visualize it,
+collect summary statistics.
+
+1094
+00:59:04 --> 00:59:07
+It&#39;s always good to know the distribution
+if you have different kinds of classes.
+
+1095
+00:59:07 --> 00:59:10
+You want to, again very important, look
+at the errors that your model is making.
+
+1096
+00:59:10 --> 00:59:12
+Cuz that can also give you
+intuitions of what kinds of
+
+1097
+00:59:12 --> 00:59:15
+patterns can your deep learning
+algorithm not capture.
+
+1098
+00:59:15 --> 00:59:17
+Maybe you need to add
+a memory component or
+
+1099
+00:59:17 --> 00:59:21
+maybe you need to have longer temporal
+kind of dependencies and so on.
+
+1100
+00:59:21 --> 00:59:24
+Those things you can only figure out
+if you&#39;re close to your data and
+
+1101
+00:59:24 --> 00:59:26
+you look at the errors that your
+baseline models are making.
+
+1102
+00:59:26 --> 00:59:28
+And then we want you to analyze
+also different hyperparameters.
+
+1103
+00:59:28 --> 00:59:29
+A lot of these models
+have lots of choices.
+
+1104
+00:59:29 --> 00:59:31
+Did we add the sigmoid to that score or
+not?
+
+1105
+00:59:31 --> 00:59:34
+Is the second layer 100 dimensional or
+200 dimensional?
+
+1106
+00:59:34 --> 00:59:38
+Should we use 50 dimensional word vectors
+or 1,000 dimensional word vectors?
+
+1107
+00:59:38 --> 00:59:40
+There are a lot of choices that you make.
+
+1108
+00:59:40 --> 00:59:44
+And it&#39;s really good in your first
+couple projects to try more and
+
+1109
+00:59:44 --> 00:59:46
+gain that intuition yourself.
+
+1110
+00:59:46 --> 00:59:49
+And sometimes, if you&#39;re running
+out of time, and only so much, so
+
+1111
+00:59:49 --> 00:59:52
+many experiments you can run, we can help
+you, and use our intuition to guide you,.
+
+1112
+00:59:52 --> 00:59:55
+But it&#39;s best if you do
+that a little bit yourself.
+
+1113
+00:59:55 --> 00:59:59
+And once you&#39;ve done all of that, now you
+can try different model variants, and
+
+1114
+00:59:59 --> 01:00:01
+you&#39;ll soon see a lot of
+these kinds of options.
+
+1115
+01:00:01 --> 01:00:03
+We&#39;ll talk through all
+of them in the class.
+
+1116
+01:00:03 --> 01:00:05
+So now another
+
+1117
+01:00:05 --> 01:00:09
+kind of class project is you actually
+wanna implement a new fancy model.
+
+1118
+01:00:09 --> 01:00:12
+Those are the kinds of things that
+will put you into potentially writing
+
+1119
+01:00:12 --> 01:00:15
+an academic paper, peer review,
+and at a conference, and so on.
+
+1120
+01:00:15 --> 01:00:18
+The tricky bit of that is you kinda have
+to do all the other steps that I just
+
+1121
+01:00:18 --> 01:00:19
+described first.
+
+1122
+01:00:19 --> 01:00:22
+And then, on top of that,
+you know the errors that you&#39;re making.
+
+1123
+01:00:22 --> 01:00:26
+And now you can gain some intuition of
+why the existing models are flawed.
+
+1124
+01:00:26 --> 01:00:28
+And you come up with your own new model.
+
+1125
+01:00:28 --> 01:00:33
+If you do that, you really wanna be in
+close contact with your mentor and some
+
+1126
+01:00:33 --> 01:00:37
+researchers, unless you&#39;re a researcher
+yourself, and you earned your PhD.
+
+1127
+01:00:37 --> 01:00:40
+But even then,
+you should chat with us from the class.
+
+1128
+01:00:40 --> 01:00:43
+You want to basically try to set up
+
+1129
+01:00:43 --> 01:00:45
+an infrastructure such that
+you can iterate quickly.
+
+1130
+01:00:45 --> 01:00:50
+You&#39;re like, maybe I should add this new
+layer type to this part of my model.
+
+1131
+01:00:50 --> 01:00:53
+You want to be able to quickly iterate and
+see if that helps or not.
+
+1132
+01:00:53 --> 01:00:54
+So it&#39;s important and
+
+1133
+01:00:54 --> 01:00:58
+actually require a fair amount of software
+engineering skills to set up efficient
+
+1134
+01:00:58 --> 01:01:02
+experimental frameworks that
+allow you to collect results.
+
+1135
+01:01:02 --> 01:01:05
+And again you want to start with
+simple models and then go to more and
+
+1136
+01:01:05 --> 01:01:05
+more complex ones.
+
+1137
+01:01:05 --> 01:01:08
+So for instance, in summarization you
+might start with something super simple
+
+1138
+01:01:08 --> 01:01:10
+like just average all your
+word vectors in the paragraph.
+
+1139
+01:01:10 --> 01:01:13
+And then do a greedy search of
+generating one word at a time.
+
+1140
+01:01:13 --> 01:01:17
+Or even greedily searching for
+just snippets from the existing
+
+1141
+01:01:17 --> 01:01:21
+article in Wikipedia and
+you&#39;re just copying certain snippets over.
+
+1142
+01:01:21 --> 01:01:24
+And then stretch goal is something more
+advanced would be lets you actually
+
+1143
+01:01:24 --> 01:01:25
+generate that whole summary.
+
+1144
+01:01:25 --> 01:01:27
+And so here are a couple of project ideas.
+
+1145
+01:01:27 --> 01:01:32
+But, again, we&#39;ll post the whole
+list of them with potential mentors
+
+1146
+01:01:32 --> 01:01:37
+from the NOP group and the vision group
+and various other groups inside Stanford.
+
+1147
+01:01:37 --> 01:01:38
+Sentiment is also a fun data set.
+
+1148
+01:01:38 --> 01:01:40
+You can look at this URL here for
+
+1149
+01:01:40 --> 01:01:43
+one of the preexisting data sets
+that a lot of people have worked on.
+
+1150
+01:01:43 --> 01:01:46
+All right, so
+next week we&#39;ll look at some fun and
+
+1151
+01:01:46 --> 01:01:48
+fundamental linguistic tasks
+like syntactic parsing.
+
+1152
+01:01:48 --> 01:01:51
+And then you&#39;ll learn TensorFlow and
+have some great tools under your belt.
+
+1153
+01:01:51 --> 01:01:51
+Thank you.
+
