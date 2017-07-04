@@ -1,0 +1,5880 @@
+1
+0:00:00 --> 0:00:05
+Downloaded from ccSubs.com
+
+2
+00:00:00 --> 00:00:07
+[SOUND] Stanford University.
+
+3
+00:00:07 --> 00:00:10
+&gt;&gt; We&#39;ll get back started
+again with CS224N,
+
+4
+00:00:10 --> 00:00:13
+Natural Language Processing
+with Deep Learning.
+
+5
+00:00:13 --> 00:00:18
+So, you&#39;re in for a respite,
+or a change of pace today.
+
+6
+00:00:18 --> 00:00:23
+So for today&#39;s lecture, what we&#39;re
+principally going to look at is syntax,
+
+7
+00:00:23 --> 00:00:25
+grammar and dependency parsing.
+
+8
+00:00:25 --> 00:00:29
+So my hope today is to teach
+you in one lecture enough about
+
+9
+00:00:29 --> 00:00:33
+dependency grammars and
+parsing that you&#39;ll all be able to do
+
+10
+00:00:33 --> 00:00:37
+the main part of
+Assignment 2 successfully.
+
+11
+00:00:37 --> 00:00:41
+So quite a bit of the early part of
+the lecture is giving a bit of background
+
+12
+00:00:41 --> 00:00:43
+about syntax and dependency grammar.
+
+13
+00:00:43 --> 00:00:47
+And then it&#39;s time to talk about
+a particular kind of dependency grammar,
+
+14
+00:00:47 --> 00:00:52
+transition-based, also dependency parsing,
+transition-based dependency parsing.
+
+15
+00:00:52 --> 00:00:56
+And then it&#39;s probably only in
+the last kind of 15 minutes or so
+
+16
+00:00:56 --> 00:01:02
+of the lecture that we&#39;ll then get back
+into specifically neural network content.
+
+17
+00:01:02 --> 00:01:06
+Talking about a dependency parser that
+Danqi and I wrote a couple of years ago.
+
+18
+00:01:06 --> 00:01:08
+Okay, so for general reminders,
+
+19
+00:01:08 --> 00:01:12
+I hope you&#39;re all really aware
+that Assignment 1 is due today.
+
+20
+00:01:12 --> 00:01:16
+And I guess by this stage you&#39;ve either
+made good progress or you haven&#39;t.
+
+21
+00:01:16 --> 00:01:21
+But to give my,
+Good housekeeping reminders,
+
+22
+00:01:21 --> 00:01:25
+I mean it seems like every year there
+are people that sort of blow lots of
+
+23
+00:01:25 --> 00:01:28
+late days on the first assignment for
+no really good reason.
+
+24
+00:01:28 --> 00:01:31
+And that isn&#39;t such
+a clever strategy [LAUGH].
+
+25
+00:01:31 --> 00:01:35
+So hopefully [LAUGH] you are well
+along with the assignment, and
+
+26
+00:01:35 --> 00:01:38
+can aim to hand it in before
+it gets to the weekend.
+
+27
+00:01:38 --> 00:01:44
+Okay, then secondly today is also the day
+that the new assignment comes out.
+
+28
+00:01:44 --> 00:01:47
+So maybe you won&#39;t look at it
+till the start of next week but
+
+29
+00:01:47 --> 00:01:49
+we&#39;ve got it up ready to go.
+
+30
+00:01:49 --> 00:01:54
+And so that&#39;ll involve a couple of new
+things and in some respects probably for
+
+31
+00:01:54 --> 00:01:59
+much of it you might not want to start
+it until after next Tuesday&#39;s lecture.
+
+32
+00:01:59 --> 00:02:02
+So two big things will be different for
+that assignment.
+
+33
+00:02:02 --> 00:02:07
+Big thing number one is we&#39;re gonna do
+assignment number two using TensorFlow.
+
+34
+00:02:07 --> 00:02:11
+And that&#39;s the reason why, quite apart
+from exhaustion from assignment one,
+
+35
+00:02:11 --> 00:02:15
+why you probably you don&#39;t wanna start
+it on the weekend is because on Tuesday,
+
+36
+00:02:15 --> 00:02:18
+Tuesday&#39;s lecture&#39;s gonna be
+an introduction to TensorFlow.
+
+37
+00:02:18 --> 00:02:21
+So you&#39;ll really be more qualified
+then to start it after that.
+
+38
+00:02:21 --> 00:02:26
+And then the other big different thing
+in assignment two is we get into
+
+39
+00:02:26 --> 00:02:31
+some sort of more substantive
+natural language processing content.
+
+40
+00:02:31 --> 00:02:36
+In particular, you guys are going to build
+neural dependency parsers, and the hope
+
+41
+00:02:36 --> 00:02:40
+is that you can learn about everything
+that you need to know to do that today.
+
+42
+00:02:40 --> 00:02:42
+Or perhaps looking at some of
+the readings on the website,
+
+43
+00:02:42 --> 00:02:45
+if you don&#39;t get quite
+everything straight from me.
+
+44
+00:02:45 --> 00:02:47
+Couple more comments on things.
+
+45
+00:02:47 --> 00:02:51
+Okay, so for final projects.
+
+46
+00:02:51 --> 00:02:55
+We&#39;re going to sort of post,
+hopefully tomorrow or on the weekend,
+
+47
+00:02:55 --> 00:02:59
+a kind of an outline of what&#39;s in
+assignment four, so you can have sort of
+
+48
+00:02:59 --> 00:03:03
+a more informed meaningful choice between
+whether you want to do assignment four, or
+
+49
+00:03:03 --> 00:03:04
+come up with a final project.
+
+50
+00:03:04 --> 00:03:07
+The area of assignment four, if you do it,
+
+51
+00:03:07 --> 00:03:11
+is going to be question answering
+over the SQuAD dataset.
+
+52
+00:03:11 --> 00:03:14
+But we&#39;ve got kind of a page and a half
+description to explain what that means, so
+
+53
+00:03:14 --> 00:03:15
+you can look out for that.
+
+54
+00:03:15 --> 00:03:18
+But if you are interested in
+doing a final project, again,
+
+55
+00:03:18 --> 00:03:23
+we&#39;ll encourage people to come and meet
+with one of the final project mentors or
+
+56
+00:03:23 --> 00:03:27
+find some other well qualified person
+around here to be a final project mentor.
+
+57
+00:03:27 --> 00:03:31
+So what we&#39;re wanting is that sort of,
+everybody has met with
+
+58
+00:03:31 --> 00:03:34
+their final project mentor
+before putting in an abstract.
+
+59
+00:03:34 --> 00:03:36
+And that means it&#39;d be really great for
+
+60
+00:03:36 --> 00:03:39
+people to get started doing
+that as soon as possible.
+
+61
+00:03:39 --> 00:03:42
+I know some of you have already
+talked to various of us.
+
+62
+00:03:42 --> 00:03:47
+For me personally, I&#39;ve got final
+project office hours tomorrow
+
+63
+00:03:47 --> 00:03:51
+from 1 to 3 pm so
+I hope some people will come by for those.
+
+64
+00:03:51 --> 00:03:53
+And again, sort of as Richard mentioned,
+
+65
+00:03:53 --> 00:03:57
+not everybody can possible have Richard or
+me as the final project mentor.
+
+66
+00:03:57 --> 00:04:01
+And besides, there&#39;s some really big
+advantages of having some of the PhD
+
+67
+00:04:01 --> 00:04:03
+student TAs as final project mentors.
+
+68
+00:04:03 --> 00:04:07
+Cuz really, for things like spending
+time hacking on TensorFlow,
+
+69
+00:04:07 --> 00:04:09
+they get to do it much more than I do.
+
+70
+00:04:09 --> 00:04:11
+And so, Danqi, Kevin, Ignacio,
+
+71
+00:04:11 --> 00:04:16
+Arun that they&#39;ve had tons of experience
+doing NLP research using deep learning.
+
+72
+00:04:16 --> 00:04:19
+And so that they&#39;d also be great mentors,
+and look them up for
+
+73
+00:04:19 --> 00:04:21
+their final project advice.
+
+74
+00:04:21 --> 00:04:26
+The final thing I just want to touch
+on is we clearly had a lot of problems,
+
+75
+00:04:26 --> 00:04:30
+I realize, at keeping up and
+coping with people in office hours,
+
+76
+00:04:30 --> 00:04:34
+and queue status has just
+regularly got out of control.
+
+77
+00:04:34 --> 00:04:37
+I&#39;m sorry that that&#39;s
+been kind of difficult.
+
+78
+00:04:37 --> 00:04:42
+I mean honestly we are trying to work and
+work out ways that we can do this better,
+
+79
+00:04:42 --> 00:04:46
+and we&#39;re thinking of sort of unveiling
+a few changes for doing things for
+
+80
+00:04:46 --> 00:04:47
+the second assignment.
+
+81
+00:04:47 --> 00:04:51
+If any of you peoples have any better
+advice as to how things could be
+
+82
+00:04:51 --> 00:04:55
+organized so that they could work
+better feel free to send a message
+
+83
+00:04:55 --> 00:04:58
+on Piazza with suggestions
+of ways of doing it.
+
+84
+00:04:58 --> 00:05:02
+I guess yesterday I ran down
+Percy Liang and said, Percy,
+
+85
+00:05:02 --> 00:05:05
+Percy, how do you do it for CS221?
+
+86
+00:05:05 --> 00:05:07
+Do you have some big
+secrets to do this better?
+
+87
+00:05:07 --> 00:05:11
+But unfortunately I seem to come away
+with no big secrets cuz he sort of said:
+
+88
+00:05:11 --> 00:05:16
+&quot;we use queue status and we use the Huang
+basement&quot;, what else are you meant to do?
+
+89
+00:05:16 --> 00:05:19
+So I&#39;m still looking for
+that divine insight [LAUGH] that
+
+90
+00:05:19 --> 00:05:23
+will tell me how to get this
+problem better under control.
+
+91
+00:05:23 --> 00:05:25
+So if you&#39;ve got any good ideas,
+feel free to share.
+
+92
+00:05:25 --> 00:05:29
+But we&#39;ll try to get
+this as much better under
+
+93
+00:05:29 --> 00:05:33
+control as we can for the following weeks.
+
+94
+00:05:33 --> 00:05:36
+Okay, any questions, or
+should I just go into the meat of things?
+
+95
+00:05:36 --> 00:05:36
+Okay.
+
+96
+00:05:36 --> 00:05:41
+All right, so what we&#39;re going
+to want to do today is work
+
+97
+00:05:41 --> 00:05:46
+out how to put structures over
+sentences in some human language.
+
+98
+00:05:46 --> 00:05:50
+All the examples I&#39;m going to show is for
+English, but in principle,
+
+99
+00:05:50 --> 00:05:55
+the same techniques you can apply for
+any language, where these structures
+
+100
+00:05:55 --> 00:06:00
+are going to sort of reveal
+how the sentence is made up.
+
+101
+00:06:00 --> 00:06:06
+So that the idea is that sentences and
+parts of sentences have some kind
+
+102
+00:06:06 --> 00:06:10
+of structure and there are sort of regular
+ways that people put sentences together.
+
+103
+00:06:10 --> 00:06:15
+So, we can sort of start off with very
+simple things that aren&#39;t yet sentences
+
+104
+00:06:15 --> 00:06:20
+like &quot;the cat&quot; and &quot;a dog&quot;, and they
+seem to kind of have a bit of structure.
+
+105
+00:06:20 --> 00:06:23
+We have an article, or
+what linguists often call a determiner,
+
+106
+00:06:23 --> 00:06:24
+that&#39;s followed by a noun.
+
+107
+00:06:24 --> 00:06:27
+And then, well, for those kind of phrases,
+
+108
+00:06:27 --> 00:06:30
+which get called noun
+phrases that describe things,
+
+109
+00:06:30 --> 00:06:35
+you can kind of make them bigger and there
+are sort of rules for how you can do that.
+
+110
+00:06:35 --> 00:06:39
+So you can put adjectives in
+between the article and the noun.
+
+111
+00:06:39 --> 00:06:45
+You can say the large dog or a barking dog
+or a cuddly dog, and things like that.
+
+112
+00:06:45 --> 00:06:50
+And, well, you can put things like what I
+call prepositional phrases after the noun
+
+113
+00:06:50 --> 00:06:55
+so you can get things like &quot;a large dog
+in a crate&quot; or something like that.
+
+114
+00:06:55 --> 00:06:59
+And so, traditionally what linguists and
+natural language processors have
+
+115
+00:06:59 --> 00:07:04
+wanted to do is describe
+the structure of human languages.
+
+116
+00:07:04 --> 00:07:10
+And they&#39;re effectively two key tools
+that people have used to do this and
+
+117
+00:07:10 --> 00:07:12
+one of these key tools and
+
+118
+00:07:12 --> 00:07:17
+I think in general the only one
+you have seen a fraction of is
+
+119
+00:07:17 --> 00:07:21
+to use what in computer science terms what
+is most commonly referred to as context
+
+120
+00:07:21 --> 00:07:25
+free grammars which are often referred to
+by linguists as phrase structure grammars.
+
+121
+00:07:25 --> 00:07:28
+And is then referred to as
+the notion of constituency and so
+
+122
+00:07:28 --> 00:07:33
+for that what we are doing is writing
+these context free grammar rules and
+
+123
+00:07:33 --> 00:07:36
+the least if you are Standford
+undergrad or something like that.
+
+124
+00:07:36 --> 00:07:37
+I know that way back in 103,
+
+125
+00:07:37 --> 00:07:42
+you spent a whole lecture learning about
+context-free grammars, and their rules.
+
+126
+00:07:42 --> 00:07:46
+So I could start writing some rules that
+might start off saying a noun phrase,
+
+127
+00:07:46 --> 00:07:48
+and go to a determiner or a noun.
+
+128
+00:07:48 --> 00:07:51
+Then I realized that noun phrases
+would get a bit more complicated.
+
+129
+00:07:51 --> 00:07:54
+And so I came up with this new rule
+that says- Noun phrase goes to terminal
+
+130
+00:07:54 --> 00:07:58
+optional adject of noun and then
+optional prepositional phrase wherefore
+
+131
+00:07:58 --> 00:08:01
+prepositional phrase that&#39;s a preposition
+followed by another noun phrase.
+
+132
+00:08:01 --> 00:08:04
+Because, I can say a crate,
+or, a large crate.
+
+133
+00:08:04 --> 00:08:06
+Or, a large crate by the door.
+
+134
+00:08:06 --> 00:08:11
+And then, well I can go along
+even further, and I could say,
+
+135
+00:08:11 --> 00:08:17
+you know a large barking
+dog by the door in a crate.
+
+136
+00:08:17 --> 00:08:20
+So then I noticed, wow I can put
+in multiple adjectives there and
+
+137
+00:08:20 --> 00:08:24
+I can stick on multiple prepositional
+phrases, so I&#39;m using that star,
+
+138
+00:08:24 --> 00:08:25
+the kinda clingy star that you also see,
+
+139
+00:08:25 --> 00:08:29
+See in regular expressions to say that
+you can have zero or any number of these.
+
+140
+00:08:29 --> 00:08:35
+And then I can start making a bigger
+thing like, talk to the cuddly dog.
+
+141
+00:08:35 --> 00:08:36
+Or, look for the cuddly dog.
+
+142
+00:08:36 --> 00:08:40
+And, well, now I&#39;ve got a verb
+followed by a prepositional phrase.
+
+143
+00:08:40 --> 00:08:42
+And so, I can sort of build
+up a constituency grammar.
+
+144
+00:08:42 --> 00:08:48
+So that&#39;s one way of organizing
+the structure of sentences and,
+
+145
+00:08:48 --> 00:08:54
+you know,
+in 20th dragging into 21st century
+
+146
+00:08:54 --> 00:08:58
+America, this has been
+the dominant way of doing it.
+
+147
+00:08:58 --> 00:09:03
+I mean it&#39;s what you see mainly in your
+Intro CS class when you get taught
+
+148
+00:09:03 --> 00:09:08
+about regular languages and context free
+languages and context sensitive languages.
+
+149
+00:09:08 --> 00:09:13
+You&#39;re working up the Chomsky
+hierarchy where Noam Chomsky
+
+150
+00:09:13 --> 00:09:18
+did not actually invent
+the Chomsky hierarchy to torture
+
+151
+00:09:18 --> 00:09:23
+CS under grads With formal content
+to fill the SCS 103 class.
+
+152
+00:09:23 --> 00:09:26
+The original purpose of the Chomsky
+hierarchy was actually to understand
+
+153
+00:09:26 --> 00:09:31
+the complexity of human languages and
+to make arguments about their complexity.
+
+154
+00:09:31 --> 00:09:35
+If you look more broadly, and
+sorry, it&#39;s also dominated,
+
+155
+00:09:35 --> 00:09:40
+sorta linguistics in America in the last
+50 years through the work of Noam Chomsky.
+
+156
+00:09:40 --> 00:09:45
+But if you look more broadly than that,
+this isn&#39;t actually the dominate form
+
+157
+00:09:45 --> 00:09:47
+of syntactic description
+that is being used for
+
+158
+00:09:47 --> 00:09:49
+understanding of
+the structure of sentences.
+
+159
+00:09:49 --> 00:09:49
+So what else can you do?
+
+160
+00:09:49 --> 00:09:53
+So there is this other alternative view of
+linguistic structure which is referred to
+
+161
+00:09:53 --> 00:09:57
+as Dependency structure and
+what your doing with dependency structure.
+
+162
+00:09:57 --> 00:10:02
+Is that you&#39;re describing the structure
+of a sentence by taking each word and
+
+163
+00:10:02 --> 00:10:04
+saying what it&#39;s a dependent on.
+
+164
+00:10:04 --> 00:10:07
+So, if it&#39;s a word that
+kind of modifies or
+
+165
+00:10:07 --> 00:10:12
+is an argument of another word that you&#39;re
+saying, it&#39;s a dependent of that word.
+
+166
+00:10:12 --> 00:10:18
+So, barking dog, barking is a dependent
+of dog, because it&#39;s of a modifier of it.
+
+167
+00:10:18 --> 00:10:23
+Large barking dog, large is a modifier of
+dog as well, so it&#39;s a dependent of it.
+
+168
+00:10:23 --> 00:10:28
+And dog by the door, so the by the door
+is somehow a dependent of dog.
+
+169
+00:10:28 --> 00:10:30
+And we&#39;re putting
+a dependency between words,
+
+170
+00:10:30 --> 00:10:34
+and we normally indicate those
+dependencies with arrows.
+
+171
+00:10:34 --> 00:10:38
+And so we can draw dependency
+structures over sentences that say
+
+172
+00:10:38 --> 00:10:40
+how they&#39;re represented as well.
+
+173
+00:10:40 --> 00:10:45
+And when right in the first class,
+I gave examples of ambiguous sentences.
+
+174
+00:10:45 --> 00:10:50
+A lot of those ambiguous sentences, we
+can think about in terms of dependencies.
+
+175
+00:10:50 --> 00:10:54
+So do you remember this one,
+scientists study whales from space.
+
+176
+00:10:54 --> 00:10:56
+Well that was an ambiguous headline.
+
+177
+00:10:56 --> 00:10:58
+And well, why is it an ambiguous headline?
+
+178
+00:10:58 --> 00:11:01
+Well it&#39;s ambiguous because
+there&#39;s sort of two possibilities.
+
+179
+00:11:01 --> 00:11:06
+So in either case there&#39;s
+the main verb study.
+
+180
+00:11:06 --> 00:11:10
+And it&#39;s the scientist that&#39;s studying,
+that&#39;s an argument of study, the subject.
+
+181
+00:11:10 --> 00:11:13
+And it&#39;s the whales that are being
+studied, so that&#39;s an argument of study.
+
+182
+00:11:13 --> 00:11:14
+That&#39;s the object.
+
+183
+00:11:14 --> 00:11:19
+But the big difference is then,
+what are you doing with the from space.
+
+184
+00:11:19 --> 00:11:25
+You saying that it&#39;s modifying study,
+or are you saying it&#39;s modifying whales?
+
+185
+00:11:25 --> 00:11:28
+And like, if you sort of just
+quickly read the headline
+
+186
+00:11:28 --> 00:11:29
+It sounds like it&#39;s the bottom one, right?
+
+187
+00:11:29 --> 00:11:31
+It&#39;s whales from space.
+
+188
+00:11:31 --> 00:11:33
+And that sounds really exciting.
+
+189
+00:11:33 --> 00:11:36
+But [LAUGH] what the article was meant to
+be about was, really, that they were being
+
+190
+00:11:36 --> 00:11:39
+able to use satellites to
+track the movements of whales.
+
+191
+00:11:39 --> 00:11:43
+And so it&#39;s the first one where the,
+from space, is modifying.
+
+192
+00:11:43 --> 00:11:44
+How they&#39;re being studied.
+
+193
+00:11:44 --> 00:11:49
+And so thinking about ambiguities of
+sentences can then be thought about,
+
+194
+00:11:49 --> 00:11:53
+many of them, in terms of these dependency
+structures as to what&#39;s modifying what.
+
+195
+00:11:53 --> 00:11:56
+And this is just a really common thing
+
+196
+00:11:56 --> 00:12:00
+in natural language because these kind
+of questions of what modifies what,
+
+197
+00:12:00 --> 00:12:04
+really dominate a lot of
+questions of interpretation.
+
+198
+00:12:04 --> 00:12:06
+So, here&#39;s the kind of sentence
+
+199
+00:12:06 --> 00:12:09
+you find when you&#39;re reading
+the Wall Street Journal every morning.
+
+200
+00:12:09 --> 00:12:14
+The board approved its acquisition by
+Royal Trustco Limited of Toronto for
+
+201
+00:12:14 --> 00:12:16
+$27 a share at its Monthly meeting.
+
+202
+00:12:16 --> 00:12:20
+And as I&#39;ve hopefully indicated by
+the square brackets, if you look at
+
+203
+00:12:20 --> 00:12:25
+the structure of this sentence, it sort
+of starts off as subject, verb, object.
+
+204
+00:12:25 --> 00:12:26
+The board approved its acquisition,
+
+205
+00:12:26 --> 00:12:30
+and then everything after that is a whole
+sequence of prepositional phrases.
+
+206
+00:12:30 --> 00:12:36
+By Royal Trustco Ltd, of Toronto, for
+$27 a share, at its monthly meeting.
+
+207
+00:12:36 --> 00:12:42
+And well, so then there&#39;s the question of,
+what&#39;s everyone modifying?
+
+208
+00:12:42 --> 00:12:47
+So the acquisition is by
+Royal Trustco Ltd, so that&#39;s,
+
+209
+00:12:47 --> 00:12:52
+by Royal Trustco Ltd is modifying
+the thing that immediately precedes that.
+
+210
+00:12:52 --> 00:12:57
+And of Toronto is modifying the company,
+Royal Trustco Limited,
+
+211
+00:12:57 --> 00:13:00
+so that&#39;s modifying the thing that
+comes immediately preceeding it.
+
+212
+00:13:00 --> 00:13:02
+So you might think this is easy,
+
+213
+00:13:02 --> 00:13:06
+everything just modifies the thing
+that&#39;s coming immediately before it.
+
+214
+00:13:06 --> 00:13:07
+But that, then stops being true.
+
+215
+00:13:07 --> 00:13:10
+So, what&#39;s for $27 a share modifying?
+
+216
+00:13:10 --> 00:13:12
+Yeah so
+that&#39;s modifying the acquisition so
+
+217
+00:13:12 --> 00:13:15
+then we&#39;re jumping back
+a few candidates and
+
+218
+00:13:15 --> 00:13:20
+saying is modifying acquisition and
+then actually at it&#39;s monthly meeting.
+
+219
+00:13:20 --> 00:13:25
+That wasn&#39;t the Toronto the Royal
+Trustco Ltd or the acquisition that that
+
+220
+00:13:25 --> 00:13:30
+was when the approval was happening so
+that jumps all the way back up to the top.
+
+221
+00:13:30 --> 00:13:34
+So in general the situation is that if
+you&#39;ve got some stuff like a verb and
+
+222
+00:13:34 --> 00:13:38
+a noun phrase, then you start
+getting these prepositional phrases.
+
+223
+00:13:38 --> 00:13:42
+Well, the prepositional
+phrase can be modifying,
+
+224
+00:13:42 --> 00:13:43
+either this noun phrase or the verb.
+
+225
+00:13:43 --> 00:13:46
+But then when you get to
+the second prepositional phrase.
+
+226
+00:13:46 --> 00:13:49
+Well, there was another noun phrase
+inside this prepositional phrase.
+
+227
+00:13:49 --> 00:13:49
+So, now there&#39;s.
+
+228
+00:13:49 --> 00:13:49
+Three choices.
+
+229
+00:13:49 --> 00:13:53
+It can be modifying this noun phrase,
+that noun phrase or the verb phrase.
+
+230
+00:13:53 --> 00:13:54
+And then we get to another one.
+
+231
+00:13:54 --> 00:13:56
+So it&#39;s now got four choices.
+
+232
+00:13:56 --> 00:14:01
+And you don&#39;t get sort of
+a completely free choice,
+
+233
+00:14:01 --> 00:14:03
+cuz you do get a nesting constraint.
+
+234
+00:14:03 --> 00:14:08
+So once I&#39;ve had for $27 a share
+referring back to the acquisition,
+
+235
+00:14:08 --> 00:14:11
+the next prepositional phrase has to,
+in general,
+
+236
+00:14:11 --> 00:14:14
+refer to either the acquisition or
+approved.
+
+237
+00:14:14 --> 00:14:17
+I say in general because
+there are exceptions to that.
+
+238
+00:14:17 --> 00:14:19
+And I&#39;ll actually talk about that later.
+
+239
+00:14:19 --> 00:14:20
+But most of the time in English,
+it&#39;s true.
+
+240
+00:14:20 --> 00:14:22
+You have to sort of refer to
+the same one or further back, so
+
+241
+00:14:22 --> 00:14:24
+you get a nesting relationship.
+
+242
+00:14:24 --> 00:14:29
+But I mean, even if you obey that nesting
+relationship, the result is that you
+
+243
+00:14:29 --> 00:14:34
+get an exponential number of
+ambiguities in a sentence based
+
+244
+00:14:34 --> 00:14:38
+on in the number of prepositional phrases
+you stick on the end of the sentence.
+
+245
+00:14:38 --> 00:14:43
+And so the series of the exponential
+series you get of these Catalan numbers.
+
+246
+00:14:43 --> 00:14:45
+And so Catalan numbers actually show up
+
+247
+00:14:45 --> 00:14:48
+in a lot of places in
+theoretical computer science.
+
+248
+00:14:48 --> 00:14:53
+Because any kind of structure
+that is somehow sort of similar,
+
+249
+00:14:53 --> 00:14:56
+if you&#39;re putting these constraints in,
+you get Catalan series.
+
+250
+00:14:56 --> 00:14:58
+So, are any of you doing CS228?
+
+251
+00:14:58 --> 00:14:58
+Yeah, so
+
+252
+00:14:58 --> 00:15:03
+another place the Catalan series turns up
+is that when you&#39;ve got a vector graph and
+
+253
+00:15:03 --> 00:15:08
+you&#39;re triangulating it, the number of
+ways that you can triangulate your vector
+
+254
+00:15:08 --> 00:15:13
+graph is also giving you Catalan numbers.
+
+255
+00:15:13 --> 00:15:16
+Okay, so
+human languages get very ambiguous.
+
+256
+00:15:16 --> 00:15:20
+And we can hope to describe
+them on the basis of sort of
+
+257
+00:15:20 --> 00:15:22
+looking at these dependencies.
+
+258
+00:15:22 --> 00:15:23
+So that&#39;s important concept One.
+
+259
+00:15:23 --> 00:15:27
+The other important concept I wanted to
+introduce at this point is this idea of
+
+260
+00:15:27 --> 00:15:33
+full linguistics having annotated
+data in the form of treebanks.
+
+261
+00:15:33 --> 00:15:36
+This is probably a little
+bit small to see exactly.
+
+262
+00:15:36 --> 00:15:39
+But what this is, is we&#39;ve got sentences.
+
+263
+00:15:39 --> 00:15:42
+These are actually sentences
+that come off Yahoo Answers.
+
+264
+00:15:42 --> 00:15:47
+And what&#39;s happened is,
+human beings have sat around and
+
+265
+00:15:47 --> 00:15:52
+drawn in the syntactic structures of
+these sentences as dependency graphs and
+
+266
+00:15:52 --> 00:15:55
+those things we refer to as treebanks.
+
+267
+00:15:55 --> 00:15:59
+And so a really interesting thing
+that&#39;s happened starting around
+
+268
+00:15:59 --> 00:16:03
+1990 is that people have devoted a lot of
+
+269
+00:16:03 --> 00:16:07
+resources to building up these kind
+of annotated treebanks and various
+
+270
+00:16:07 --> 00:16:11
+other kinds of annotated linguistic
+resources that we&#39;ll talk about later.
+
+271
+00:16:11 --> 00:16:16
+Now in some sense, from the viewpoint of
+sort of modern machine learning in 2017,
+
+272
+00:16:16 --> 00:16:18
+that&#39;s completely unsurprising,
+
+273
+00:16:18 --> 00:16:21
+because all the time what we do
+is say we want labelled data so
+
+274
+00:16:21 --> 00:16:25
+we can take our supervised classifier and
+chug on it and get good results.
+
+275
+00:16:25 --> 00:16:29
+But in many ways, it was kind of
+a surprising thing that happened,
+
+276
+00:16:29 --> 00:16:33
+which is sort of different to the whole
+of the rest of history, right?
+
+277
+00:16:33 --> 00:16:37
+Cuz for the whole of the rest of
+the history, it was back in this space of,
+
+278
+00:16:37 --> 00:16:40
+well, to describe linguistic
+structure what we should be doing
+
+279
+00:16:40 --> 00:16:45
+is writing grammar rules that describe
+what happens in linguistic structure.
+
+280
+00:16:45 --> 00:16:49
+Where here, we&#39;re no longer even
+attempting to write grammar rules.
+
+281
+00:16:49 --> 00:16:50
+We&#39;re just saying, give us some sentences.
+
+282
+00:16:50 --> 00:16:53
+And I&#39;m gonna diagram these sentences and
+show you what their structure is.
+
+283
+00:16:53 --> 00:16:57
+And tomorrow give me a bunch more and
+I&#39;ll diagram them for you as well.
+
+284
+00:16:57 --> 00:17:01
+And if you think about it, in a way,
+that initially seems kind of
+
+285
+00:17:01 --> 00:17:05
+a crazy thing to do, cuz it seems
+like just putting structures over
+
+286
+00:17:05 --> 00:17:09
+sentences one by one seems really,
+really inefficient and slow.
+
+287
+00:17:09 --> 00:17:10
+Whereas, if you&#39;re writing a grammar,
+
+288
+00:17:10 --> 00:17:12
+you&#39;re writing this thing
+that generalizes, right?
+
+289
+00:17:12 --> 00:17:14
+The whole point of grammar is that
+you&#39;re gonna write this one small,
+
+290
+00:17:14 --> 00:17:14
+finite grammar.
+
+291
+00:17:14 --> 00:17:17
+And it describes an infinite
+number of sentences.
+
+292
+00:17:17 --> 00:17:20
+And so surely,
+that&#39;s a big labor saving effort.
+
+293
+00:17:20 --> 00:17:25
+But, slightly surprisingly, but maybe it
+makes sense in terms of what&#39;s happened
+
+294
+00:17:25 --> 00:17:30
+in machine learning, that it&#39;s just turned
+out to be kind of super successful,
+
+295
+00:17:30 --> 00:17:33
+this building of explicit,
+annotated treebanks.
+
+296
+00:17:33 --> 00:17:36
+And it ends up giving us a lot of things.
+
+297
+00:17:36 --> 00:17:38
+And I sort of mention a few
+of their advantages here.
+
+298
+00:17:38 --> 00:17:40
+First, it gives you
+a reusability of labor.
+
+299
+00:17:40 --> 00:17:44
+But the problem of human beings
+handwriting grammars is that they tend to,
+
+300
+00:17:44 --> 00:17:48
+in practice, be almost unreusable,
+because everybody does it differently and
+
+301
+00:17:48 --> 00:17:50
+has their idea of the grammar.
+
+302
+00:17:50 --> 00:17:54
+And people spend years working on one and
+no one else ever uses it.
+
+303
+00:17:54 --> 00:17:58
+Where effectively, these treebanks have
+been a really reusable tool that lots of
+
+304
+00:17:58 --> 00:18:02
+people have then built on top of to
+build all kinds of natural language
+
+305
+00:18:02 --> 00:18:06
+processing tools, of part of speech
+taggers and parsers and things like that.
+
+306
+00:18:06 --> 00:18:10
+They&#39;ve also turned out to be a really
+useful resource, actually, for linguists,
+
+307
+00:18:10 --> 00:18:14
+because they give a kind of real languages
+are spoken, complete with syntactic
+
+308
+00:18:14 --> 00:18:18
+analyses that you can do all kinds of
+quantitative linguistics on top of.
+
+309
+00:18:18 --> 00:18:21
+It&#39;s genuine data that&#39;s broad
+coverage when people just work
+
+310
+00:18:21 --> 00:18:23
+with their intuitions as to what
+are the grammar rules of English.
+
+311
+00:18:23 --> 00:18:25
+They think of some things but
+not of other things.
+
+312
+00:18:25 --> 00:18:28
+And so this is actually a better way to
+find out all of the things that actually
+
+313
+00:18:28 --> 00:18:28
+happened.
+
+314
+00:18:28 --> 00:18:30
+For anything that&#39;s sort
+of probabilistic or
+
+315
+00:18:30 --> 00:18:34
+machine learning, it gives some sort
+of not only what&#39;s possible, but
+
+316
+00:18:34 --> 00:18:37
+how frequent it is and what other
+things it tends to co-occur with and
+
+317
+00:18:37 --> 00:18:40
+all that kind of distributional
+information that&#39;s super important.
+
+318
+00:18:40 --> 00:18:44
+And crucially, crucially, crucially,
+and we&#39;ll use this for assignment two,
+
+319
+00:18:44 --> 00:18:49
+it&#39;s also great because it gives you
+a way to evaluate any system that you
+
+320
+00:18:49 --> 00:18:54
+built because this gives us what we treat
+as ground truth, gold standard data.
+
+321
+00:18:54 --> 00:18:55
+These are the correct answers.
+
+322
+00:18:55 --> 00:19:00
+And then we can evaluate any tool on
+how good it is at reproducing those.
+
+323
+00:19:00 --> 00:19:02
+Okay, so that&#39;s the general advertisement.
+
+324
+00:19:02 --> 00:19:06
+And what I wanted to do now is sort of
+go through a bit more carefully for
+
+325
+00:19:06 --> 00:19:11
+sort of 15 minutes, what are dependency
+grammars and dependency structure?
+
+326
+00:19:11 --> 00:19:12
+So we&#39;ve sort of got that straight.
+
+327
+00:19:12 --> 00:19:15
+I guess I&#39;ve maybe failed to say, yeah.
+
+328
+00:19:15 --> 00:19:18
+I mentioned there was this sort of
+constituency context-free grammar
+
+329
+00:19:18 --> 00:19:20
+viewpoint and
+the dependency grammar viewpoint.
+
+330
+00:19:20 --> 00:19:22
+Today, it&#39;s gonna be all dependencies.
+
+331
+00:19:22 --> 00:19:25
+And what we&#39;re doing for
+assignment two is all dependencies.
+
+332
+00:19:25 --> 00:19:28
+We will get back to some notions of
+constituency and phrase structure.
+
+333
+00:19:28 --> 00:19:32
+You&#39;ll see those coming back in
+later classes in a few weeks&#39; time.
+
+334
+00:19:32 --> 00:19:34
+But this is what we&#39;re
+going to be doing today.
+
+335
+00:19:34 --> 00:19:36
+And that&#39;s not a completely random choice.
+
+336
+00:19:36 --> 00:19:40
+It&#39;s turned out that, unlike what&#39;s
+happened in linguistics in most of
+
+337
+00:19:40 --> 00:19:44
+the last 50 years, in the last decade
+in natural language processing,
+
+338
+00:19:44 --> 00:19:47
+it&#39;s essentially been swept by
+the use of dependency grammars,
+
+339
+00:19:47 --> 00:19:51
+that people have found dependency
+grammars just a really suitable
+
+340
+00:19:51 --> 00:19:55
+framework on which to build semantic
+representations to get out the kind of
+
+341
+00:19:55 --> 00:19:58
+understanding of language that
+they&#39;d like to get out easily.
+
+342
+00:19:58 --> 00:20:00
+They enable the building of very fast,
+
+343
+00:20:00 --> 00:20:03
+efficient parsers,
+as I&#39;ll explain later today.
+
+344
+00:20:03 --> 00:20:04
+And so in the last sort of ten years,
+
+345
+00:20:04 --> 00:20:08
+you&#39;ve just sort of seen this huge sea
+change in natural language processing.
+
+346
+00:20:08 --> 00:20:12
+Whereas, if you pick up a conference
+volume around the 1990s, it was basically
+
+347
+00:20:12 --> 00:20:16
+all phrase structure grammars and one or
+two papers on dependency grammars.
+
+348
+00:20:16 --> 00:20:17
+And if you pick up a volume now,
+
+349
+00:20:17 --> 00:20:22
+what you&#39;ll find out is that of the papers
+they&#39;re using syntactic representations,
+
+350
+00:20:22 --> 00:20:25
+kind of 80% of them are using
+dependency representations.
+
+351
+00:20:25 --> 00:20:26
+Okay, yes.
+
+352
+00:20:26 --> 00:20:27
+&gt;&gt; What&#39;s that,
+a phrase structure grammar?
+
+353
+00:20:27 --> 00:20:30
+Phrase structure, what&#39;s the phrase
+structure grammar, that&#39;s exactly the same
+
+354
+00:20:30 --> 00:20:32
+as the context-free grammar
+when a linguist is speaking.
+
+355
+00:20:32 --> 00:20:37
+[LAUGH] Yes,
+formerly a context-free grammar.
+
+356
+00:20:37 --> 00:20:41
+Okay, so
+what does a dependency syntax say?
+
+357
+00:20:41 --> 00:20:46
+So the idea of dependency syntax
+is to say that the sort of model
+
+358
+00:20:46 --> 00:20:50
+of syntax is we have relationships
+between lexical items,
+
+359
+00:20:50 --> 00:20:53
+words, and only between lexical items.
+
+360
+00:20:53 --> 00:20:58
+They&#39;re binary, asymmetric relations,
+which means we draw arrows.
+
+361
+00:20:58 --> 00:21:01
+And we call those arrows dependencies.
+
+362
+00:21:01 --> 00:21:06
+So the whole, there is a dependency
+analysis of bills on ports and
+
+363
+00:21:06 --> 00:21:10
+immigration were submitted by
+Senator Brownback, Republican of Kansas.
+
+364
+00:21:10 --> 00:21:16
+Okay, so that&#39;s a start,
+normally hen we do dependency parsing,
+
+365
+00:21:16 --> 00:21:19
+we do a little bit more than that.
+
+366
+00:21:19 --> 00:21:24
+So typically we type the dependencies
+by giving them a name for
+
+367
+00:21:24 --> 00:21:27
+some grammatical relationship.
+
+368
+00:21:27 --> 00:21:32
+So I&#39;m calling this the subject, and
+it&#39;s actually a passive subject.
+
+369
+00:21:32 --> 00:21:35
+And then this is an auxiliary modifier,
+and
+
+370
+00:21:35 --> 00:21:40
+Republican of Kansas is an appositional
+phrase that&#39;s coming off of Brownback.
+
+371
+00:21:40 --> 00:21:44
+And so we use this kind of
+typed dependency grammars.
+
+372
+00:21:44 --> 00:21:48
+And interestingly,
+I&#39;m not going to go through it, but
+
+373
+00:21:48 --> 00:21:53
+there&#39;s sort of some interesting
+math that if you just have this,
+
+374
+00:21:53 --> 00:21:55
+although it&#39;s notationally very different,
+
+375
+00:21:55 --> 00:22:01
+from context-free grammar,
+these are actually equivalent
+
+376
+00:22:01 --> 00:22:05
+to a restricted kind of context-free
+grammar with one addition.
+
+377
+00:22:05 --> 00:22:09
+But things become sort of a bit more
+different once you put in a typing
+
+378
+00:22:09 --> 00:22:13
+of the dependency labels, where I wont
+go into that in great detail, right.
+
+379
+00:22:13 --> 00:22:16
+So a substantive theory
+of dependency grammar for
+
+380
+00:22:16 --> 00:22:20
+a language,
+we&#39;re then having to make some decisions.
+
+381
+00:22:20 --> 00:22:24
+So what we&#39;re gonna do is when we,
+we&#39;re gonna draw these arrows
+
+382
+00:22:24 --> 00:22:27
+between two things, and
+I&#39;ll just mention a bit more terminology.
+
+383
+00:22:27 --> 00:22:33
+So we have an arrow and its got what we
+called the tail end of the arrow, I guess.
+
+384
+00:22:33 --> 00:22:35
+And the word up here is sort of the head.
+
+385
+00:22:35 --> 00:22:41
+So bills is an argument of submitted, were
+is an auxiliary modifier of submitted.
+
+386
+00:22:41 --> 00:22:45
+And so this word here is normally referred
+to as the head, or the governor, or
+
+387
+00:22:45 --> 00:22:48
+the superior, or
+sometimes even the regent.
+
+388
+00:22:48 --> 00:22:51
+I&#39;ll normally call it the head.
+
+389
+00:22:51 --> 00:22:54
+And then the word at
+the other end of the arrow,
+
+390
+00:22:54 --> 00:22:57
+the pointy bit,
+I&#39;ll refer to as the dependent,
+
+391
+00:22:57 --> 00:23:02
+but other words that you can sometimes
+see are modifier, inferior, subordinate.
+
+392
+00:23:02 --> 00:23:06
+Some people who do dependency grammar
+really get into these classist notions
+
+393
+00:23:06 --> 00:23:09
+of superiors and inferiors, but
+I&#39;ll go with heads and dependents.
+
+394
+00:23:09 --> 00:23:12
+Okay, so the idea is you
+have a head of a clause and
+
+395
+00:23:12 --> 00:23:14
+then the arguments of the dependence.
+
+396
+00:23:14 --> 00:23:17
+And then when you have a phrase like,
+
+397
+00:23:17 --> 00:23:21
+by Senator Brownback, Republican of Texas.
+
+398
+00:23:21 --> 00:23:24
+It&#39;s got a head which is here
+being taken as Brownback and
+
+399
+00:23:24 --> 00:23:26
+then it&#39;s got words beneath it.
+
+400
+00:23:26 --> 00:23:31
+And so one of the main parts of
+dependency grammars at the end of the day
+
+401
+00:23:31 --> 00:23:35
+is you have to make decisions
+as to which words are heads and
+
+402
+00:23:35 --> 00:23:40
+which words are then the dependents of
+the heads of any particular structure.
+
+403
+00:23:40 --> 00:23:44
+So in these diagrams I&#39;m showing you here,
+and
+
+404
+00:23:44 --> 00:23:48
+the ones I showed you back a few pages,
+what I&#39;m actually showing you
+
+405
+00:23:48 --> 00:23:51
+here is analysis according
+to universal dependencies.
+
+406
+00:23:51 --> 00:23:54
+So universal dependencies is
+a new tree banking effort
+
+407
+00:23:54 --> 00:23:56
+which I&#39;ve actually been
+very strongly involved in.
+
+408
+00:23:56 --> 00:23:58
+That sort of started
+a couple of years ago and
+
+409
+00:23:58 --> 00:24:01
+there are pointers in both
+earlier in the slides and
+
+410
+00:24:01 --> 00:24:05
+on the website if you wanna go off and
+learn a lot about universal dependencies.
+
+411
+00:24:05 --> 00:24:07
+I mean it&#39;s sort of
+an ambitious attempt to try and
+
+412
+00:24:07 --> 00:24:11
+have a common dependency representation
+that works over a ton of languages.
+
+413
+00:24:11 --> 00:24:12
+I could prattle on about it for
+
+414
+00:24:12 --> 00:24:16
+ages, and if by some off chance there&#39;s
+time at the end of the class I could.
+
+415
+00:24:16 --> 00:24:20
+But probably there won&#39;t be so I won&#39;t
+actually tell you a lot about that now.
+
+416
+00:24:20 --> 00:24:25
+But I will just mention one thing that
+probably you&#39;ll notice very quickly.
+
+417
+00:24:25 --> 00:24:28
+And we&#39;re also going to be using this
+representation in the assignment that&#39;s
+
+418
+00:24:28 --> 00:24:33
+being given out today,
+the analysis of universal dependencies
+
+419
+00:24:33 --> 00:24:38
+treats prepositions sort of differently
+to what you might have seen else where.
+
+420
+00:24:38 --> 00:24:42
+If you&#39;ve seen any, many accounts of
+English grammar, or heard references in
+
+421
+00:24:42 --> 00:24:46
+some English classroom,
+to have prepositions, having objects.
+
+422
+00:24:46 --> 00:24:52
+In universal dependencies,
+prepositions don&#39;t have any dependents.
+
+423
+00:24:52 --> 00:24:55
+Prepositions are treated kind
+of like they were case markers,
+
+424
+00:24:55 --> 00:24:58
+if you know any language like, German, or
+
+425
+00:24:58 --> 00:25:03
+Latin, or Hindi, or
+something that has cases.
+
+426
+00:25:03 --> 00:25:08
+So that the by is sort of treated as
+if it were a case marker of Brownback.
+
+427
+00:25:08 --> 00:25:12
+So this sort of a bleak modifier
+of by Senator Brownback.
+
+428
+00:25:12 --> 00:25:15
+And so it&#39;s actually treating
+Brownback here as the head
+
+429
+00:25:15 --> 00:25:19
+with the preposition as sort of like
+a case marking dependent of by.
+
+430
+00:25:19 --> 00:25:23
+And that was sort of done to get more
+parallelism across different languages
+
+431
+00:25:23 --> 00:25:24
+of the world.
+
+432
+00:25:24 --> 00:25:26
+But I&#39;ll just mention that.
+
+433
+00:25:26 --> 00:25:32
+Other properties of old dependencies,
+normally dependencies form a tree.
+
+434
+00:25:32 --> 00:25:34
+So there are formal properties
+that goes along with that.
+
+435
+00:25:34 --> 00:25:41
+That means that they&#39;ve got a single-head,
+they&#39;re acyclic, and they&#39;re connected.
+
+436
+00:25:41 --> 00:25:44
+So there is a sort of graph
+theoretic properties.
+
+437
+00:25:44 --> 00:25:46
+Yeah, I sort of mentioned that really
+
+438
+00:25:46 --> 00:25:49
+dependencies have dominated
+most of the world.
+
+439
+00:25:49 --> 00:25:51
+So just very quickly on that.
+
+440
+00:25:51 --> 00:25:56
+The famous first linguist was Panini,
+
+441
+00:25:56 --> 00:26:01
+who wrote his Grammar of Sanskrit
+around the fifth century BCE.
+
+442
+00:26:01 --> 00:26:05
+Really most of the work that Panini
+did was kind of on sound systems and
+
+443
+00:26:05 --> 00:26:07
+make ups of words,
+phonology, and morphology,
+
+444
+00:26:07 --> 00:26:11
+when we mentioned linguistic
+levels in the first class.
+
+445
+00:26:11 --> 00:26:15
+And he only did a little bit of
+work on the structure of sentences.
+
+446
+00:26:15 --> 00:26:16
+But the notation that he used for
+
+447
+00:26:16 --> 00:26:20
+structure of sentences was essentially
+a dependency grammar of having word
+
+448
+00:26:20 --> 00:26:23
+relationships being
+marked as dependencies.
+
+449
+00:26:23 --> 00:26:23
+Question?
+
+450
+00:26:23 --> 00:26:27
+Yeah, so the question is,
+well compare CFGs and PCFGs and
+
+451
+00:26:27 --> 00:26:31
+do they, dependency grammars
+look strongly lexicalized,
+
+452
+00:26:31 --> 00:26:36
+they&#39;re between words and
+does that makes it harder to generalize.
+
+453
+00:26:36 --> 00:26:38
+I honestly feel I just
+can&#39;t do justice to that
+
+454
+00:26:38 --> 00:26:40
+question right now if I&#39;m gonna get
+through the rest of the lecture.
+
+455
+00:26:40 --> 00:26:42
+But I will make two comments, so I mean,
+
+456
+00:26:42 --> 00:26:46
+there&#39;s certainly the natural way
+to think of dependency grammars,
+
+457
+00:26:46 --> 00:26:50
+they&#39;re strongly lexicalized, you&#39;re
+drawing relationships between words.
+
+458
+00:26:50 --> 00:26:53
+Whereas the simplest way of thinking of
+context-free grammars is you&#39;ve got these
+
+459
+00:26:53 --> 00:26:55
+rules in terms of categories like.
+
+460
+00:26:55 --> 00:26:59
+Noun phrase goes to determiner noun,
+optional prepositional phrase.
+
+461
+00:26:59 --> 00:27:03
+And so, that is a big difference.
+
+462
+00:27:03 --> 00:27:05
+But it kind of goes both ways.
+
+463
+00:27:05 --> 00:27:09
+So, normally, when actually, natural
+language processing people wanna work with
+
+464
+00:27:09 --> 00:27:12
+context-free grammars,
+they frequently lexicalize them so
+
+465
+00:27:12 --> 00:27:16
+they can do more precise probabilistic
+prediction, and vice versa.
+
+466
+00:27:16 --> 00:27:18
+If you want to do generalization and
+dependency grammar,
+
+467
+00:27:18 --> 00:27:21
+you can still use at least
+notions of parts of speech
+
+468
+00:27:21 --> 00:27:25
+to give you a level of generalization
+as more like categories.
+
+469
+00:27:25 --> 00:27:29
+But nevertheless, the kind of natural
+ways of sort of turning them into
+
+470
+00:27:29 --> 00:27:32
+probabilities, and machine learning
+models are quite different.
+
+471
+00:27:32 --> 00:27:34
+Though, on the other hand,
+there&#39;s sort of some results, or
+
+472
+00:27:34 --> 00:27:35
+sort of relationships between them.
+
+473
+00:27:35 --> 00:27:37
+But I would think I&#39;d better
+not go on a huge digression.
+
+474
+00:27:37 --> 00:27:38
+But you have another question?
+
+475
+00:27:38 --> 00:27:42
+That means to rather than just have
+categories like noun phrase to have
+
+476
+00:27:42 --> 00:27:46
+categories like a noun phrase headed
+by dog, and so it&#39;s lexicalized.
+
+477
+00:27:46 --> 00:27:50
+Let&#39;s leave this for
+the moment though, please, okay.
+
+478
+00:27:50 --> 00:27:53
+[LAUGH]
+Okay, so
+
+479
+00:27:53 --> 00:27:56
+that&#39;s Panini, and
+there&#39;s a whole big history, right?
+
+480
+00:27:56 --> 00:28:00
+So, essentially for
+Latin grammarians, what they did for
+
+481
+00:28:00 --> 00:28:03
+the syntax of Latin,
+again, not very developed.
+
+482
+00:28:03 --> 00:28:04
+They mainly did morphology, but
+
+483
+00:28:04 --> 00:28:07
+it was essentially a dependency
+kind of analysis that was given.
+
+484
+00:28:07 --> 00:28:11
+There was sort of a flowering of Arabic
+grammarians in the first millennium, and
+
+485
+00:28:11 --> 00:28:13
+they essentially had a dependency grammar.
+
+486
+00:28:13 --> 00:28:20
+I mean, by contrast, I mean, really kind
+of context free grammars and constituency
+
+487
+00:28:20 --> 00:28:26
+grammar only got invented almost in
+the second half of the 20th century.
+
+488
+00:28:26 --> 00:28:28
+I mean, it wasn&#39;t actually Chomsky
+that originally invented them,
+
+489
+00:28:28 --> 00:28:32
+there was a little bit of earlier work in
+Britain, but only kind of a decade before.
+
+490
+00:28:32 --> 00:28:37
+So, there was this French
+linguist Lucien Tesniere,
+
+491
+00:28:37 --> 00:28:41
+he is often referred to as the father
+of modern dependency grammar,
+
+492
+00:28:41 --> 00:28:42
+he&#39;s got a book from 1959.
+
+493
+00:28:42 --> 00:28:48
+Dependency grammars have been very popular
+and more sorta free word order languages,
+
+494
+00:28:48 --> 00:28:52
+cuz notions, sort of like context-free
+grammars work really well for
+
+495
+00:28:52 --> 00:28:55
+languages like English that
+have very fixed word order, but
+
+496
+00:28:55 --> 00:29:00
+a lot of other languages of the world
+have much freer word order.
+
+497
+00:29:00 --> 00:29:04
+And that&#39;s often more naturally
+described with dependency grammars.
+
+498
+00:29:04 --> 00:29:08
+Interestingly, one of the very first
+natural language parsers developed
+
+499
+00:29:08 --> 00:29:12
+in the US was also a dependency parser.
+
+500
+00:29:12 --> 00:29:16
+So, David Hays was one of the first
+US computational linguists.
+
+501
+00:29:16 --> 00:29:20
+And one of the founders of the Association
+for Computational Linguistics which is our
+
+502
+00:29:20 --> 00:29:24
+main kind of academic association where
+we publish our conference papers, etc.
+
+503
+00:29:24 --> 00:29:31
+And he actually built in 1962,
+a dependency parser for English.
+
+504
+00:29:31 --> 00:29:33
+Okay, so
+a lot of history of dependency grammar.
+
+505
+00:29:33 --> 00:29:37
+So, couple of other fine points
+to note about the notation.
+
+506
+00:29:37 --> 00:29:41
+People aren&#39;t always consistent in
+which way they draw the arrows.
+
+507
+00:29:41 --> 00:29:45
+I&#39;m always gonna draw the arrows, so
+they point, go from a head to a dependent,
+
+508
+00:29:45 --> 00:29:47
+which is the direction
+which Tesniere drew them.
+
+509
+00:29:47 --> 00:29:50
+But there are some other people who
+draw the arrows the other way around.
+
+510
+00:29:50 --> 00:29:52
+So, they point from
+the dependent to the head.
+
+511
+00:29:52 --> 00:29:55
+And so, you just need to look and
+see what people are doing.
+
+512
+00:29:55 --> 00:29:58
+The other thing that&#39;s very commonly done,
+and we will do in our parses,
+
+513
+00:29:58 --> 00:30:02
+is you stick this pseudo-word,
+which might be called ROOT or
+
+514
+00:30:02 --> 00:30:07
+WALL, or some other name like that,
+at the start of the sentence.
+
+515
+00:30:07 --> 00:30:11
+And that kind of makes the math and
+formalism easy,
+
+516
+00:30:11 --> 00:30:16
+because, then, every sentence starts with
+root and something is a dependent of root.
+
+517
+00:30:16 --> 00:30:20
+Or, turned around the other way, if you
+think of what parsing a dependency grammar
+
+518
+00:30:20 --> 00:30:23
+means is for every word in
+the sentence you&#39;re going to say,
+
+519
+00:30:23 --> 00:30:26
+what is it a dependent of,
+because if you do that you&#39;re done.
+
+520
+00:30:26 --> 00:30:28
+You&#39;ve got the dependency
+structure of the sentence.
+
+521
+00:30:28 --> 00:30:32
+And what you&#39;re gonna want to say is,
+well, it&#39;s either gonna be a dependent of
+
+522
+00:30:32 --> 00:30:35
+some other word in the sentence,
+or it&#39;s gonna be a dependent of
+
+523
+00:30:35 --> 00:30:39
+the pseudo-word ROOT, which is meaning
+it&#39;s the head of the entire sentence.
+
+524
+00:30:39 --> 00:30:44
+And so, we&#39;ll go through some
+specifics of dependency parsing
+
+525
+00:30:44 --> 00:30:45
+the second half of the class.
+
+526
+00:30:45 --> 00:30:48
+But the kind of thing that you
+should think about is well,
+
+527
+00:30:48 --> 00:30:53
+how could we decide which
+words are dependent on what?
+
+528
+00:30:53 --> 00:30:57
+And there are certain various information
+sources that we can think about.
+
+529
+00:30:57 --> 00:31:01
+So yeah, it&#39;s sort of totally natural with
+the dependency representation to just
+
+530
+00:31:01 --> 00:31:03
+think about word relationships.
+
+531
+00:31:03 --> 00:31:06
+And that&#39;s great, cuz that&#39;ll fit super
+well with what we&#39;ve done already in
+
+532
+00:31:06 --> 00:31:07
+distributed word representations.
+
+533
+00:31:07 --> 00:31:11
+So actually,
+doing things this way just fits well
+
+534
+00:31:11 --> 00:31:15
+with a couple of tools we
+already know how to use.
+
+535
+00:31:15 --> 00:31:17
+We&#39;ll want to say well,
+discussion of issues,
+
+536
+00:31:17 --> 00:31:20
+is that a reasonable attachment
+as lexical dependency?
+
+537
+00:31:20 --> 00:31:23
+And that&#39;s a lot of the information
+that we&#39;ll actually use, but
+
+538
+00:31:23 --> 00:31:26
+there&#39;s some other sources of
+information that we&#39;d also like to use.
+
+539
+00:31:26 --> 00:31:31
+Dependency distance, so sometimes,
+there are dependency relationships and
+
+540
+00:31:31 --> 00:31:35
+sentences between words that is 20 words
+apart when you got some big long sentence,
+
+541
+00:31:35 --> 00:31:37
+and you&#39;re referring that back
+to some previous clause, but
+
+542
+00:31:37 --> 00:31:37
+it&#39;s kind of uncommon.
+
+543
+00:31:37 --> 00:31:41
+Most of dependencies are pretty short
+distance, so you want to prefer that.
+
+544
+00:31:41 --> 00:31:46
+Many dependencies don&#39;t, sort of,
+span certain kinds of things.
+
+545
+00:31:46 --> 00:31:50
+So, if you have the kind of dependencies
+that occur inside noun phrases,
+
+546
+00:31:50 --> 00:31:53
+like adjective modifier,
+they&#39;re not gonna cross over a verb.
+
+547
+00:31:53 --> 00:31:58
+It&#39;s unusual for many kinds of
+dependencies to cross over a punctuation,
+
+548
+00:31:58 --> 00:32:01
+so it&#39;s very rare to have a punctuation
+between a verb and a subject and
+
+549
+00:32:01 --> 00:32:01
+things like that.
+
+550
+00:32:01 --> 00:32:04
+So, looking at the intervening
+material gives you some clues.
+
+551
+00:32:04 --> 00:32:09
+And the final source of information is
+sort of thinking about heads, and thinking
+
+552
+00:32:09 --> 00:32:15
+how likely they are to have to dependence
+in what number, and on what sides.
+
+553
+00:32:15 --> 00:32:19
+So, the kind of information there is,
+right, a word like the,
+
+554
+00:32:19 --> 00:32:23
+is basically not likely to have
+any dependents at all, anywhere.
+
+555
+00:32:23 --> 00:32:25
+So, you&#39;d be surprised if it did.
+
+556
+00:32:25 --> 00:32:30
+Words like nouns can have dependents, and
+they can have quite a few dependents,
+
+557
+00:32:30 --> 00:32:34
+but they&#39;re likely to have some kinds like
+determiners and adjectives on the left,
+
+558
+00:32:34 --> 00:32:37
+other kinds like prepositional
+phrases on the right
+
+559
+00:32:37 --> 00:32:38
+verbs tend to have a lot of dependence.
+
+560
+00:32:38 --> 00:32:41
+So, different kinds of words have
+different kinds of patterns of dependence,
+
+561
+00:32:41 --> 00:32:44
+and so there&#39;s some information
+there we could hope to gather.
+
+562
+00:32:44 --> 00:32:49
+Okay, yeah,
+I guess I&#39;ve already said the first point.
+
+563
+00:32:49 --> 00:32:51
+How do we do dependency parsing?
+
+564
+00:32:51 --> 00:32:54
+In principle, it&#39;s kind of really easy.
+
+565
+00:32:54 --> 00:32:59
+So, we&#39;re just gonna take every
+word in the sentence and say,
+
+566
+00:32:59 --> 00:33:04
+make a decision as to what word or
+root this word is a dependent of.
+
+567
+00:33:04 --> 00:33:06
+And we do that with a few constraints.
+
+568
+00:33:06 --> 00:33:11
+So normally, we require that only
+one word can be a dependent of root,
+
+569
+00:33:11 --> 00:33:13
+and we&#39;re not going to allow any cycles.
+
+570
+00:33:13 --> 00:33:16
+And if we do both of those things,
+
+571
+00:33:16 --> 00:33:20
+we&#39;re guaranteeing that we make
+the dependencies of a tree.
+
+572
+00:33:20 --> 00:33:24
+And normally,
+we want to make out dependencies a tree.
+
+573
+00:33:24 --> 00:33:29
+And there&#39;s one other property
+I then wanted to mention,
+
+574
+00:33:29 --> 00:33:33
+that if you draw your
+dependencies as I have here, so
+
+575
+00:33:33 --> 00:33:38
+all the dependencies been drawn
+as loops above the words.
+
+576
+00:33:38 --> 00:33:42
+It&#39;s different if you&#39;re allowed to
+put some of them below the words.
+
+577
+00:33:42 --> 00:33:46
+There&#39;s then a question as to
+whether you can draw them like this.
+
+578
+00:33:46 --> 00:33:50
+So that they have that kind of nice,
+little nesting structure, but
+
+579
+00:33:50 --> 00:33:52
+none of them cross each other.
+
+580
+00:33:52 --> 00:33:57
+Or whether, like these two that I&#39;ve
+got here, where they necessarily
+
+581
+00:33:57 --> 00:34:01
+cross each other, and
+I couldn&#39;t avoid them crossing each other.
+
+582
+00:34:01 --> 00:34:06
+And what you&#39;ll find is in most languages,
+certainly English,
+
+583
+00:34:06 --> 00:34:10
+the vast majority of dependency
+relationships have a nesting
+
+584
+00:34:10 --> 00:34:13
+structure relative to the linear order.
+
+585
+00:34:13 --> 00:34:16
+And if a dependency tree is fully nesting,
+
+586
+00:34:16 --> 00:34:18
+it&#39;s referred to as
+a projective dependency tree,
+
+587
+00:34:18 --> 00:34:23
+that you can lay it out in this plane,
+and have sort of a nesting relationship.
+
+588
+00:34:23 --> 00:34:26
+But there are few structures
+
+589
+00:34:26 --> 00:34:29
+in English where you&#39;d get things
+that aren&#39;t nested and yet crossing.
+
+590
+00:34:29 --> 00:34:31
+And this sentence is
+a natural example of one.
+
+591
+00:34:31 --> 00:34:33
+So I&#39;ll give a talk
+tomorrow on bootstrapping.
+
+592
+00:34:33 --> 00:34:37
+So something that you can do with
+noun modifiers, especially if they&#39;re
+
+593
+00:34:37 --> 00:34:41
+kind of long words like bootstrapping or
+techniques of bootstrapping,
+
+594
+00:34:41 --> 00:34:45
+is you can sort of move them towards
+the end of the sentence, right.
+
+595
+00:34:45 --> 00:34:48
+I could have said I&#39;ll give
+a talk on bootstrapping tomorrow.
+
+596
+00:34:48 --> 00:34:52
+But it sounds pretty natural to say, I&#39;ll
+give a talk tomorrow on bootstrapping.
+
+597
+00:34:52 --> 00:34:55
+But this on bootstrapping is
+still modifying the talk.
+
+598
+00:34:55 --> 00:34:59
+And so that&#39;s referred to by
+linguists as right extraposition.
+
+599
+00:34:59 --> 00:35:02
+And so when you get that kind of
+rightward movement of phrases,
+
+600
+00:35:02 --> 00:35:05
+you then end up with these crossing lines.
+
+601
+00:35:05 --> 00:35:09
+And that gives you what&#39;s referred to
+as a non-projective dependency tree.
+
+602
+00:35:09 --> 00:35:12
+So, importantly,
+it is still a tree if you sort of
+
+603
+00:35:12 --> 00:35:15
+ignore the constraints of linear order,
+and you&#39;re just drawing it out.
+
+604
+00:35:15 --> 00:35:19
+There&#39;s a graph in theoretical computer
+science, right, it&#39;s still a tree.
+
+605
+00:35:19 --> 00:35:23
+It&#39;s only when you consider this extra
+thing of the linear order of the words,
+
+606
+00:35:23 --> 00:35:25
+that you&#39;re then forced
+to have the lines across.
+
+607
+00:35:25 --> 00:35:28
+And so that property which you don&#39;t
+actually normally see mentioned in
+
+608
+00:35:28 --> 00:35:31
+theoretical computer science
+discussions of graphs
+
+609
+00:35:31 --> 00:35:34
+is then this property that&#39;s
+referred to projectivity.
+
+610
+00:35:34 --> 00:35:41
+Yes.
+&gt;&gt; [INAUDIBLE]
+
+611
+00:35:41 --> 00:35:43
+&gt;&gt; So the questions is is it possible to
+
+612
+00:35:43 --> 00:35:46
+recover the order of the words
+from a dependency tree.
+
+613
+00:35:46 --> 00:35:51
+So given how I&#39;ve defined dependency
+trees, the strict answer is no.
+
+614
+00:35:51 --> 00:35:53
+They aren&#39;t giving you the order at all.
+
+615
+00:35:53 --> 00:35:58
+Now, in practice, people write down
+the words of a sentence in order and have
+
+616
+00:35:58 --> 00:36:03
+these crossing brackets, right, crossing
+arrows when they&#39;re non-projective.
+
+617
+00:36:03 --> 00:36:06
+And, of course, it would be a
+straightforward thing to index the words.
+
+618
+00:36:06 --> 00:36:10
+And, obviously, it&#39;s a real thing about
+languages that they have linear order.
+
+619
+00:36:10 --> 00:36:11
+One can&#39;t deny it.
+
+620
+00:36:11 --> 00:36:15
+But as I&#39;ve defined dependency structures,
+yeah,
+
+621
+00:36:15 --> 00:36:17
+you can&#39;t actually recover
+the order of words from them.
+
+622
+00:36:17 --> 00:36:22
+Okay, one more slide before
+we get to the intermission.
+
+623
+00:36:22 --> 00:36:24
+Yeah, so in the second half of the class,
+
+624
+00:36:24 --> 00:36:29
+I&#39;m gonna tell you about
+a method of dependency parsing.
+
+625
+00:36:29 --> 00:36:33
+I just wanted to say, very quickly,
+there are a whole bunch
+
+626
+00:36:33 --> 00:36:36
+of ways that people have gone
+about doing dependency parsing.
+
+627
+00:36:36 --> 00:36:41
+So one very prominent way of doing
+dependency parsing is using dynamic
+
+628
+00:36:41 --> 00:36:42
+programming methods,
+
+629
+00:36:42 --> 00:36:46
+which is normally what people have
+used for constituency grammars.
+
+630
+00:36:46 --> 00:36:50
+A second way of doing it
+is to use graph algorithms.
+
+631
+00:36:50 --> 00:36:54
+So a common way of doing dependency
+parsing, you&#39;re using MST algorithms,
+
+632
+00:36:54 --> 00:36:55
+Minimum Spanning Tree algorithms.
+
+633
+00:36:55 --> 00:36:58
+And that&#39;s actually a very
+successful way of doing it.
+
+634
+00:36:58 --> 00:37:01
+You can view it as kind of
+a constraint satisfaction problem.
+
+635
+00:37:01 --> 00:37:03
+And people have done that.
+
+636
+00:37:03 --> 00:37:07
+But the way we&#39;re gonna look at it is
+this fourth way which is, these days,
+
+637
+00:37:07 --> 00:37:11
+most commonly called transition
+based-parsing, though when it was first
+
+638
+00:37:11 --> 00:37:16
+introduced, it was quite often called
+deterministic dependency parsing.
+
+639
+00:37:16 --> 00:37:21
+And the idea of this is that
+we&#39;re kind of greedily going to
+
+640
+00:37:21 --> 00:37:27
+decide which word each
+word is a dependent of,
+
+641
+00:37:27 --> 00:37:30
+guided by having a machine
+learning classifier.
+
+642
+00:37:30 --> 00:37:33
+And this is the method you&#39;re
+going to use for assignment two.
+
+643
+00:37:33 --> 00:37:35
+So one way of thinking about this is, so
+
+644
+00:37:35 --> 00:37:39
+far in this class,
+we only have two hammers.
+
+645
+00:37:39 --> 00:37:44
+One hammer we have is word vectors, and
+you can do a lot with word vectors.
+
+646
+00:37:44 --> 00:37:48
+And the other hammer we have is
+how to build a classifier as
+
+647
+00:37:48 --> 00:37:52
+a feedforward neural network
+with a softmax on top so
+
+648
+00:37:52 --> 00:37:55
+it classifies between two various classes.
+
+649
+00:37:55 --> 00:37:57
+And it turns out that if
+those are your two hammers,
+
+650
+00:37:57 --> 00:38:00
+you can do dependency parsing this way and
+it works really well.
+
+651
+00:38:00 --> 00:38:04
+And so, therefore, that&#39;s a great
+approach for using in assignment two.
+
+652
+00:38:04 --> 00:38:06
+And it&#39;s not just a great approach for
+assignment two.
+
+653
+00:38:06 --> 00:38:11
+Actually method four is the dominant
+way these days of doing
+
+654
+00:38:11 --> 00:38:18
+dependency parsing because it has
+extremely good properties of scalability.
+
+655
+00:38:18 --> 00:38:23
+That greedy word there is a way of
+saying this is a linear time algorithm,
+
+656
+00:38:23 --> 00:38:25
+which none of the other methods are.
+
+657
+00:38:25 --> 00:38:28
+So in the modern world
+of web-scale parsing,
+
+658
+00:38:28 --> 00:38:31
+it&#39;s sort of become most
+people&#39;s favorite method.
+
+659
+00:38:31 --> 00:38:33
+So I&#39;ll say more about that very soon.
+
+660
+00:38:33 --> 00:38:34
+But before we get to that,
+
+661
+00:38:34 --> 00:38:39
+we have Ajay doing our research spotlight
+with one last look back at word vectors.
+
+662
+00:38:39 --> 00:38:40
+&gt;&gt; Am I on?
+Okay, awesome, so
+
+663
+00:38:40 --> 00:38:43
+let&#39;s take a break from
+dependency parsing and
+
+664
+00:38:43 --> 00:38:48
+talk about something we should
+know a lot about, word embeddings.
+
+665
+00:38:48 --> 00:38:53
+So for today&#39;s research highlight, we&#39;re
+gonna be talking about a paper titled,
+
+666
+00:38:53 --> 00:38:58
+Improving Distributional Similarity with
+Lessons Learned from Word Embeddings.
+
+667
+00:38:58 --> 00:38:59
+And it&#39;s authored by Levy, et al.
+
+668
+00:38:59 --> 00:39:04
+So in class we&#39;ve learned two major
+paradigms for generating word vectors.
+
+669
+00:39:04 --> 00:39:07
+We&#39;ve learned count-based
+distributional models,
+
+670
+00:39:07 --> 00:39:13
+which essentially utilize a co-occurrence
+matrix to produce your word vectors.
+
+671
+00:39:13 --> 00:39:16
+And we&#39;ve learned SVD,
+which is Singular Value Decomposition.
+
+672
+00:39:16 --> 00:39:18
+And we haven&#39;t really talked about PPMI.
+
+673
+00:39:18 --> 00:39:19
+But, in effect,
+
+674
+00:39:19 --> 00:39:24
+it still uses that co-occurrence matrix to
+produce sparse vector encodings for words.
+
+675
+00:39:24 --> 00:39:26
+We&#39;ve also learned neural
+network-based models,
+
+676
+00:39:26 --> 00:39:28
+which you all should have
+lots of experience with now.
+
+677
+00:39:28 --> 00:39:33
+And, specifically, we&#39;ve talked
+about Skip-Gram Negative Sampling,
+
+678
+00:39:33 --> 00:39:35
+as well as CBOW methods.
+
+679
+00:39:35 --> 00:39:38
+And GloVe is also a neural
+network-based model.
+
+680
+00:39:38 --> 00:39:42
+And the conventional wisdom is that
+neural network-based models are superior
+
+681
+00:39:42 --> 00:39:43
+to count-based models.
+
+682
+00:39:43 --> 00:39:47
+However, Levy et al proposed
+that hyperparameters and
+
+683
+00:39:47 --> 00:39:50
+system design choices are more important,
+not the embedding algorithms themselves.
+
+684
+00:39:50 --> 00:39:53
+So they&#39;re challenging
+this popular convention.
+
+685
+00:39:53 --> 00:39:58
+And so, essentially,
+what they do in their paper is
+
+686
+00:39:58 --> 00:40:03
+propose a slew of hyperparameters that,
+when implemented and tuned over,
+
+687
+00:40:03 --> 00:40:08
+the count-based distributional models
+pretty much approach the performance
+
+688
+00:40:08 --> 00:40:11
+of neural network-based models,
+to the point where there&#39;s no consistent,
+
+689
+00:40:11 --> 00:40:13
+better choice across the different
+tasks that they tried.
+
+690
+00:40:13 --> 00:40:15
+And a lot of these
+hyperparameters were actually
+
+691
+00:40:15 --> 00:40:20
+inspired by these neural network-based
+models such as Skip-Gram.
+
+692
+00:40:20 --> 00:40:23
+So if you recall, which you all
+should be very familiar with this,
+
+693
+00:40:23 --> 00:40:26
+we have two hyperparameters in Skip-Gram.
+
+694
+00:40:26 --> 00:40:29
+We have the number of negative samples
+that we&#39;re sampling, as well as
+
+695
+00:40:29 --> 00:40:32
+the unigram distributions smoothing
+exponent, which we fixed at 3 over 4.
+
+696
+00:40:32 --> 00:40:35
+But it can be thought of as
+more of a system design choice.
+
+697
+00:40:35 --> 00:40:38
+And these can also be transferred
+over to the account based variants.
+
+698
+00:40:38 --> 00:40:40
+And I&#39;ll go over those very quickly.
+
+699
+00:40:40 --> 00:40:44
+So the single hyper
+parameter that Levy et al.,
+
+700
+00:40:44 --> 00:40:48
+proposed that had the biggest
+impact in performance was
+
+701
+00:40:48 --> 00:40:52
+Context Distribution Smoothing
+which is analogous to
+
+702
+00:40:52 --> 00:40:57
+the unigram distribution
+smoothing constant 3 over 4 here.
+
+703
+00:40:57 --> 00:41:01
+And in effect they both
+achieved the same goal which is
+
+704
+00:41:01 --> 00:41:06
+to sort of smooth out your distribution
+such that you&#39;re penalizing rare words.
+
+705
+00:41:06 --> 00:41:11
+And using this hyperparameter
+which interestingly enough,
+
+706
+00:41:11 --> 00:41:15
+the optimal alpha they
+found was exactly 3 over 4,
+
+707
+00:41:15 --> 00:41:20
+which is the same as
+the Skip-Gram Unigram smoothing exponent.
+
+708
+00:41:20 --> 00:41:23
+They were able to increase performance
+by an average of three points across
+
+709
+00:41:23 --> 00:41:25
+tasks on average which
+is pretty interesting.
+
+710
+00:41:25 --> 00:41:26
+And they also propose Shifted PMI,
+
+711
+00:41:26 --> 00:41:28
+which I&#39;m not gonna get
+into the details of this.
+
+712
+00:41:28 --> 00:41:30
+But this is analogous to
+the negative sampling,
+
+713
+00:41:30 --> 00:41:32
+choosing the number of
+negative samples in Skip-Gram.
+
+714
+00:41:32 --> 00:41:37
+And they&#39;ve also proposed a total
+of eight hyperparameters in total.
+
+715
+00:41:37 --> 00:41:41
+And we&#39;ve described one of them which
+is the Context Distribution Smoothing.
+
+716
+00:41:41 --> 00:41:42
+So here&#39;s the results.
+
+717
+00:41:42 --> 00:41:46
+And this is a lot of data, and if you&#39;re
+confused, that&#39;s actually the conclusion
+
+718
+00:41:46 --> 00:41:52
+that I want you to arrive at because
+clearly there&#39;s no trend here.
+
+719
+00:41:52 --> 00:41:57
+So, what the authors did was
+take all four methods, tried
+
+720
+00:41:57 --> 00:42:02
+three different windows, and then test
+all the models across a different task.
+
+721
+00:42:02 --> 00:42:05
+And those are split up into word
+similarity and analogy task.
+
+722
+00:42:05 --> 00:42:09
+And all of these methods are tuned
+
+723
+00:42:09 --> 00:42:12
+to find the best hyperparameters
+to optimize for the performance.
+
+724
+00:42:12 --> 00:42:17
+And the best models are bolded, and as you
+can see there&#39;s no consistent best model.
+
+725
+00:42:17 --> 00:42:23
+So, in effect, they&#39;re challenging
+the popular convention that
+
+726
+00:42:23 --> 00:42:29
+neural network-based models
+are superior to the count-based models.
+
+727
+00:42:29 --> 00:42:31
+However, there&#39;s a few
+things to note here.
+
+728
+00:42:31 --> 00:42:36
+Number one, adding hyperparameters
+is never a great thing because
+
+729
+00:42:36 --> 00:42:41
+now you have to train those
+hyperparameters which takes time.
+
+730
+00:42:41 --> 00:42:45
+Number two,
+we still have the issues with count-based
+
+731
+00:42:45 --> 00:42:51
+distributional models specifically
+with respect to the computational
+
+732
+00:42:51 --> 00:42:56
+issues of storing PPMI counts
+as well as performing SVD.
+
+733
+00:42:56 --> 00:43:00
+So the key takeaways here is that the
+paper challenges the conventional wisdom
+
+734
+00:43:00 --> 00:43:04
+that neutral network-based models are in
+fact superior to count-based models.
+
+735
+00:43:04 --> 00:43:07
+Number two,
+while model design is important,
+
+736
+00:43:07 --> 00:43:10
+hyperparameters are also key for
+achieving good results.
+
+737
+00:43:10 --> 00:43:13
+So this implies specifically to
+you guys especially if you&#39;re
+
+738
+00:43:13 --> 00:43:15
+doing a project instead
+of assignment four.
+
+739
+00:43:15 --> 00:43:20
+You might implement the model but
+that might only take you half way there.
+
+740
+00:43:20 --> 00:43:24
+Some models to find your optimal
+hyperparameters might take days or
+
+741
+00:43:24 --> 00:43:25
+even weeks to find.
+
+742
+00:43:25 --> 00:43:26
+So don&#39;t discount their importance.
+
+743
+00:43:26 --> 00:43:31
+And, finally, my personal interest within
+ML is in deep representation learning.
+
+744
+00:43:31 --> 00:43:35
+And this paper specifically excites
+me because I think it sort of
+
+745
+00:43:35 --> 00:43:39
+displays that there&#39;s still lots
+of work to be done in the field.
+
+746
+00:43:39 --> 00:43:43
+And so, the final takeaway
+is challenge the status quo.
+
+747
+00:43:43 --> 00:43:44
+Thank you.
+
+748
+00:43:44 --> 00:43:49
+&gt;&gt; [APPLAUSE]
+
+749
+00:43:49 --> 00:43:51
+&gt;&gt; Okay, thanks a lot Ajay.
+
+750
+00:43:51 --> 00:43:55
+Okay and so
+now we&#39;re back to learning about how to
+
+751
+00:43:55 --> 00:43:59
+build a transition based
+dependency parser.
+
+752
+00:43:59 --> 00:44:04
+So, maybe in 103 or compilers class,
+formal languages class,
+
+753
+00:44:04 --> 00:44:08
+there&#39;s this notion of
+shift reduced parsing.
+
+754
+00:44:08 --> 00:44:10
+How many of you have seen shift
+reduced parsing somewhere?
+
+755
+00:44:10 --> 00:44:12
+A minority it turns out.
+
+756
+00:44:12 --> 00:44:16
+They just don&#39;t teach formal languages the
+way they used to in the 1960s in computer
+
+757
+00:44:16 --> 00:44:17
+science anymore.
+
+758
+00:44:17 --> 00:44:21
+&gt;&gt; [LAUGH]
+&gt;&gt; You&#39;ll just have to spend more time
+
+759
+00:44:21 --> 00:44:21
+with Jeff Ullman.
+
+760
+00:44:21 --> 00:44:23
+Okay, well I won&#39;t assume that
+you&#39;ve all seen that before.
+
+761
+00:44:23 --> 00:44:31
+Okay, essentially what
+we&#39;re going to have is,
+
+762
+00:44:31 --> 00:44:36
+I&#39;ll just skip these two slides and
+go straight to the pictures.
+
+763
+00:44:36 --> 00:44:37
+Because, they will be
+much more understandable.
+
+764
+00:44:37 --> 00:44:41
+But before I go on, I&#39;ll just
+mention the picture on this page,
+
+765
+00:44:41 --> 00:44:43
+that&#39;s a picture of Joakim Nivre.
+
+766
+00:44:43 --> 00:44:46
+So Joakim Nivre is a computational
+linguist in Uppsala,
+
+767
+00:44:46 --> 00:44:51
+Sweden who pioneered this approach of
+transition based dependency parsing.
+
+768
+00:44:51 --> 00:44:53
+He&#39;s one of my favorite
+computational linguists.
+
+769
+00:44:53 --> 00:44:57
+I mean he was also an example,
+going along with what Ajay said,
+
+770
+00:44:57 --> 00:45:00
+of sort of doing something unpopular and
+
+771
+00:45:00 --> 00:45:03
+out of the mainstream and
+proving that you can get it to work well.
+
+772
+00:45:03 --> 00:45:08
+So at an age when everyone else was trying
+to build sort of fancy dynamic program
+
+773
+00:45:08 --> 00:45:13
+parsers Joakim said no,no, what I&#39;m
+gonna do, is I&#39;m just gonna take each
+
+774
+00:45:13 --> 00:45:18
+successive word and have a straight
+classifier that says what to do with that.
+
+775
+00:45:18 --> 00:45:22
+And go onto the next word completely
+greedy cuz maybe that&#39;s kinda like what
+
+776
+00:45:22 --> 00:45:25
+humans do with incremental
+sentence processing and
+
+777
+00:45:25 --> 00:45:28
+I&#39;m gonna see how well
+I can make that work.
+
+778
+00:45:28 --> 00:45:30
+And it turned out you can
+make it work really well.
+
+779
+00:45:30 --> 00:45:34
+So and then sort of transition based
+parsing has grown to this sort of
+
+780
+00:45:34 --> 00:45:36
+really widespread dominant
+way of doing parsing.
+
+781
+00:45:36 --> 00:45:41
+So it&#39;s good to find something different
+to do If everyone else is doing something,
+
+782
+00:45:41 --> 00:45:43
+it&#39;s good to think of something else
+that might be promising that you
+
+783
+00:45:43 --> 00:45:43
+got an idea from.
+
+784
+00:45:43 --> 00:45:46
+And I also like Joakim because he&#39;s
+actually another person that&#39;s really
+
+785
+00:45:46 --> 00:45:47
+interested in human languages and
+
+786
+00:45:47 --> 00:45:50
+linguistics which actually seems
+to be a minority of the field of
+
+787
+00:45:50 --> 00:45:52
+natural language processing
+when it comes down to it.
+
+788
+00:45:52 --> 00:45:56
+Okay, so here&#39;s some more formalism,
+but I&#39;ll skip that as well and
+
+789
+00:45:56 --> 00:45:59
+show it to you afterwards and
+I&#39;ll give you the idea of what
+
+790
+00:45:59 --> 00:46:04
+an arc-standard transition-based
+dependency parser does.
+
+791
+00:46:04 --> 00:46:09
+So what we&#39;re gonna do is were going
+to have a sentence we want to parse,
+
+792
+00:46:09 --> 00:46:14
+I ate fish, and so we&#39;ve got some rules
+for parsing which is the transition
+
+793
+00:46:14 --> 00:46:18
+scheme which is written so
+small you can&#39;t possibly read it.
+
+794
+00:46:18 --> 00:46:19
+And this is how we start.
+
+795
+00:46:19 --> 00:46:22
+So we have two things,
+we have a stack, and
+
+796
+00:46:22 --> 00:46:26
+a stack is kinda got the gray
+cartouche around that.
+
+797
+00:46:26 --> 00:46:30
+And we start off parsing any
+sentence by putting it on the stack,
+
+798
+00:46:30 --> 00:46:33
+one thing, which is our root symbol.
+
+799
+00:46:33 --> 00:46:38
+Okay and
+the stack has its top towards the right.
+
+800
+00:46:38 --> 00:46:41
+And then we have this other thing
+which gets referred to as the buffer.
+
+801
+00:46:41 --> 00:46:43
+And the buffer is the orange cartouche and
+
+802
+00:46:43 --> 00:46:46
+the buffer is the sentence
+that we&#39;ve got to deal with.
+
+803
+00:46:46 --> 00:46:51
+And so the thing that we regard as the top
+of the buffer is the thing to the left,
+
+804
+00:46:51 --> 00:46:53
+because we&#39;re gonna be taking
+off excessive words right?
+
+805
+00:46:53 --> 00:46:58
+So the top of both of them is sort of at
+that intersection point between them.
+
+806
+00:46:58 --> 00:47:02
+Okay and so,
+to do parsing under this transition-based
+
+807
+00:47:02 --> 00:47:06
+scheme there are three
+operations that we can perform.
+
+808
+00:47:06 --> 00:47:12
+We can perform, they&#39;re called Shift,
+Left-Arc and Right-Arc.
+
+809
+00:47:12 --> 00:47:15
+So the first one that we&#39;re
+gonna do is shift operation.
+
+810
+00:47:15 --> 00:47:17
+So shift is really easy.
+
+811
+00:47:17 --> 00:47:22
+All we do when we do a shift is we take
+the word that&#39;s on the top of the buffer
+
+812
+00:47:22 --> 00:47:23
+and put it on the top of the stack.
+
+813
+00:47:23 --> 00:47:24
+And then we can shift again and
+
+814
+00:47:24 --> 00:47:29
+we take the word that&#39;s on the top of the
+buffer and put it on the top of the stack.
+
+815
+00:47:29 --> 00:47:32
+Remember the stack,
+the top is to the right.
+
+816
+00:47:32 --> 00:47:34
+The buffer, the top is to the left.
+
+817
+00:47:34 --> 00:47:35
+That&#39;s pretty easy, right?
+
+818
+00:47:35 --> 00:47:40
+Okay, so there are two other
+operations left in this arc-standard
+
+819
+00:47:40 --> 00:47:45
+transition scheme which were left arc and
+right arc.
+
+820
+00:47:45 --> 00:47:50
+So what left arc and right arc
+are gonna do is we&#39;re going to make
+
+821
+00:47:50 --> 00:47:54
+attachment decisions by adding
+a word as the dependent,
+
+822
+00:47:54 --> 00:47:56
+either to the left or to the right.
+
+823
+00:47:56 --> 00:48:00
+Okay, so what we do for left arc is
+
+824
+00:48:00 --> 00:48:05
+on the stack we say that
+the second to the top
+
+825
+00:48:05 --> 00:48:10
+of the stack is a dependent of
+the thing that&#39;s the top of the stack.
+
+826
+00:48:10 --> 00:48:16
+So, I is a dependent of ate, and we remove
+that second top thing from the stack.
+
+827
+00:48:16 --> 00:48:18
+So that&#39;s a left arc operation.
+
+828
+00:48:18 --> 00:48:21
+And so now we&#39;ve got a stack
+with just [root] ate on it.
+
+829
+00:48:21 --> 00:48:25
+But we collect up our decisions, so we&#39;ve
+made a decision that I is a dependent of
+
+830
+00:48:25 --> 00:48:29
+ate, and that&#39;s that said A that I am
+writing in small print off to the right.
+
+831
+00:48:29 --> 00:48:32
+Okay, so
+we still had our buffer with fish on it.
+
+832
+00:48:32 --> 00:48:39
+So the next thing we&#39;re gonna do is
+shift again and put fish on the stack.
+
+833
+00:48:39 --> 00:48:41
+And so at that point our buffer is empty,
+
+834
+00:48:41 --> 00:48:43
+we&#39;ve moved every word on to
+the stack in our sentence.
+
+835
+00:48:43 --> 00:48:46
+And we have on it root ate fish, okay.
+
+836
+00:48:46 --> 00:48:50
+So then the third operation we have
+
+837
+00:48:50 --> 00:48:54
+is right arc, and right arc is
+just the opposite of left arc.
+
+838
+00:48:54 --> 00:48:59
+So for the right arc operation, we say
+the thing that&#39;s on the top of the stack
+
+839
+00:48:59 --> 00:49:03
+should be made a dependent of the thing
+that&#39;s second to top on the stack.
+
+840
+00:49:03 --> 00:49:07
+We remove it from the stack and
+we add an arc saying that.
+
+841
+00:49:07 --> 00:49:10
+So we right arc, so
+
+842
+00:49:10 --> 00:49:15
+we say fish is a dependent of ate,
+and we remove fish from the stack.
+
+843
+00:49:15 --> 00:49:20
+We add a new dependency saying
+that fish is a dependent of ate.
+
+844
+00:49:20 --> 00:49:24
+And then we right arc one more time so
+
+845
+00:49:24 --> 00:49:28
+then we&#39;re saying that ate is
+the dependent of the root.
+
+846
+00:49:28 --> 00:49:32
+So we pop it off the stack and we&#39;re
+just left with root on the stack, and
+
+847
+00:49:32 --> 00:49:37
+we&#39;ve got one new dependency saying
+that ate is a dependent of root.
+
+848
+00:49:37 --> 00:49:41
+So at this point, And
+I&#39;ll just mention, right,
+
+849
+00:49:41 --> 00:49:45
+in reality there&#39;s,
+I left out writing the buffer in a few of
+
+850
+00:49:45 --> 00:49:48
+those examples there just because it was
+getting pretty crowded on the slide.
+
+851
+00:49:48 --> 00:49:51
+But really the buffer is always there,
+right, it&#39;s not that the buffer
+
+852
+00:49:51 --> 00:49:55
+disappeared and came back again,
+it&#39;s just I didn&#39;t always draw it.
+
+853
+00:49:55 --> 00:49:56
+So but in our end state,
+
+854
+00:49:56 --> 00:50:00
+we&#39;ve got one thing on the stack,
+and we&#39;ve got nothing in the buffer.
+
+855
+00:50:00 --> 00:50:02
+And that&#39;s the good state
+that we want to be in if we
+
+856
+00:50:02 --> 00:50:04
+finish parsing our sentence correctly.
+
+857
+00:50:04 --> 00:50:07
+And so we say, okay,
+we&#39;re in the finished state and we stop.
+
+858
+00:50:07 --> 00:50:11
+And so that is almost all there
+
+859
+00:50:11 --> 00:50:16
+is to arc-standard
+transition based parsing.
+
+860
+00:50:16 --> 00:50:20
+So if just sort of go back to
+these slides that I skipped over.
+
+861
+00:50:20 --> 00:50:24
+Right, so we have a stack and our buffer,
+and then on the side we have a set of
+
+862
+00:50:24 --> 00:50:29
+dependency arcs A which starts
+off empty and we add things to.
+
+863
+00:50:29 --> 00:50:33
+And we have this sort of set of actions
+which are kind of legal moves that we can
+
+864
+00:50:33 --> 00:50:37
+make for parsing, and so
+this was how things are.
+
+865
+00:50:37 --> 00:50:43
+So we have a start condition, ROOT on the
+stack, buffer is the sentence, no arcs.
+
+866
+00:50:43 --> 00:50:46
+We have the three operations
+that we can perform.
+
+867
+00:50:46 --> 00:50:49
+Here I&#39;ve tried to write
+them out formally, so
+
+868
+00:50:49 --> 00:50:54
+the sort of vertical bar is sort of
+appends an element to a list operation.
+
+869
+00:50:54 --> 00:51:00
+So this is sort of having wi as the first
+word on the buffer, it&#39;s written
+
+870
+00:51:00 --> 00:51:03
+the opposite way around for the stack
+because the head&#39;s on the other side.
+
+871
+00:51:03 --> 00:51:07
+And so we can sort of do this shift
+operation of moving a word onto the stack
+
+872
+00:51:07 --> 00:51:11
+and these two arc operations
+add a new dependency.
+
+873
+00:51:11 --> 00:51:16
+And then removing one word from the stack
+and our ending condition is one
+
+874
+00:51:16 --> 00:51:20
+thing on the stack which will
+be the root and an empty buffer.
+
+875
+00:51:20 --> 00:51:23
+And so
+that&#39;s sort of the formal operations.
+
+876
+00:51:23 --> 00:51:27
+So the idea of transition based
+parsing is that you have this sort of
+
+877
+00:51:27 --> 00:51:32
+set of legal moves to parse a sentence
+in sort of a shift reduced way.
+
+878
+00:51:32 --> 00:51:35
+I mean this one I referred to as
+arc-standard cuz it turns out there
+
+879
+00:51:35 --> 00:51:38
+are different ways you can define
+your sets of dependencies.
+
+880
+00:51:38 --> 00:51:41
+But this is the simplest one,
+the one we&#39;ll use for the assignment, and
+
+881
+00:51:41 --> 00:51:42
+one that works pretty well.
+
+882
+00:51:42 --> 00:51:42
+Question?
+
+883
+00:51:42 --> 00:51:43
+I was gonna get to that.
+
+884
+00:51:43 --> 00:51:45
+So I&#39;ve told you the whole
+thing except for
+
+885
+00:51:45 --> 00:51:49
+one thing which is this just gives
+you a set of possible moves.
+
+886
+00:51:49 --> 00:51:52
+It doesn&#39;t say which
+move you should do when.
+
+887
+00:51:52 --> 00:51:55
+And so
+that&#39;s the remaining thing that&#39;s left.
+
+888
+00:51:55 --> 00:51:56
+And I have a slide on that.
+
+889
+00:51:56 --> 00:52:01
+Okay, so the only thing that&#39;s left
+is to say, gee, at any point in time,
+
+890
+00:52:01 --> 00:52:06
+like we were here, at any point in time,
+you&#39;re in some configuration, right.
+
+891
+00:52:06 --> 00:52:09
+You&#39;ve got certain things on there,
+certain things in the stacks,
+
+892
+00:52:09 --> 00:52:13
+certain things in your buffer, you have
+some set of arcs that you&#39;ve already made.
+
+893
+00:52:13 --> 00:52:18
+And which one of these
+operations do I do next?
+
+894
+00:52:18 --> 00:52:19
+And so that&#39;s the final thing.
+
+895
+00:52:19 --> 00:52:22
+And the way that you do that,
+that Nivre proposed,
+
+896
+00:52:22 --> 00:52:27
+is well what we should do is just
+build a machine learning classifier.
+
+897
+00:52:27 --> 00:52:30
+Since we have a tree bank
+with parses of sentences,
+
+898
+00:52:30 --> 00:52:33
+we can use those parses
+of sentences to see
+
+899
+00:52:33 --> 00:52:38
+which sequence of operations would
+give the correct parse of a sentence.
+
+900
+00:52:38 --> 00:52:40
+I am not actually gonna go
+through that right now.
+
+901
+00:52:40 --> 00:52:43
+But if you have the structure
+of a sentence in a tree bank,
+
+902
+00:52:43 --> 00:52:48
+you can sort of work out deterministically
+the sequence of shifts and
+
+903
+00:52:48 --> 00:52:50
+reducers that you need
+to get that structure.
+
+904
+00:52:50 --> 00:52:54
+And it&#39;s indeed unique, right, that for
+each tree structure there&#39;s a sequence of
+
+905
+00:52:54 --> 00:52:57
+shifts and left arcs and right arcs
+that will give you the right structure.
+
+906
+00:52:57 --> 00:53:00
+So you take the tree, you read off
+the correct operation sequence, and
+
+907
+00:53:00 --> 00:53:03
+therefore you&#39;ve got a supervised
+classification problem.
+
+908
+00:53:03 --> 00:53:07
+Say in this scenario, what you
+should do next is you should shift,
+
+909
+00:53:07 --> 00:53:11
+and so you&#39;re then building
+a classified to try to predict that.
+
+910
+00:53:11 --> 00:53:18
+So in the early work that started off
+with Nivre and others in the mid 2000s,
+
+911
+00:53:18 --> 00:53:23
+this was being done with conventional
+machine learning classifiers.
+
+912
+00:53:23 --> 00:53:28
+So maybe an SVM, maybe a perceptron,
+a kind of maxent / soft max classifiers,
+
+913
+00:53:28 --> 00:53:33
+various things, but sort of some
+classified that you&#39;re gonna use.
+
+914
+00:53:33 --> 00:53:38
+So if you&#39;re just deciding between
+the operations, shift left arc,
+
+915
+00:53:38 --> 00:53:41
+right arc,
+you have got at most three choices.
+
+916
+00:53:41 --> 00:53:44
+Occasionally you have less because if
+there&#39;s nothing left on the buffer
+
+917
+00:53:44 --> 00:53:47
+you can&#39;t shift anymore, so then you&#39;d
+only have two choices left maybe.
+
+918
+00:53:47 --> 00:53:51
+But something I didn&#39;t mention
+when I was showing this is when
+
+919
+00:53:51 --> 00:53:55
+I added to the arc set, I didn&#39;t only
+say that fish is an object of ate.
+
+920
+00:53:55 --> 00:53:58
+I said,
+the dependency is the object of ate.
+
+921
+00:53:58 --> 00:54:01
+And so
+if you want to include dependency labels,
+
+922
+00:54:01 --> 00:54:06
+the standard way of doing that is you just
+have sub types of left arc and right arc.
+
+923
+00:54:06 --> 00:54:08
+So rather than having three choices.
+
+924
+00:54:08 --> 00:54:11
+If you have a approximately 40
+different dependency labels.
+
+925
+00:54:11 --> 00:54:15
+As we will in assignment two and
+in universal dependencies.
+
+926
+00:54:15 --> 00:54:20
+You actually end up with the space
+of 81 way classification.
+
+927
+00:54:20 --> 00:54:24
+Because you have classes with
+names like left arc as an object.
+
+928
+00:54:24 --> 00:54:28
+Or left arc as an adjectival modifier.
+
+929
+00:54:28 --> 00:54:30
+For the assignment,
+you don&#39;t have to do that.
+
+930
+00:54:30 --> 00:54:33
+For the assignment,
+we&#39;re just doing un-type dependency trees.
+
+931
+00:54:33 --> 00:54:36
+Which sort of makes it a bit more
+scalable and easy for you guys.
+
+932
+00:54:36 --> 00:54:40
+So it&#39;s only sort of a three way
+decision is all you&#39;re doing.
+
+933
+00:54:40 --> 00:54:44
+In most real applications, it&#39;s really
+handy to have those dependency labels.
+
+934
+00:54:44 --> 00:54:45
+Okay.
+
+935
+00:54:45 --> 00:54:48
+And then what do we use as features?
+
+936
+00:54:48 --> 00:54:51
+Well, in the traditional model, you sort
+of looked at all the words around you.
+
+937
+00:54:51 --> 00:54:53
+You saw what word was on
+the top of the stack.
+
+938
+00:54:53 --> 00:54:55
+What was the part of speech of that word?
+
+939
+00:54:55 --> 00:54:56
+What was the first word in the buffer?
+
+940
+00:54:56 --> 00:54:57
+What was its parts of speech?
+
+941
+00:54:57 --> 00:55:00
+Maybe it&#39;s good to look at the thing
+beneath the top of the stack.
+
+942
+00:55:00 --> 00:55:02
+And what word and part of speech it is.
+
+943
+00:55:02 --> 00:55:03
+And further ahead in the buffers.
+
+944
+00:55:03 --> 00:55:04
+So you&#39;re looking at a bunch of words.
+
+945
+00:55:04 --> 00:55:07
+You&#39;re looking at some attributes of those
+words, such as their part of speech.
+
+946
+00:55:07 --> 00:55:10
+And that was giving you
+a bunch of features.
+
+947
+00:55:10 --> 00:55:13
+Which are the same kind of classic,
+categorical,
+
+948
+00:55:13 --> 00:55:16
+sparse features of
+traditional machine learning.
+
+949
+00:55:16 --> 00:55:19
+And people were building
+classifiers over that.
+
+950
+00:55:19 --> 00:55:20
+Yeah, Question?
+
+951
+00:55:20 --> 00:55:24
+So yeah, the question is are most
+treebanks annotated with part of speech?
+
+952
+00:55:24 --> 00:55:25
+And the answer is yes.
+
+953
+00:55:25 --> 00:55:26
+Yeah, so I mean.
+
+954
+00:55:26 --> 00:55:29
+We&#39;ve barely talked about
+part of speech so far,
+
+955
+00:55:29 --> 00:55:32
+things like living things,
+nouns, and verbs.
+
+956
+00:55:32 --> 00:55:35
+So the simplest way of doing
+dependency parsing as you&#39;re
+
+957
+00:55:35 --> 00:55:39
+first writing a part of speech, tag it or
+assign parts of speech to words.
+
+958
+00:55:39 --> 00:55:43
+And then you&#39;re doing the syntactic
+structure of dependency parsing over
+
+959
+00:55:43 --> 00:55:46
+a sequence of word,
+part of speech, tag pairs.
+
+960
+00:55:46 --> 00:55:49
+Though there has been other work
+that&#39;s done joint parsing and
+
+961
+00:55:49 --> 00:55:51
+part of speech tag
+prediction at the same time.
+
+962
+00:55:51 --> 00:55:54
+Which actually has some advantages,
+because you can kind of explore.
+
+963
+00:55:54 --> 00:55:57
+Since the two things are associated,
+
+964
+00:55:57 --> 00:56:00
+you can get some advantages
+from doing it jointly.
+
+965
+00:56:00 --> 00:56:06
+Okay, on the simplest possible model,
+which was what Nivre started to explore.
+
+966
+00:56:06 --> 00:56:08
+There was absolutely no search.
+
+967
+00:56:08 --> 00:56:10
+You just took the next word,
+ran your classifier.
+
+968
+00:56:10 --> 00:56:14
+And said, that&#39;s the object of the verb,
+what&#39;s the next word?
+
+969
+00:56:14 --> 00:56:15
+Okay, that one&#39;s a noun modifier.
+
+970
+00:56:15 --> 00:56:18
+And you went along and
+just made these decisions.
+
+971
+00:56:18 --> 00:56:22
+Now you could obviously think,
+gee maybe if I did some more searching and
+
+972
+00:56:22 --> 00:56:24
+explore different alternatives
+I could do a bit better.
+
+973
+00:56:24 --> 00:56:25
+And the answer is yes, you can.
+
+974
+00:56:25 --> 00:56:27
+So there&#39;s a lot of work
+in dependency parsing.
+
+975
+00:56:27 --> 00:56:31
+Which uses various forms of beam search
+where you explore different alternatives.
+
+976
+00:56:31 --> 00:56:34
+And if you do that, it gets a ton slower.
+
+977
+00:56:34 --> 00:56:37
+And gets a teeny bit better in
+terms of your performance results.
+
+978
+00:56:37 --> 00:56:42
+Okay, but especially if you start from the
+greediest end or you have a small beam.
+
+979
+00:56:42 --> 00:56:47
+The secret of this type of parsing
+is it gives you extremely fast
+
+980
+00:56:47 --> 00:56:48
+linear time parsing.
+
+981
+00:56:48 --> 00:56:51
+Because you&#39;re just going through
+your corpus, no matter how big.
+
+982
+00:56:51 --> 00:56:52
+And say, what&#39;s the next word?
+
+983
+00:56:52 --> 00:56:53
+Okay, attach it there.
+
+984
+00:56:53 --> 00:56:53
+What&#39;s the next word?
+
+985
+00:56:53 --> 00:56:54
+Attach it there.
+
+986
+00:56:54 --> 00:56:56
+And you keep on chugging through.
+
+987
+00:56:56 --> 00:57:00
+So when people, like prominent search
+engines in suburbs south of us,
+
+988
+00:57:00 --> 00:57:02
+want to parse the entire
+content of the Web.
+
+989
+00:57:02 --> 00:57:05
+They use a parser like this
+because it goes super fast.
+
+990
+00:57:05 --> 00:57:05
+Okay.
+
+991
+00:57:05 --> 00:57:09
+And so, what was shown was these
+kind of greedy dependencies parses.
+
+992
+00:57:09 --> 00:57:14
+Their accuracy is slightly below
+the best dependency parses possible.
+
+993
+00:57:14 --> 00:57:17
+But their performance is
+actually kind of close to it.
+
+994
+00:57:17 --> 00:57:20
+And the fact that they&#39;re sort of so
+fast and scalable.
+
+995
+00:57:20 --> 00:57:23
+More than makes up for
+their teeny performance decrease.
+
+996
+00:57:23 --> 00:57:24
+So that&#39;s kind of exciting.
+
+997
+00:57:24 --> 00:57:29
+Okay, so then for the last few minutes
+I now want to get back to neural nets.
+
+998
+00:57:29 --> 00:57:30
+Okay so where are we at the moment?
+
+999
+00:57:30 --> 00:57:33
+So at the moment we have a configuration
+where we have a stack and
+
+1000
+00:57:33 --> 00:57:35
+a buffer and parts of speech or words.
+
+1001
+00:57:35 --> 00:57:37
+And as we start to build some structure.
+
+1002
+00:57:37 --> 00:57:40
+The things that we&#39;ve taken off
+the stack when we build arcs.
+
+1003
+00:57:40 --> 00:57:43
+We can kind of sort of think of them as
+starting to build up a tree as we go.
+
+1004
+00:57:43 --> 00:57:45
+As I&#39;ve indicated with that example below.
+
+1005
+00:57:45 --> 00:57:49
+So, the classic way of doing that
+is you could then say, okay,
+
+1006
+00:57:49 --> 00:57:50
+well we&#39;ve got all of these features.
+
+1007
+00:57:50 --> 00:57:54
+Like top of stack is word good,
+or top of stack is word bad,
+
+1008
+00:57:54 --> 00:57:56
+or top of stack is word easy.
+
+1009
+00:57:56 --> 00:57:58
+Top of stack&#39;s part of
+speech as adjective.
+
+1010
+00:57:58 --> 00:57:59
+Top of stack&#39;s word is noun.
+
+1011
+00:57:59 --> 00:58:00
+And if you start doing that.
+
+1012
+00:58:00 --> 00:58:05
+When you&#39;ve got a combination of
+positions and words and parts of speech.
+
+1013
+00:58:05 --> 00:58:09
+You very quickly find that the number
+of features you have in your model
+
+1014
+00:58:09 --> 00:58:11
+is sort of order ten million.
+
+1015
+00:58:11 --> 00:58:12
+Extremely, extremely large.
+
+1016
+00:58:12 --> 00:58:16
+But you know that&#39;s precisely how these
+kinds of parses were standardly made
+
+1017
+00:58:16 --> 00:58:17
+in the 2000s.
+
+1018
+00:58:17 --> 00:58:22
+So you&#39;re building these huge machine
+learning classifiers over sparse features.
+
+1019
+00:58:22 --> 00:58:25
+And commonly you even had features
+that were conjunctions of things.
+
+1020
+00:58:25 --> 00:58:26
+As that helped you predict better.
+
+1021
+00:58:26 --> 00:58:30
+So you had features like the second
+word on the stack is has.
+
+1022
+00:58:30 --> 00:58:32
+And its tag is present tense verb.
+
+1023
+00:58:32 --> 00:58:33
+And the top word on the stack is good.
+
+1024
+00:58:33 --> 00:58:34
+And things like that would be one feature.
+
+1025
+00:58:34 --> 00:58:38
+And that&#39;s where you easily get
+into the ten million plus features.
+
+1026
+00:58:38 --> 00:58:41
+So even doing this already
+worked quite well.
+
+1027
+00:58:41 --> 00:58:45
+But the starting point
+from going on is saying,
+
+1028
+00:58:45 --> 00:58:48
+well it didn&#39;t work completely great.
+
+1029
+00:58:48 --> 00:58:49
+That we wanna do better than that.
+
+1030
+00:58:49 --> 00:58:52
+And we&#39;ll go on and
+do that in just a minute.
+
+1031
+00:58:52 --> 00:58:56
+But before I do that, I should mention
+just the evaluation of dependency parsing.
+
+1032
+00:58:56 --> 00:58:59
+Evaluation of dependency
+parsing is actually very easy.
+
+1033
+00:58:59 --> 00:59:03
+Cuz since for each word we&#39;re saying,
+what is it a dependent of.
+
+1034
+00:59:03 --> 00:59:07
+That we&#39;re sort of making choices of
+what each word is a dependent of.
+
+1035
+00:59:07 --> 00:59:08
+And then there&#39;s a right answer.
+
+1036
+00:59:08 --> 00:59:11
+Which we get from our tree bank,
+which is the gold thing.
+
+1037
+00:59:11 --> 00:59:15
+We&#39;re sort of, essentially,
+just counting how often we are right.
+
+1038
+00:59:15 --> 00:59:16
+Which is an accuracy measure.
+
+1039
+00:59:16 --> 00:59:19
+And so, there are two ways
+that that&#39;s commonly done.
+
+1040
+00:59:19 --> 00:59:24
+One way is that we just look at
+the arrows and ignore the labels.
+
+1041
+00:59:24 --> 00:59:28
+And that&#39;s often referred to as
+the UAS measure, unlabeled accuracy.
+
+1042
+00:59:28 --> 00:59:31
+Or we can also pay
+attention to the labels.
+
+1043
+00:59:31 --> 00:59:33
+And say you&#39;re only right if
+you also get the label right.
+
+1044
+00:59:33 --> 00:59:37
+And that&#39;s referred to as the LAS,
+the labelled accuracy score.
+
+1045
+00:59:37 --> 00:59:37
+Yes?
+
+1046
+00:59:37 --> 00:59:41
+So the question is, don&#39;t you have
+waterfall effects if you get something
+
+1047
+00:59:41 --> 00:59:45
+wrong high up that&#39;ll destroy
+everything else further down?
+
+1048
+00:59:45 --> 00:59:47
+You do get some of that.
+
+1049
+00:59:47 --> 00:59:53
+Because, yes, one decision will
+prevent some other decisions.
+
+1050
+00:59:53 --> 00:59:54
+It&#39;s typically not so bad.
+
+1051
+00:59:54 --> 00:59:57
+Because even if you mis-attach something
+like a prepositional phrase attachment.
+
+1052
+00:59:57 --> 01:00:00
+You can still get right all of
+the attachments inside noun
+
+1053
+01:00:00 --> 01:00:01
+phrase that&#39;s inside that
+prepositional phrase.
+
+1054
+01:00:01 --> 01:00:02
+So it&#39;s not so bad.
+
+1055
+01:00:02 --> 01:00:05
+And I mean actually dependency parsing
+
+1056
+01:00:05 --> 01:00:09
+evaluation suffers much less
+badly from waterfall effects.
+
+1057
+01:00:09 --> 01:00:13
+Than doing CFG parsing which
+is worse in that respect.
+
+1058
+01:00:13 --> 01:00:13
+So it&#39;s not so bad.
+
+1059
+01:00:13 --> 01:00:18
+Okay, I had one slide there
+which I think I should skip.
+
+1060
+01:00:18 --> 01:00:23
+Okay I&#39;ll skip on to Neural ones.
+
+1061
+01:00:23 --> 01:00:29
+Okay, so, people could build quite good
+
+1062
+01:00:29 --> 01:00:34
+machine learning dependency parsers on
+these kind of categorical features.
+
+1063
+01:00:34 --> 01:00:37
+But nevertheless,
+there was a problems of doing that.
+
+1064
+01:00:37 --> 01:00:42
+So, Problem #1 is the features
+were just super sparse.
+
+1065
+01:00:42 --> 01:00:46
+That if you typically might have a tree
+bank that is an order about a million
+
+1066
+01:00:46 --> 01:00:50
+words, and if you&#39;re then trying
+to train 15 million features,
+
+1067
+01:00:50 --> 01:00:53
+which are kinda different
+combinations of configurations.
+
+1068
+01:00:53 --> 01:00:57
+Not surprisingly, a lot of those
+configurations, you&#39;ve seen once or twice.
+
+1069
+01:00:57 --> 01:01:01
+So, you just don&#39;t have any
+accurate model of what happens in
+
+1070
+01:01:01 --> 01:01:02
+different configurations.
+
+1071
+01:01:02 --> 01:01:05
+You just kind of getting these
+weak feature weights, and
+
+1072
+01:01:05 --> 01:01:07
+crossing your fingers and
+hoping for the best.
+
+1073
+01:01:07 --> 01:01:09
+Now, it turns out that
+modern machine learning,
+
+1074
+01:01:09 --> 01:01:10
+crossing your fingers works pretty well.
+
+1075
+01:01:10 --> 01:01:12
+But, nevertheless,
+you&#39;re suffering a lot from sparsity.
+
+1076
+01:01:12 --> 01:01:15
+Okay, the second problem is,
+you also have an incompleteness problem,
+
+1077
+01:01:15 --> 01:01:19
+because lots of configurations
+you&#39;ll see it run time, will be
+
+1078
+01:01:19 --> 01:01:23
+different configurations that you just
+never happened to see the configuration.
+
+1079
+01:01:23 --> 01:01:25
+When exquisite was the second
+word on the stack, and
+
+1080
+01:01:25 --> 01:01:30
+the top word of the stack,
+speech, or something.
+
+1081
+01:01:30 --> 01:01:33
+Any kind of word pale,
+I&#39;ve only seen a small fraction of them.
+
+1082
+01:01:33 --> 01:01:35
+Lot&#39;s of things you
+don&#39;t have features for.
+
+1083
+01:01:35 --> 01:01:37
+The third one is a little bit surprising.
+
+1084
+01:01:37 --> 01:01:42
+It turned out that when you looked at
+these symbolic dependency parsers,
+
+1085
+01:01:42 --> 01:01:44
+and you ask what made them slow.
+
+1086
+01:01:44 --> 01:01:48
+What made them slow
+wasn&#39;t running your SVM,
+
+1087
+01:01:48 --> 01:01:52
+or your dot products in your logistic
+regression, or things like that.
+
+1088
+01:01:52 --> 01:01:55
+All of those things were really fast.
+
+1089
+01:01:55 --> 01:01:59
+What these parsers were ending up
+spending 95% of their time doing
+
+1090
+01:01:59 --> 01:02:03
+is just computing these features, and
+looking up their weights because you
+
+1091
+01:02:03 --> 01:02:07
+had to sort of walk around the stack and
+the buffer and sort of put together.
+
+1092
+01:02:07 --> 01:02:10
+A feature name, and then you had to
+look it up in some big hash table to
+
+1093
+01:02:10 --> 01:02:12
+get a feature number and a weight for it.
+
+1094
+01:02:12 --> 01:02:14
+And all the time is going on that, so
+
+1095
+01:02:14 --> 01:02:18
+even though there are linear time,
+that slowed them down a ton.
+
+1096
+01:02:18 --> 01:02:22
+So, in a paper in 2014 Danqi and
+
+1097
+01:02:22 --> 01:02:25
+I developed this alternative
+where we said well,
+
+1098
+01:02:25 --> 01:02:29
+let&#39;s just replace that all
+with a neural net classifier.
+
+1099
+01:02:29 --> 01:02:33
+So that way, we can have a dense
+compact feature representation and
+
+1100
+01:02:33 --> 01:02:34
+do classification.
+
+1101
+01:02:34 --> 01:02:38
+So, rather than having our 10
+million categorical features,
+
+1102
+01:02:38 --> 01:02:42
+we&#39;ll have a relatively modest
+number of dense features, and
+
+1103
+01:02:42 --> 01:02:44
+we&#39;ll use that to decide our next action.
+
+1104
+01:02:44 --> 01:02:47
+And so, I want to spend the last
+few minutes sort of showing
+
+1105
+01:02:47 --> 01:02:51
+you how that works, and this is basically
+question two of the assignment.
+
+1106
+01:02:51 --> 01:02:56
+Okay, and basically, just to give you
+the headline, this works really well.
+
+1107
+01:02:56 --> 01:02:59
+So, this was sort of the outcome
+the first Parser MaltParser.
+
+1108
+01:02:59 --> 01:03:01
+So, it has pretty good UAS and
+
+1109
+01:03:01 --> 01:03:05
+LAS and it had this advantage,
+that it was really fast.
+
+1110
+01:03:05 --> 01:03:09
+When I said that&#39;s been the preferred
+method, I give you some contrast in gray.
+
+1111
+01:03:09 --> 01:03:11
+So, these are two of
+the graph base parsers.
+
+1112
+01:03:11 --> 01:03:15
+So, the graph based parsers have
+been somewhat more accurate, but
+
+1113
+01:03:15 --> 01:03:17
+they were kind of like two
+orders in magnitude slower.
+
+1114
+01:03:17 --> 01:03:20
+So, if you didn&#39;t wanna parse much stuff
+than you wanted accuracy, you&#39;d use them.
+
+1115
+01:03:20 --> 01:03:23
+But if you wanted to parse the web,
+no one use them.
+
+1116
+01:03:23 --> 01:03:27
+And so,
+the cool thing was that by doing this as
+
+1117
+01:03:27 --> 01:03:31
+neural network dependency parser,
+we were able to get much better accuracy.
+
+1118
+01:03:31 --> 01:03:35
+We were able to get accuracy that
+was virtually as good as the best,
+
+1119
+01:03:35 --> 01:03:38
+graph-based parsers at that time.
+
+1120
+01:03:38 --> 01:03:42
+And we were actually about to build
+a parser that works significantly
+
+1121
+01:03:42 --> 01:03:46
+faster than MaltParser, because of
+the fact that it wasn&#39;t spending
+
+1122
+01:03:46 --> 01:03:48
+all this time doing feature combination.
+
+1123
+01:03:48 --> 01:03:50
+It did have to do more
+vector matrix multiplies,
+
+1124
+01:03:50 --> 01:03:52
+of course, but that&#39;s a different story.
+
+1125
+01:03:52 --> 01:03:53
+Okay, so how did we do it?
+
+1126
+01:03:53 --> 01:03:56
+Well, so, our starting point was
+the two tools we have, right?
+
+1127
+01:03:56 --> 01:03:57
+Distributed representation.
+
+1128
+01:03:57 --> 01:04:01
+So, we&#39;re gonna use distributed
+representations of words.
+
+1129
+01:04:01 --> 01:04:05
+So, similar words have close by vectors,
+we&#39;ve seen all of that.
+
+1130
+01:04:05 --> 01:04:09
+We&#39;re also going to use part, in our POS,
+we use part-of-speech tags and
+
+1131
+01:04:09 --> 01:04:10
+dependency labels.
+
+1132
+01:04:10 --> 01:04:13
+And we also learned distributed
+representations for those.
+
+1133
+01:04:13 --> 01:04:14
+That&#39;s kind of a cool idea,
+
+1134
+01:04:14 --> 01:04:18
+cuz it&#39;s also the case that parts of
+speech some are more related than others.
+
+1135
+01:04:18 --> 01:04:21
+So, if you have a fine grain
+part-of-speech set where you have
+
+1136
+01:04:21 --> 01:04:24
+plural nouns and proper names as
+different parts of speech from nouns,
+
+1137
+01:04:24 --> 01:04:27
+singular, you want to say
+that they are close together.
+
+1138
+01:04:27 --> 01:04:32
+So, we also had distributed
+representations for those.
+
+1139
+01:04:32 --> 01:04:35
+So now,
+we have the same kind of configuration.
+
+1140
+01:04:35 --> 01:04:39
+We&#39;re gonna run exactly the same
+transition based dependency parser.
+
+1141
+01:04:39 --> 01:04:42
+So, the configuration
+is no different at all.
+
+1142
+01:04:42 --> 01:04:46
+But what we&#39;re going to extract
+from it is the starting point.
+
+1143
+01:04:46 --> 01:04:48
+We extract certain positions,
+
+1144
+01:04:48 --> 01:04:52
+just like Nivre&#39;s MaltParser but
+then what we&#39;re gonna do is,
+
+1145
+01:04:52 --> 01:04:57
+for each of these positions, like top of
+stack, second top of stack, buffer etc.
+
+1146
+01:04:57 --> 01:05:01
+We&#39;re then going to look then
+up in our bedding matrix, and
+
+1147
+01:05:01 --> 01:05:03
+come up with a dense representation.
+
+1148
+01:05:03 --> 01:05:06
+So, you might be representing
+words as sort of a 50 or
+
+1149
+01:05:06 --> 01:05:11
+100 dimensional word vector representation
+of the kind that we&#39;ve talked about.
+
+1150
+01:05:11 --> 01:05:15
+And so, we get those representations for
+the different words as vectors, and
+
+1151
+01:05:15 --> 01:05:20
+then what we&#39;re gonna do is just
+concatenate those into one longer vector.
+
+1152
+01:05:20 --> 01:05:23
+So, any configuration of the parser
+is just being represented as
+
+1153
+01:05:23 --> 01:05:24
+the longest vector.
+
+1154
+01:05:24 --> 01:05:25
+Well, perhaps not that long,
+
+1155
+01:05:25 --> 01:05:28
+our vectors are sort of more
+around 1,000 not 10 million, yeah.
+
+1156
+01:05:28 --> 01:05:30
+Sorry, the dependency of, right,
+
+1157
+01:05:30 --> 01:05:33
+the question is what&#39;s this
+dependency on feeding as an input?
+
+1158
+01:05:33 --> 01:05:35
+The dependency I&#39;m feeding
+here as an import,
+
+1159
+01:05:35 --> 01:05:40
+is when I previously built some arcs
+that are in my arc set, I&#39;m thinking
+
+1160
+01:05:40 --> 01:05:45
+maybe it&#39;ll be useful to use those arcs as
+well, to help predict the next decision.
+
+1161
+01:05:45 --> 01:05:50
+So, I&#39;m using previous decisions on arcs
+as well to predict my follow-up decisions.
+
+1162
+01:05:50 --> 01:05:51
+Okay, so how do I do this?
+
+1163
+01:05:51 --> 01:05:55
+And this is essentially what
+you guys are gonna build.
+
+1164
+01:05:55 --> 01:05:59
+From my configuration,
+I take things out of it.
+
+1165
+01:05:59 --> 01:06:03
+I get there embedding representations, and
+
+1166
+01:06:03 --> 01:06:08
+I can concatenate them together,
+and that&#39;s my input layer.
+
+1167
+01:06:08 --> 01:06:12
+I then run that through a hidden
+layer Is a neural network,
+
+1168
+01:06:12 --> 01:06:16
+feedforward neural network,
+I then have, from the hidden layer,
+
+1169
+01:06:16 --> 01:06:20
+I&#39;ve run that through a Softmax layer,
+and I get an output layer,
+
+1170
+01:06:20 --> 01:06:26
+which is a probability distribution of my
+different actions in the standard Softmax.
+
+1171
+01:06:26 --> 01:06:29
+And of course, I don&#39;t know what
+any of these numbers are gonna be.
+
+1172
+01:06:29 --> 01:06:33
+So, what I&#39;m gonna be doing is I&#39;m going
+to be using cross-entropy error, and
+
+1173
+01:06:33 --> 01:06:36
+then back-propagating
+down to learn things.
+
+1174
+01:06:36 --> 01:06:41
+And this is the whole model,
+and it learns super well,
+
+1175
+01:06:41 --> 01:06:45
+and it produces a great dependency parser.
+
+1176
+01:06:45 --> 01:06:48
+I&#39;m running a tiny bit short of time,
+but let me just,
+
+1177
+01:06:48 --> 01:06:51
+I think I&#39;ll have to rush this but
+I&#39;ll just say it.
+
+1178
+01:06:51 --> 01:06:55
+So, non-linearities, we&#39;ve mentioned
+non-linearities a little bit.
+
+1179
+01:06:55 --> 01:06:58
+We haven&#39;t said very much about them, and
+
+1180
+01:06:58 --> 01:07:02
+I just want to say a couple more
+sentences on non-linearities.
+
+1181
+01:07:02 --> 01:07:03
+Something like a softmax.
+
+1182
+01:07:03 --> 01:07:07
+You can say that using a logistic function
+gives you a probability distribution.
+
+1183
+01:07:07 --> 01:07:10
+And that&#39;s kind of what you get in
+generalized linear models and statistics.
+
+1184
+01:07:10 --> 01:07:12
+In general, though, you want to say that.
+
+1185
+01:07:12 --> 01:07:14
+For neural networks.
+
+1186
+01:07:14 --> 01:07:18
+Having these non-linearities sort of
+let&#39;s us do function approximation by
+
+1187
+01:07:18 --> 01:07:22
+putting together these various
+neurons that have some non-linearity.
+
+1188
+01:07:22 --> 01:07:26
+We can sorta put together little
+pieces like little wavelets to do
+
+1189
+01:07:26 --> 01:07:27
+functional approximation.
+
+1190
+01:07:27 --> 01:07:33
+And the crucial thing to notice is you
+have to use some non-linearity, right?
+
+1191
+01:07:33 --> 01:07:37
+Deep networks are useless unless you put
+something in between the layers, right?
+
+1192
+01:07:37 --> 01:07:41
+If you just have multiple linear layers
+they could just be collapsed down into one
+
+1193
+01:07:41 --> 01:07:44
+linear layer that the sort of
+product of linear transformations,
+
+1194
+01:07:44 --> 01:07:47
+affine transformations is just
+an affine transformation.
+
+1195
+01:07:47 --> 01:07:50
+So deep networks without
+non-linearities do nothing, okay?
+
+1196
+01:07:50 --> 01:07:54
+And so we&#39;ve talked about
+logistic non-linearities.
+
+1197
+01:07:54 --> 01:07:59
+A second very commonly used
+non-linearity is the tanh non-linearity,
+
+1198
+01:07:59 --> 01:08:03
+which is tanh is normally
+written a bit differently.
+
+1199
+01:08:03 --> 01:08:08
+But if you sort of actually do your
+little bit of math, tanh is really
+
+1200
+01:08:08 --> 01:08:13
+the same as a logistic, just sort of
+stretched and moved a little bit.
+
+1201
+01:08:13 --> 01:08:18
+And so tanh has the advantage that
+it&#39;s sort of symmetric around zero.
+
+1202
+01:08:18 --> 01:08:22
+And so that often works a lot better
+if you&#39;re putting it in the middle
+
+1203
+01:08:22 --> 01:08:23
+of a new neural net.
+
+1204
+01:08:23 --> 01:08:26
+But in the example I showed you earlier,
+and for
+
+1205
+01:08:26 --> 01:08:30
+what you guys will be using for
+the dependency parser,
+
+1206
+01:08:30 --> 01:08:35
+the suggestion to use for the first
+layer is this linear rectifier layer.
+
+1207
+01:08:35 --> 01:08:38
+And linear rectifier
+non-linearities are kind of freaky.
+
+1208
+01:08:38 --> 01:08:40
+They&#39;re not some interesting curve at all.
+
+1209
+01:08:40 --> 01:08:44
+Linear rectifiers just map things
+to zero if they&#39;re negative, and
+
+1210
+01:08:44 --> 01:08:46
+then linear If they&#39;re positive.
+
+1211
+01:08:46 --> 01:08:50
+And when these were first introduced,
+I thought these were kind of crazy.
+
+1212
+01:08:50 --> 01:08:53
+I couldn&#39;t really believe that these
+were gonna work and do anything useful.
+
+1213
+01:08:53 --> 01:08:56
+But they&#39;ve turned out to
+be super successful, so
+
+1214
+01:08:56 --> 01:09:01
+in the middle of neural networks, these
+days often the first thing you try and
+
+1215
+01:09:01 --> 01:09:07
+often what works the best is what&#39;s called
+ReLU, which is rectified linear unit.
+
+1216
+01:09:07 --> 01:09:11
+And they just sort of effectively
+have these nice properties where
+
+1217
+01:09:11 --> 01:09:14
+if you&#39;re on the positive
+side the slope is just 1.
+
+1218
+01:09:14 --> 01:09:19
+Which means that they transmit
+error in the back propagation step
+
+1219
+01:09:19 --> 01:09:22
+really well linearly back
+down through the network.
+
+1220
+01:09:22 --> 01:09:25
+And if they go negative that gives enough
+of a non-linearity that they&#39;re just
+
+1221
+01:09:25 --> 01:09:27
+sort of being turned off
+in certain configurations.
+
+1222
+01:09:27 --> 01:09:31
+And so these really non-linearities
+have just been super, super successful.
+
+1223
+01:09:31 --> 01:09:35
+And that&#39;s what we suggest that
+you use in the dependency parser.
+
+1224
+01:09:35 --> 01:09:38
+Okay, so I should stop now.
+
+1225
+01:09:38 --> 01:09:42
+But this kind of putting a neural
+network into a transition based
+
+1226
+01:09:42 --> 01:09:45
+parser was just a super successful idea.
+
+1227
+01:09:45 --> 01:09:50
+So if any of you heard about the Google
+announcements of Parsey McParseface.
+
+1228
+01:09:50 --> 01:09:54
+And SyntaxNet for their kind of
+open source dependency parser.
+
+1229
+01:09:54 --> 01:09:57
+It&#39;s essentially exactly
+the same idea of this.
+
+1230
+01:09:57 --> 01:10:00
+Just done with a bigger scaled up,
+better optimized neural network.
+
+1231
+01:10:00 --> 01:10:00
+Okay, thanks a lot.
+
