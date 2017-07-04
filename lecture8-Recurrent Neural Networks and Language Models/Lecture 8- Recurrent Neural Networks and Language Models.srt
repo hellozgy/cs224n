@@ -1343,7 +1343,7 @@ Now we can analyze and
 understand why that is.
 
 284
-00:20:16,570 --> 00:20:20,840
+00:20:16,570 --> 00:20:20,840 
 So basically we're multiplying here,
 the same matrix at each time step, right?
 
