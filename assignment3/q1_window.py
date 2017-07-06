@@ -97,7 +97,16 @@ def make_windowed_data(data, start, end, window_size = 1):
     windowed_data = []
     for sentence, labels in data:
     ### YOUR CODE HERE (5-20 lines)
-
+        for i in range(len(sentence)):
+            word = []
+            for j in (i - window_size, i + window_size + 1, 1):
+                if j < 0:
+                    word.extend(start)
+                elif j >= len(sentence):
+                    word.extend(end)
+                else:
+                    word.extend(sentence[j])
+            windowed_data.append((word, labels[i]))
     ### END YOUR CODE
     return windowed_data
 
