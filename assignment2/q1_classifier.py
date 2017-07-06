@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow as tf
+import time
 
 from q1_softmax import softmax
 from q1_softmax import cross_entropy_loss
