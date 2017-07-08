@@ -3,10 +3,6 @@
 """
 Q3: Grooving with GRUs
 """
-
-
-
-
 import argparse
 import logging
 import sys
@@ -87,6 +83,8 @@ class SequencePredictor(Model):
 
         x = self.inputs_placeholder
         ### YOUR CODE HERE (~2-3 lines)
+        preds = tf.nn.dynamic_rnn(cell=cell, dtype=tf.float32,inputs=x, scope=self.config.cell)[1]
+        preds = tf.sigmoid(preds)
         ### END YOUR CODE
 
         return preds #state # preds
@@ -108,7 +106,7 @@ class SequencePredictor(Model):
         y = self.labels_placeholder
 
         ### YOUR CODE HERE (~1-2 lines)
-
+        loss = tf.reduce_mean(tf.nn.l2_loss(preds - y))
         ### END YOUR CODE
 
         return loss
@@ -139,11 +137,16 @@ class SequencePredictor(Model):
         optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.config.lr)
 
         ### YOUR CODE HERE (~6-10 lines)
-
         # - Remember to clip gradients only if self.config.clip_gradients
         # is True.
         # - Remember to set self.grad_norm
-
+        grad_var = optimizer.compute_gradients(loss)
+        grad = [t[0] for t in grad_var]
+        var = [t[1] for t in grad_var]
+        if self.config.clip_gradients:
+            grad = tf.clip_by_global_norm(grad, clip_norm=self.config.max_grad_norm)[0]
+        train_op = optimizer.apply_gradients([(grad[i], var[i]) for i in range(len(grad))])
+        self.grad_norm = tf.global_norm(grad)
         ### END YOUR CODE
 
         assert self.grad_norm is not None, "grad_norm was not set properly!"

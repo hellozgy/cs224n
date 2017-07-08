@@ -274,7 +274,7 @@ class RNNModel(NERModel):
             U = tf.get_variable('U', shape=(Config.hidden_size, Config.n_classes), dtype=tf.float32,
                                 initializer=tf.contrib.layers.xavier_initializer(seed=1))
             b_2 = tf.get_variable('b2', shape=(Config.n_classes), dtype=tf.float32,
-                                  initializer=tf.contrib.layers.xavier_initializer(0))
+                                  initializer=tf.constant_initializer(0))
         h0 = tf.constant(0., shape=[1, Config.hidden_size])
         ### END YOUR CODE
 
