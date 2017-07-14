@@ -1,0 +1,2 @@
+CTC:Connectionist Temporal Classifier  一般译为联结主义时间分类器
+Automatic Speech Recognition (ASR)
